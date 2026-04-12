@@ -1,9 +1,27 @@
 <script setup>
+import { router } from '@inertiajs/vue3'
+import { arsip } from '@/routes'
+import { ref } from 'vue'
 import { Eye, Download, Heart } from 'lucide-vue-next'
 import AuthLayout from '@/layouts/AuthLayout.vue'
+
 defineOptions({
   layout: AuthLayout
 })
+
+// state input
+const search = ref('')
+const kategori = ref('')
+const tanggal = ref('')
+
+// function search
+const handleSearch = () => {
+  router.get(arsip().url, {
+    search: search.value,
+    kategori: kategori.value,
+    tanggal: tanggal.value
+  })
+}
 </script>
 
 <template>
@@ -16,14 +34,15 @@ defineOptions({
     <!-- Bar abu -->
     <div class="h-4 bg-gray-300 rounded-full w-full"></div>
 
-    <form action="/search" method="GET" class="bg-[#2f6f7e] p-4 rounded-xl shadow-md grid md:grid-cols-4 gap-4">
+    <!-- FORM -->
+    <form @submit.prevent="handleSearch" class="bg-[#2f6f7e] p-4 rounded-xl shadow-md grid md:grid-cols-4 gap-4">
 
       <!-- 🔍 SEARCH -->
       <div class="bg-white rounded-lg px-4 py-3 flex items-center shadow-sm">
         <span class="text-gray-400 mr-2">🔍</span>
         <input
           type="text"
-          name="search"
+          v-model="search"
           placeholder="Cari dokumen..."
           class="w-full outline-none text-sm"
         />
@@ -31,7 +50,7 @@ defineOptions({
 
       <!-- 📂 KATEGORI -->
       <div class="bg-white rounded-lg px-4 py-3 flex items-center shadow-sm">
-        <select name="kategori" class="text-sm outline-none w-full">
+        <select v-model="kategori" class="text-sm outline-none w-full">
           <option value="">Semua Kategori</option>
           <option value="Proposal">Vital</option>
           <option value="Laporan">Aktif</option>
@@ -43,14 +62,17 @@ defineOptions({
       <div class="bg-white rounded-lg px-4 py-3 flex items-center shadow-sm">
         <input
           type="date"
-          name="tanggal"
+          v-model="tanggal"
           class="text-sm outline-none w-full"
         />
       </div>
 
       <!-- 🔘 BUTTON -->
       <div class="bg-white rounded-lg px-4 py-3 flex items-center justify-center shadow-sm">
-        <button type="submit" class="flex items-center gap-2 text-sm font-semibold text-gray-700">
+        <button 
+          type="submit"
+          class="flex items-center gap-2 text-sm font-semibold text-gray-700"
+        >
           🔍 Cari
         </button>
       </div>
