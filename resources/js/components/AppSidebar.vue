@@ -5,6 +5,7 @@ import { Home, Upload, FileText, History, Trash2, LogOut } from 'lucide-vue-next
 // ambil data user dari inertia
 const page = usePage()
 const user = page.props.auth?.user
+const isActive = (route) => computed(() => page.url.startsWith(route))
 </script>
 
 <template>
@@ -38,8 +39,10 @@ const user = page.props.auth?.user
       <!-- MENU -->
       <div class="space-y-3">
 
-        <Link href="/dashboard" class="flex items-center gap-3 bg-[#2f4fa2] text-white px-3 py-2 rounded-lg">
-          <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/20">
+        <Link href="/dashboard" 
+          :class="page.url === '/dashboard' ? 'bg-[#2f4fa2] text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-800'"
+          class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all">
+          <span class="w-10 h-10 flex items-center justify-center rounded-xl" :class="page.url === '/dashboard' ? 'bg-white/20' : 'bg-white'">
             <Home class="w-5 h-5" />
           </span>
           <span class="text-sm">Beranda</span>
@@ -66,9 +69,11 @@ const user = page.props.auth?.user
           <span class="text-sm">Riwayat</span>
         </Link>
 
-        <Link href="/sampah" class="flex items-center gap-3 bg-gray-200 px-3 py-2 rounded-lg hover:bg-gray-300">
-          <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-white">
-            <Trash2 class="w-5 h-5 text-gray-800" />
+        <Link href="/sampah" 
+          :class="page.url.startsWith('/sampah') ? 'bg-[#2f4fa2] text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-800'"
+          class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all">
+          <span class="w-10 h-10 flex items-center justify-center rounded-xl" :class="page.url.startsWith('/sampah') ? 'bg-white/20' : 'bg-white'">
+            <Trash2 class="w-5 h-5" />
           </span>
           <span class="text-sm">Sampah</span>
         </Link>

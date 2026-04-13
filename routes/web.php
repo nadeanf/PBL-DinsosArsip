@@ -12,6 +12,12 @@ Route::get('/edit-profile', function () {
     ]);
 });
 
+Route::get('/sampah', function () {
+    return inertia('Sampah', [
+        'title' => 'Sampah'
+    ]);
+});
+
 Route::post('/register', [AuthController::class, 'register']);
 
 // LOGIN
