@@ -1,12 +1,17 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import AuthLayout from '@/Layouts/AuthLayout.vue';
 // Import icon jika menggunakan lucide-vue-next, jika tidak, pakai SVG biasa di bawah
 import { AlertTriangle } from 'lucide-vue-next';
 
 defineOptions({ layout: AuthLayout });
 
+const handleEdit = (id: number) => {
+    // Navigasi ke route /edit-dokumen
+    // Kamu bisa melempar ID lewat query parameter agar halaman edit tahu file mana yang dibuka
+    router.get('/edit-dokumen', { id: id });
+};
 // 1. Data Dummy Utama
 const allDocuments = ref(Array.from({ length: 20 }, (_, i) => ({
     id: i + 1,
@@ -98,11 +103,15 @@ const setPage = (page: number) => {
                 </div>
 
                 <div class="flex gap-3 ml-4">
-                    <button class="p-4 bg-white/40 hover:bg-white text-white hover:text-gray-800 rounded-2xl transition-all duration-300">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                        </svg>
-                    </button>
+                    <button 
+        @click="handleEdit(item.id)" 
+        class="p-4 bg-white/40 hover:bg-white text-white hover:text-gray-800 rounded-2xl transition-all duration-300"
+    >
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+        </svg>
+    </button>
                     <button @click="openConfirmDelete(item.id)" class="p-4 bg-red-500 hover:bg-red-700 text-white rounded-2xl transition-all duration-300 shadow-sm">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                             <path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>

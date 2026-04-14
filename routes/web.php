@@ -18,6 +18,12 @@ Route::get('/sampah', function () {
     ]);
 });
 
+Route::get('/edit-dokumen', function () {
+    return inertia('EditDokumen', [
+        'title' => 'EditDokumen'
+    ]);
+});
+
 Route::get('/riwayat', function () {
     return inertia('Riwayat', ['title' => 'Riwayat']);
 })->name('riwayat');
