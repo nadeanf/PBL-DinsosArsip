@@ -9,7 +9,7 @@ import SettingsLayout from '@/layouts/settings/Layout.vue'
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel'
 
 createInertiaApp({
-    title: (title) => (title ? `${title} - ${appName}` : appName),
+    title: (title?: string) => (title ? `${title} - ${appName}` : appName),
 
     resolve: async (name: string) => {
         const pages = import.meta.glob('./pages/**/*.vue')
@@ -17,7 +17,7 @@ createInertiaApp({
         const path = `./pages/${name}.vue`
 
         if (pages[path]) {
-            return await pages[path]()
+            return (await pages[path]()) as any
         }
 
         const found = Object.keys(pages).find(p =>
@@ -25,21 +25,29 @@ createInertiaApp({
         )
 
         if (found) {
-            return await pages[found]()
+            return (await pages[found]()) as any
         }
 
         throw new Error(`Page not found: ${name}`)
     },
 
-    setup({ el, App, props, plugin }) {
+    setup({ el, App, props, plugin }: any) {
         const vueApp = createApp({ render: () => h(App, props) })
         vueApp.use(plugin)
-        vueApp.mount(el)
+
+        if (typeof window !== 'undefined') {
+            vueApp.mount(el as Element)
+        }
+
+        return vueApp
     },
 
     progress: {
         color: '#4B5563',
     },
-} as any)
+})
 
-initializeTheme()
+// init theme (client only)
+if (typeof window !== 'undefined') {
+    initializeTheme()
+}

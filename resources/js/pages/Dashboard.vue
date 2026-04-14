@@ -1,9 +1,29 @@
 <script setup>
+import { router } from '@inertiajs/vue3'
+import { arsip } from '@/routes'
+import { ref } from 'vue'
 import { Eye, Download, Heart } from 'lucide-vue-next'
+import { Link } from '@inertiajs/vue3'
 import AuthLayout from '@/layouts/AuthLayout.vue'
+
 defineOptions({
   layout: AuthLayout
 })
+
+// state input
+const search = ref('')
+const kategori = ref('')
+const tanggal_awal = ref('')
+const tanggal_akhir = ref('')
+
+// function search
+const handleSearch = () => {
+  router.get(arsip().url, {
+    search: search.value,
+    kategori: kategori.value,
+    tanggal: tanggal.value
+  })
+}
 </script>
 
 <template>
@@ -16,48 +36,66 @@ defineOptions({
     <!-- Bar abu -->
     <div class="h-4 bg-gray-300 rounded-full w-full"></div>
 
-    <form action="/search" method="GET" class="bg-[#2f6f7e] p-4 rounded-xl shadow-md grid md:grid-cols-4 gap-4">
+    <!-- FORM -->
+    <form @submit.prevent="handleSearch" class="bg-[#2f6f7e] p-4 rounded-xl shadow-md flex flex-wrap gap-4 items-center">
 
-      <!-- 🔍 SEARCH -->
-      <div class="bg-white rounded-lg px-4 py-3 flex items-center shadow-sm">
-        <span class="text-gray-400 mr-2">🔍</span>
-        <input
-          type="text"
-          name="search"
-          placeholder="Cari dokumen..."
-          class="w-full outline-none text-sm"
-        />
-      </div>
+  <!-- SEARCH -->
+  <div class="bg-white rounded-lg px-4 py-3 flex items-center shadow-sm flex-1 min-w-[200px]">
+    <span class="text-gray-400 mr-2">🔍</span>
+    <input
+      type="text"
+      v-model="search"
+      placeholder="Cari dokumen..."
+      class="w-full outline-none text-sm"
+    />
+  </div>
 
-      <!-- 📂 KATEGORI -->
-      <div class="bg-white rounded-lg px-4 py-3 flex items-center shadow-sm">
-        <select name="kategori" class="text-sm outline-none w-full">
-          <option value="">Semua Kategori</option>
-          <option value="Proposal">Vital</option>
-          <option value="Laporan">Aktif</option>
-          <option value="Surat">Inaktif</option>
-        </select>
-      </div>
+  <!-- KATEGORI -->
+  <div class="bg-white rounded-lg px-4 py-3 flex items-center shadow-sm w-[180px]">
+    <select v-model="kategori" class="text-sm outline-none w-full">
+      <option value="">Semua Kategori</option>
+      <option value="Proposal">Vital</option>
+      <option value="Laporan">Aktif</option>
+      <option value="Surat">Inaktif</option>
+    </select>
+  </div>
 
-      <!-- 📅 TANGGAL -->
-      <div class="bg-white rounded-lg px-4 py-3 flex items-center shadow-sm">
-        <input
-          type="date"
-          name="tanggal"
-          class="text-sm outline-none w-full"
-        />
-      </div>
+  <!-- TANGGAL AWAL -->
+  <div class="bg-white rounded-lg px-4 py-3 flex items-center shadow-sm w-[160px]">
+    <input
+      type="date"
+      v-model="tanggal_awal"
+      class="text-sm outline-none w-full"
+    />
+  </div>
 
-      <!-- 🔘 BUTTON -->
-      <div class="bg-white rounded-lg px-4 py-3 flex items-center justify-center shadow-sm">
-        <button type="submit" class="flex items-center gap-2 text-sm font-semibold text-gray-700">
-          🔍 Cari
-        </button>
-      </div>
+  <!-- "-" -->
+  <div class="text-white font-bold px-1">
+    -
+  </div>
 
-    </form>
+  <!-- TANGGAL AKHIR -->
+  <div class="bg-white rounded-lg px-4 py-3 flex items-center shadow-sm w-[160px]">
+    <input
+      type="date"
+      v-model="tanggal_akhir"
+      class="text-sm outline-none w-full"
+    />
+  </div>
 
-    <!-- 📊 CARD STAT -->
+  <!-- BUTTON (KECIL & PROPORSIONAL) -->
+  <div>
+    <button 
+      type="submit"
+      class="bg-white rounded-lg px-4 py-2 shadow-sm text-sm font-semibold text-gray-700 hover:bg-gray-100 transition"
+    >
+      Cari
+    </button>
+  </div>
+
+</form>
+
+    <!-- CARD STAT -->
     <div class="grid md:grid-cols-3 gap-4">
       
       <div class="bg-[#7fa6b3] rounded-xl p-4 shadow-md flex justify-between items-center">
@@ -92,19 +130,23 @@ defineOptions({
 
     </div>
 
-    <!-- 📄 HEADER DOKUMEN -->
+    <!-- HEADER DOKUMEN -->
     <div class="flex items-center justify-between">
       <h2 class="bg-[#2f4fa2] text-white px-4 py-1 rounded-md text-sm">
         Dokumen Terbaru
       </h2>
 
       <div class="flex items-center gap-2">
-        <div class="h-2 bg-gray-300 w-40 rounded-full"></div>
-        <span class="text-xs bg-gray-200 px-2 py-1 rounded">Lihat Semua</span>
+        <Link
+          :href="arsip().url"
+          class="text-xs bg-gray-200 px-2 py-1 rounded hover:bg-gray-300 transition"
+        >
+          Lihat Semua
+        </Link>
       </div>
     </div>
 
-    <!-- 📄 LIST DOKUMEN -->
+    <!-- LIST DOKUMEN -->
     <div class="space-y-4">
 
       <div
