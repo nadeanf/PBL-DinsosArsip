@@ -14,7 +14,7 @@ import { Search, Filter, FileText, Clock } from 'lucide-vue-next';
 
         <main class="flex-grow">
             <div class="relative h-[530px] bg-cover bg-center flex items-center justify-center" 
-                 style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('/img/gedung-dinsos.jpg');">
+                 style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('/image/bgsosis.png');">
                 
                 <h1 class="text-white text-7xl md:text-[10rem] leading-none mb-20 drop-shadow-[0_12px_15px_rgba(0,0,0,0.9)] tracking-[0.15em]" 
                     style="font-family: 'Arvo', serif; font-style: italic !important; font-weight: 700; -webkit-text-stroke: 1px rgba(255,255,255,0.3);">
