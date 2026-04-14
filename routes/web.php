@@ -12,11 +12,25 @@ Route::get('/edit-profile', function () {
     ]);
 });
 
+
 Route::get('/sampah', function () {
     return inertia('Sampah', [
         'title' => 'Sampah'
     ]);
 });
+
+Route::get('/riwayat', function () {
+    return inertia('Riwayat', [
+        'title' => 'Riwayat'
+    ]);
+});
+
+Route::get('/arsipsaya', function () {
+    return inertia('ArsipSaya', [
+        'title' => 'ArsipSaya'
+    ]);
+});
+
 
 Route::post('/register', [AuthController::class, 'register']);
 
