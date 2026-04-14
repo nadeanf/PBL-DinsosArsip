@@ -18,6 +18,10 @@ Route::get('/sampah', function () {
     ]);
 });
 
+Route::get('/riwayat', function () {
+    return inertia('Riwayat', ['title' => 'Riwayat']);
+})->name('riwayat');
+
 Route::post('/register', [AuthController::class, 'register']);
 
 // LOGIN
@@ -57,6 +61,31 @@ Route::middleware(['auth', 'verified'])->group(function () {
     ]);
 
 })->name('arsip');
+
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    
+
+    Route::get('/unggah', function () {
+        return inertia('Unggah', ['title' => 'Unggah']);
+    })->name('unggah');
+
+    Route::get('/unggah/aktif&inaktif', function () {
+        return inertia('UnggahAktif', ['title' => 'Pilih Folder']);
+    })->name('unggah.aktif');
+
+    Route::get('/unggah/{folder}', function ($folder) {
+        return inertia('UnggahVital', [
+            'folder' => $folder 
+        ]);
+    })->name('unggah.valid');
+});
+
+Route::get('/kelola-arsip', function () {
+        return inertia('KelolaArsip', [
+            'title' => 'Kelola Arsip Saya'
+        ]);
+    })->name('kelola.arsip');
 
 Route::get('arsip/{id}', function ($id) {
 
