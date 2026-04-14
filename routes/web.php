@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 use App\Http\Controllers\AuthController;
 use Illuminate\Http\Request;
-use App\Models\Arsip; // ⬅️ model nanti
+use App\Models\Arsip; 
 
 Route::get('/edit-profile', function () {
     return inertia('settings/EditProfil', [
@@ -36,14 +36,14 @@ Route::inertia('/', 'Landing', [
     'canRegister' => Features::enabled(Features::registration()),
 ])->name('home');
 
-// ✅ GROUP UTAMA
+// GROUP UTAMA
 Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::inertia('dashboard', 'Dashboard', [
         'title' => 'Beranda'
     ])->name('dashboard');
 
-    // 🔥 INI YANG UDAH CONNECT FILTER
+    // ONNECT FILTER
     Route::get('daftar-arsip', function (Request $request) {
 
     return inertia('ListArsip', [
@@ -60,7 +60,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::get('arsip/{id}', function ($id) {
 
-    // dummy dulu (nanti ganti dari DB)
+    // dummy 
     $documents = [
         [
             "id" => 0,
