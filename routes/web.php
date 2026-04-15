@@ -8,21 +8,20 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
 use Inertia\Inertia;
 
-
 Route::post('/register', [AuthController::class, 'register']);
 
 Route::get('/login', function () {
     return inertia('Login', [
         'status' => session('status'),
     ]);
-});
+})->name('login');
 
 Route::get('/register', function () {
     return inertia('Register');
-});
+})->name('register');
 
 Route::get('/forgot-password', function () {
-    return Inertia::render('auth/ForgotPassword'); 
+    return Inertia::render('auth/ForgotPassword');
 })->name('password.request');
 
 Route::post('/forgot-password', function (Request $request) {
@@ -36,7 +35,6 @@ Route::post('/forgot-password', function (Request $request) {
 
     return back()->with('status', __($status));
 })->name('password.email');
-
 
 Route::get('/reset-password/{token}', function ($token) {
     return Inertia::render('auth/ResetPassword', [
@@ -67,6 +65,7 @@ Route::inertia('/', 'Landing', [
     'canRegister' => Features::enabled(Features::registration()),
 ])->name('home');
 
+
 Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::inertia('dashboard', 'Dashboard', [
@@ -77,12 +76,28 @@ Route::middleware(['auth', 'verified'])->group(function () {
         'title' => 'Daftar Arsip'
     ])->name('arsip');
 
+    Route::inertia('arsip-saya', 'ArsipSaya', [
+        'title' => 'Arsip Saya'
+    ])->name('arsip.saya');
+
+    Route::inertia('detail-arsip', 'DetailArsip', [
+        'title' => 'Detail Arsip'
+    ])->name('arsip.detail');
+
+    Route::inertia('riwayat', 'Riwayat', [
+        'title' => 'Riwayat'
+    ])->name('riwayat');
+
+    Route::inertia('sampah', 'Sampah', [
+        'title' => 'Sampah'
+    ])->name('sampah');
+
 });
 
 Route::get('/edit-profile', function () {
     return inertia('settings/EditProfil', [
         'title' => 'Edit Profil'
     ]);
-});
+})->name('edit.profile');
 
 require __DIR__.'/settings.php';
