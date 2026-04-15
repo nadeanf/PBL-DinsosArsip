@@ -1,7 +1,6 @@
 <script setup>
 import { Head } from '@inertiajs/vue3'
 import AuthLayout from '@/layouts/AuthLayout.vue'
-// Gunakan ikon standard Lucide yang outline-nya bersih sesuai mockup
 import { Search, FileText, Image as ImageIcon, Video, Clock } from 'lucide-vue-next'
 
 defineOptions({
@@ -95,7 +94,7 @@ const riwayatData = [
 </template>
 
 <style scoped>
-/* Menyesuaikan sedikit warna agar mirip dengan screenshot */
+
 .bg-custom-blue {
   background-color: #7fa6b3;
 }
