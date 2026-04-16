@@ -16,8 +16,7 @@ const form = useForm({
 
 function handleSubmit() {
     form.post('/login', {
-        onError: (errors) => {
-            console.error(errors)
+        onError: () => {
             alert('Login gagal, cek email dan password!')
         }
     })
@@ -25,6 +24,10 @@ function handleSubmit() {
 
 function goToRegister() {
     router.visit('/register')
+}
+
+function goToForgotPassword() {
+    router.visit('/forgot-password')
 }
 </script>
 
@@ -35,19 +38,18 @@ function goToRegister() {
         class="relative flex items-center justify-center min-h-screen bg-center bg-cover"
         style="background-image: url('/image/bgregis.jpg')"
     >
-        <!-- Light gray overlay -->
+        <!-- Overlay -->
         <div class="absolute inset-0 bg-white/30 backdrop-blur-[2px]"></div>
 
         <!-- Card -->
-        <div
-            class="relative z-10 w-full max-w-sm px-6 py-4 bg-[#e8e8e8]/80 rounded-2xl shadow-xl"
-        >
-            <!-- Logo & Institution Header -->
+        <div class="relative z-10 w-full max-w-sm px-6 py-4 bg-[#e8e8e8]/80 rounded-2xl shadow-xl">
+
+            <!-- Header -->
             <div class="flex items-center justify-center gap-2 mb-3.5">
                 <img
                     src="/image/logodinsos.png"
                     alt="logo"
-                    class="w-9.5 h-11.5 object-contain flex-shrink-0"
+                    class="w-9.5 h-11.5 object-contain"
                 />
                 <div class="text-center leading-tight">
                     <p class="text-xs font-bold text-gray-800">Sistem Arsip Digital</p>
@@ -57,11 +59,11 @@ function goToRegister() {
 
             <!-- Title -->
             <div class="text-center mb-3.5">
-                <h1 class="text-lg font-extrabold text-gray-900 tracking-wide">MASUK</h1>
-                <p class="text-xs text-gray-500 mt-0.5">Silahkan masuk untuk melanjutkan</p>
+                <h1 class="text-lg font-extrabold text-gray-900">MASUK</h1>
+                <p class="text-xs text-gray-500">Silahkan masuk untuk melanjutkan</p>
             </div>
 
-            <!-- Display status message if any -->
+            <!-- Status -->
             <div
                 v-if="status"
                 class="mb-2 p-2 bg-green-100 text-green-700 rounded-lg text-xs"
@@ -70,10 +72,11 @@ function goToRegister() {
             </div>
 
             <!-- Form -->
-            <form @submit.prevent="handleSubmit" class="space-y-2.5 text-sm">
+            <form @submit.prevent="handleSubmit" class="space-y-3 text-sm">
+
                 <!-- Email -->
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-1">Email</label>
+                    <label class="block text-xs text-gray-700 mb-1">Email</label>
                     <input
                         v-model="form.email"
                         type="email"
@@ -81,14 +84,14 @@ function goToRegister() {
                         class="field-input"
                         placeholder="email@example.com"
                     />
-                    <span v-if="form.errors.email" class="text-xs text-red-600 mt-1 block">
+                    <span v-if="form.errors.email" class="text-xs text-red-600">
                         {{ form.errors.email }}
                     </span>
                 </div>
 
                 <!-- Password -->
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-1">Password</label>
+                    <label class="block text-xs text-gray-700 mb-1">Password</label>
                     <input
                         v-model="form.password"
                         type="password"
@@ -96,36 +99,42 @@ function goToRegister() {
                         class="field-input"
                         placeholder="Password"
                     />
-                    <span v-if="form.errors.password" class="text-xs text-red-600 mt-1 block">
+                    <span v-if="form.errors.password" class="text-xs text-red-600">
                         {{ form.errors.password }}
                     </span>
                 </div>
 
-                <!-- Remember Me -->
-                <div class="flex items-center">
-                    <input
-                        v-model="form.remember"
-                        id="remember"
-                        type="checkbox"
-                        class="w-4 h-4 rounded border-gray-300"
-                    />
-                    <label for="remember" class="ml-2 text-xs text-gray-700">
+                <!-- Remember + Forgot -->
+                <div class="flex items-center justify-between">
+                    <label class="flex items-center text-xs text-gray-700">
+                        <input
+                            v-model="form.remember"
+                            type="checkbox"
+                            class="w-4 h-4 mr-1"
+                        />
                         Ingat saya
                     </label>
+
+                    <span
+                        @click="goToForgotPassword"
+                        class="text-xs text-blue-600 cursor-pointer hover:underline"
+                    >
+                        Lupa Password?
+                    </span>
                 </div>
 
-                <!-- Login Button -->
+                <!-- Button -->
                 <button
                     type="submit"
                     :disabled="form.processing"
-                    class="w-full py-2 mt-2 text-sm font-bold text-white bg-[#2d3282] hover:bg-[#232769] rounded-lg transition-colors duration-200 disabled:opacity-50"
+                    class="w-full py-2 mt-1 font-bold text-white bg-[#2d3282] hover:bg-[#232769] rounded-lg disabled:opacity-50"
                 >
                     {{ form.processing ? 'Loading...' : 'LOGIN' }}
                 </button>
             </form>
 
-            <!-- Register Link -->
-            <p class="mt-2.5 text-xs text-center text-gray-700">
+            <!-- Register -->
+            <p class="mt-3 text-xs text-center text-gray-700">
                 Belum punya akun?
                 <span
                     @click="goToRegister"
@@ -142,14 +151,13 @@ function goToRegister() {
 .field-input {
     width: 100%;
     padding: 7px 11px;
-    border: none;
     border-radius: 6px;
     background-color: #ffffff;
     color: #1f2937;
     font-size: 12.5px;
     outline: none;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
-    transition: box-shadow 0.2s;
+    transition: 0.2s;
 }
 
 .field-input:focus {

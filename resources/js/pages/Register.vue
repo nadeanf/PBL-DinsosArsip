@@ -17,9 +17,8 @@ const form = ref({
 const bagianOptions = [
     'Sekretariat',
     'Bidang Rehabilitasi Sosial',
-    'Bidang Perlindungan Sosial',
-    'Bidang Pemberdayaan Sosial',
-    'Bidang Penanganan Fakir Miskin',
+    'Bidang Perlindungan dan Jaminan Sosial',
+    'Bidang Pemberdayaan Sosial dan Penanganan Fakir Miskin',
 ]
 
 function handleSubmit() {
