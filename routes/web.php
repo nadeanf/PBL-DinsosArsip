@@ -14,6 +14,16 @@ Route::get('/sampah', function () {
     ]);
 });
 
+Route::get('/edit-dokumen', function () {
+    return inertia('EditDokumen', [
+        'title' => 'EditDokumen'
+    ]);
+});
+
+Route::get('/riwayat', function () {
+    return inertia('Riwayat', ['title' => 'Riwayat']);
+})->name('riwayat');
+
 Route::post('/register', [AuthController::class, 'register']);
 
 // LOGIN
@@ -95,6 +105,28 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     })->name('arsip');
 
+    // 🔥 TAMBAHAN DARI DEY (DITAMBAH, BUKAN NGUBAH)
+    Route::get('/unggah', function () {
+        return inertia('Unggah', ['title' => 'Unggah']);
+    })->name('unggah');
+
+    Route::get('/unggah/aktif&inaktif', function () {
+        return inertia('UnggahAktif', ['title' => 'Pilih Folder']);
+    })->name('unggah.aktif');
+
+    Route::get('/unggah/{folder}', function ($folder) {
+        return inertia('UnggahVital', [
+            'folder' => $folder 
+        ]);
+    })->name('unggah.valid');
+
+    Route::get('/kelola-arsip', function () {
+        return inertia('KelolaArsip', [
+            'title' => 'Kelola Arsip Saya'
+        ]);
+    })->name('kelola.arsip');
+
+    // PUNYA KAMU (TETAP)
     Route::get('arsip/{id}', function ($id) {
 
         $documents = [

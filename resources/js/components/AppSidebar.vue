@@ -48,23 +48,29 @@ const isActive = (route) => computed(() => page.url.startsWith(route))
           <span class="text-sm">Beranda</span>
         </Link>
 
-        <Link href="/unggah" class="flex items-center gap-3 bg-gray-200 px-3 py-2 rounded-lg hover:bg-gray-300">
-          <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-white">
-            <Upload class="w-5 h-5 text-gray-800" />
+        <Link href="/unggah" 
+          :class="page.url.startsWith('/unggah') ? 'bg-[#2f4fa2] text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-800'"
+          class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all">
+          <span class="w-10 h-10 flex items-center justify-center rounded-xl" :class="page.url.startsWith('/unggah') ? 'bg-white/20' : 'bg-white'">
+            <Upload class="w-5 h-5" />
           </span>
           <span class="text-sm">Unggah</span>
         </Link>
 
-        <Link href="/arsip" class="flex items-center gap-3 bg-gray-200 px-3 py-2 rounded-lg hover:bg-gray-300">
-          <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-white">
-            <FileText class="w-5 h-5 text-gray-800" />
+        <Link href="/kelola-arsip" 
+          :class="page.url.startsWith('/kelola-arsip') ? 'bg-[#2f4fa2] text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-800'"
+          class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all">
+          <span class="w-10 h-10 flex items-center justify-center rounded-xl" :class="page.url.startsWith('/kelola-arsip') ? 'bg-white/20' : 'bg-white'">
+            <FileText class="w-5 h-5" />
           </span>
           <span class="text-sm">Arsip Saya</span>
         </Link>
 
-        <Link href="/riwayat" class="flex items-center gap-3 bg-gray-200 px-3 py-2 rounded-lg hover:bg-gray-300">
-          <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-white">
-            <History class="w-5 h-5 text-gray-800" />
+        <Link href="/riwayat" 
+          :class="page.url.startsWith('/riwayat') ? 'bg-[#2f4fa2] text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-800'"
+          class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all">
+          <span class="w-10 h-10 flex items-center justify-center rounded-xl" :class="page.url.startsWith('/riwayat') ? 'bg-white/20' : 'bg-white'">
+            <History class="w-5 h-5" />
           </span>
           <span class="text-sm">Riwayat</span>
         </Link>
