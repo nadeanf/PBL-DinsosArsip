@@ -24,6 +24,12 @@ Route::get('/riwayat', function () {
     return inertia('Riwayat', ['title' => 'Riwayat']);
 })->name('riwayat');
 
+Route::get('/arsipsaya', function () {
+    return inertia('ArsipSaya', [
+        'title' => 'ArsipSaya'
+    ]);
+});
+
 Route::post('/register', [AuthController::class, 'register']);
 
 // LOGIN
@@ -53,7 +59,6 @@ Route::post('/forgot-password', function (Request $request) {
     return back()->with('status', __($status));
 })->name('password.email');
 
-
 Route::get('/reset-password/{token}', function ($token) {
     return Inertia::render('auth/ResetPassword', [
         'token' => $token,
@@ -79,9 +84,21 @@ Route::post('/reset-password', function (Request $request) {
     return redirect('/login')->with('status', 'Password berhasil diubah!');
 })->name('password.update');
 
+// LANDING
 Route::inertia('/', 'Landing', [
     'canRegister' => Features::enabled(Features::registration()),
 ])->name('home');
+
+
+// ✅ LOGOUT (INI YANG BARU DITAMBAHIN)
+Route::post('/logout', function () {
+    auth()->logout();
+    request()->session()->invalidate();
+    request()->session()->regenerateToken();
+
+    return redirect('/');
+})->name('logout');
+
 
 // GROUP UTAMA
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -99,13 +116,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
             'filters' => [
                 'search' => $request->search,
                 'kategori' => $request->kategori,
-                'tanggal' => $request->tanggal,
+                'tanggal_awal' => $request->tanggal_awal,
+                'tanggal_akhir' => $request->tanggal_akhir,
             ]
         ]);
 
     })->name('arsip');
 
-    // 🔥 TAMBAHAN DARI DEY (DITAMBAH, BUKAN NGUBAH)
     Route::get('/unggah', function () {
         return inertia('Unggah', ['title' => 'Unggah']);
     })->name('unggah');
@@ -126,7 +143,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ]);
     })->name('kelola.arsip');
 
-    // PUNYA KAMU (TETAP)
     Route::get('arsip/{id}', function ($id) {
 
         $documents = [
@@ -149,7 +165,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 });
 
-// dari branch kintan (tetap dipakai)
 Route::get('/edit-profile', function () {
     return inertia('settings/EditProfil', [
         'title' => 'Edit Profil'

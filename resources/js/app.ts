@@ -34,7 +34,13 @@ createInertiaApp({
     setup({ el, App, props, plugin }) {
         const vueApp = createApp({ render: () => h(App, props) })
         vueApp.use(plugin)
-        vueApp.mount(el)
+
+        // ✅ FIX SSR ERROR (window tidak ada di server)
+        if (typeof window !== 'undefined') {
+            vueApp.mount(el)
+        }
+
+        return vueApp
     },
 
     progress: {
@@ -42,4 +48,7 @@ createInertiaApp({
     },
 } as any)
 
-initializeTheme()
+// ✅ FIX tambahan (biar gak error SSR)
+if (typeof window !== 'undefined') {
+    initializeTheme()
+}

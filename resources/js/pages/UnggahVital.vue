@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { Head, useForm } from '@inertiajs/vue3';
-import AuthLayout from '@/Layouts/AuthLayout.vue';
+import AuthLayout from '@/layouts/AuthLayout.vue';
 
 defineOptions({ layout: AuthLayout });
 
@@ -43,15 +43,28 @@ const form = useForm({
     nomor: '',
     tahun: '',
     status_akses: 'Publik',
-    kategori_kelompok: '', // Khusus Aktif/Inaktif (Level 1)
-    kategori: '',          // Digunakan Vital (Langsung) atau Aktif/Inaktif (Level 2)
+    kategori_kelompok: '',
+    kategori: '',
     lokasi: '',
     deskripsi: '',
     files: null as any, 
+    // TAMBAHAN
+    // @ts-ignore
+    bidang: '',
 });
 
 // 3. Logika Filter
 const isVital = computed(() => props.folder.toLowerCase() === 'vital');
+
+// TAMBAHAN
+const bidangList = [
+  'Sekretariat',
+  'Rehabilitasi Sosial',
+  'Perlindungan dan Jaminan Sosial',
+  'Pemberdayaan Sosial'
+];
+
+const isPrivate = computed(() => form.status_akses === 'Private');
 
 // Sub-kategori dinamis untuk Aktif/Inaktif
 const subKategoriList = computed(() => {
@@ -61,6 +74,14 @@ const subKategoriList = computed(() => {
 // Reset kategori jika kelompok berubah
 watch(() => form.kategori_kelompok, () => {
     form.kategori = '';
+});
+
+// TAMBAHAN reset bidang
+watch(() => form.status_akses, (val) => {
+  if (val !== 'Private') {
+    // @ts-ignore
+    form.bidang = '';
+  }
 });
 
 const fileInput = ref<HTMLInputElement | null>(null);
@@ -147,7 +168,7 @@ const submit = () => {
 
             <div v-if="isVital">
               <label class="block text-black font-black mb-1.5 ml-3 text-sm uppercase">Kategori Vital</label>
-              <select v-model="form.kategori" class="w-full p-4 bg-white text-black font-medium rounded-2xl border border-gray-300 shadow-sm outline-none appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[right_1.5rem_center] bg-[length:1.2em]">
+              <select v-model="form.kategori" class="w-full p-4 bg-white text-black font-medium rounded-2xl border border-gray-300 shadow-sm outline-none appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg...')] bg-no-repeat bg-[right_1.5rem_center] bg-[length:1.2em]">
                 <option value="">-- Pilih Kategori Vital --</option>
                 <option v-for="item in kategoriVital" :key="item" :value="item">{{ item }}</option>
               </select>
@@ -156,40 +177,40 @@ const submit = () => {
             <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label class="block text-black font-black mb-1.5 ml-3 text-sm uppercase">Kelompok Kategori</label>
-                <select v-model="form.kategori_kelompok" class="w-full p-4 bg-white text-black font-medium rounded-2xl border border-gray-300 shadow-sm outline-none appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[right_1.5rem_center] bg-[length:1.2em]">
+                <select v-model="form.kategori_kelompok" class="w-full p-4 bg-white text-black font-medium rounded-2xl border border-gray-300 shadow-sm outline-none appearance-none">
                   <option value="">-- Pilih Kelompok --</option>
                   <option v-for="(subs, parent) in kategoriAktifInaktif" :key="parent" :value="parent">{{ parent }}</option>
                 </select>
               </div>
+
               <div>
-  <div class="flex items-baseline gap-3 mb-1.5 ml-3">
-    <label class="block text-black font-black text-sm uppercase leading-none">
-      Detail Kategori
-    </label>
-    <span v-if="form.kategori_kelompok" class="text-black text-[11px] font-medium lowercase italic leading-none">
-      (menampilkan isi {{ form.kategori_kelompok }})
-    </span>
-  </div>
-  
-  <select 
-    v-model="form.kategori" 
-    :disabled="!form.kategori_kelompok" 
-    class="w-full p-4 bg-white text-black font-medium rounded-2xl border border-gray-300 shadow-sm outline-none appearance-none disabled:bg-gray-100 bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[right_1.5rem_center] bg-[length:1.2em]"
-  >
-    <option value="">-- Pilih Detail --</option>
-    <option v-for="item in subKategoriList" :key="item" :value="item">{{ item }}</option>
-  </select>
-</div>
+                <label class="block text-black font-black mb-1.5 ml-3 text-sm uppercase">Detail Kategori</label>
+                <select v-model="form.kategori" :disabled="!form.kategori_kelompok" class="w-full p-4 bg-white text-black font-medium rounded-2xl border border-gray-300 shadow-sm outline-none appearance-none">
+                  <option value="">-- Pilih Detail --</option>
+                  <option v-for="item in subKategoriList" :key="item" :value="item">{{ item }}</option>
+                </select>
+              </div>
             </div>
 
+            <!-- STATUS -->
             <div class="grid grid-cols- gap-4">
               <div>
                 <label class="block text-black font-black mb-1.5 ml-3 text-sm uppercase">Status Akses</label>
-                <select v-model="form.status_akses" class="w-full p-4 bg-white text-black font-medium rounded-2xl border border-gray-300 shadow-sm outline-none appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[right_1.5rem_center] bg-[length:1.2em]">
+                <select v-model="form.status_akses" class="w-full p-4 bg-white text-black font-medium rounded-2xl border border-gray-300 shadow-sm outline-none">
                   <option>Publik</option>
                   <option>Private</option>
                 </select>
               </div>
+
+              <!-- TAMBAHAN -->
+              <div v-if="isPrivate">
+                <label class="block text-black font-black mb-1.5 ml-3 text-sm uppercase">Bidang</label>
+                <select v-model="form.bidang" class="w-full p-4 bg-white text-black font-medium rounded-2xl border border-gray-300 shadow-sm outline-none">
+                  <option value="">-- Pilih Bidang --</option>
+                  <option v-for="item in bidangList" :key="item" :value="item">{{ item }}</option>
+                </select>
+              </div>
+
               <div>
                 <label class="block text-black font-black mb-1.5 ml-3 text-sm uppercase">Lokasi Hardcopy</label>
                 <input v-model="form.lokasi" type="text" placeholder="Rak..." class="w-full p-4 bg-white text-black font-medium rounded-2xl border border-gray-300 shadow-sm outline-none" />
@@ -199,18 +220,19 @@ const submit = () => {
             <div>
               <label class="block text-black font-black mb-1.5 ml-3 text-sm uppercase tracking-wide">Deskripsi</label>
               <textarea v-model="form.deskripsi" rows="3" placeholder="Tambahkan keterangan..." 
-                class="w-full p-4 bg-white text-black font-medium rounded-2xl border border-gray-300 shadow-sm outline-none focus:ring-2 focus:ring-blue-400 placeholder:text-gray-400"></textarea>
+                class="w-full p-4 bg-white text-black font-medium rounded-2xl border border-gray-300 shadow-sm outline-none"></textarea>
             </div>
           </div>
 
           <div class="flex justify-end gap-4 mt-10">
-            <button type="submit" :class="isVital ? 'bg-[#4a7a96]' : 'bg-[#2f55a4]'" class="text-white px-10 py-3.5 rounded-2xl font-black shadow-md hover:opacity-90 transition-all uppercase text-sm tracking-widest">
+            <button type="submit" :class="isVital ? 'bg-[#4a7a96]' : 'bg-[#2f55a4]'" class="text-white px-10 py-3.5 rounded-2xl font-black shadow-md">
               Simpan File
             </button>
-            <button type="button" @click="window.history.back()" class="bg-[#ff0000] text-white px-10 py-3.5 rounded-full font-black shadow-md hover:bg-red-700 transition-all uppercase text-sm tracking-widest">
+            <button type="button" @click="window.history.back()" class="bg-[#ff0000] text-white px-10 py-3.5 rounded-full font-black">
               Batal
             </button>
           </div>
+
         </div>
       </form>
     </div>

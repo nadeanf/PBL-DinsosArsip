@@ -44,9 +44,26 @@ const user = page.props.auth?.user
 
       <!-- kalau SUDAH login -->
       <template v-else>
-        <!-- kosong tapi jaga spacing -->
-        <div class="w-[120px]"></div>
-      </template>
+  <div class="flex items-center gap-3">
+    
+    <Link 
+      href="/dashboard"
+      class="px-5 py-2 bg-white text-blue-900 rounded-lg text-sm font-semibold hover:bg-gray-100"
+    >
+      Dashboard
+    </Link>
+
+    <Link 
+      href="/logout" 
+      method="post" 
+      as="button"
+      class="px-5 py-2 bg-red-500 rounded-lg text-sm font-semibold hover:bg-red-400"
+    >
+      Logout
+    </Link>
+
+  </div>
+</template>
 
     </div>
 
