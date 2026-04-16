@@ -21,7 +21,8 @@ const handleSearch = () => {
   router.get(arsip().url, {
     search: search.value,
     kategori: kategori.value,
-    tanggal: tanggal.value
+    tanggal_awal: tanggal_awal.value,
+    tanggal_akhir: tanggal_akhir.value
   })
 }
 </script>

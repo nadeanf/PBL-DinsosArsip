@@ -22,6 +22,7 @@ const user = page.props.auth?.user
 
       <div class="space-y-3">
 
+        <!-- DASHBOARD -->
         <Link href="/dashboard" 
           :class="page.url === '/dashboard' ? 'bg-[#2f4fa2] text-white shadow-md' : 'bg-gray-200 hover:bg-gray-300 text-gray-800'"
           class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all">
@@ -31,6 +32,7 @@ const user = page.props.auth?.user
           <span class="text-sm font-medium">Beranda</span>
         </Link>
 
+        <!-- UNGGAH -->
         <Link href="/unggah" 
           :class="page.url.startsWith('/unggah') ? 'bg-[#2f4fa2] text-white shadow-md' : 'bg-gray-200 hover:bg-gray-300 text-gray-800'"
           class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all hover:translate-x-1">
@@ -40,15 +42,17 @@ const user = page.props.auth?.user
           <span class="text-sm font-medium">Unggah</span>
         </Link>
 
-        <Link href="/arsipsaya" 
-          :class="page.url.startsWith('/arsip') ? 'bg-[#2f4fa2] text-white shadow-md' : 'bg-gray-200 hover:bg-gray-300 text-gray-800'"
+        <!-- ARSIP SAYA (pakai punyamu) -->
+        <Link href="/kelola-arsip" 
+          :class="page.url.startsWith('/kelola-arsip') ? 'bg-[#2f4fa2] text-white shadow-md' : 'bg-gray-200 hover:bg-gray-300 text-gray-800'"
           class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all">
           <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-white shadow-inner">
-            <FileText :class="page.url.startsWith('/arsip') ? 'text-[#2f4fa2]' : 'text-gray-800'" class="w-5 h-5" />
+            <FileText :class="page.url.startsWith('/kelola-arsip') ? 'text-[#2f4fa2]' : 'text-gray-800'" class="w-5 h-5" />
           </span>
           <span class="text-sm font-medium">Arsip Saya</span>
         </Link>
 
+        <!-- RIWAYAT -->
         <Link href="/riwayat" 
           :class="page.url.startsWith('/riwayat') ? 'bg-[#2f4fa2] text-white shadow-md' : 'bg-gray-200 hover:bg-gray-300 text-gray-800'"
           class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all hover:translate-x-1">
@@ -58,6 +62,7 @@ const user = page.props.auth?.user
           <span class="text-sm font-medium">Riwayat</span>
         </Link>
 
+        <!-- SAMPAH -->
         <Link href="/sampah" 
           :class="page.url.startsWith('/sampah') ? 'bg-[#2f4fa2] text-white shadow-md' : 'bg-gray-200 hover:bg-gray-300 text-gray-800'"
           class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all hover:translate-x-1">
@@ -78,7 +83,8 @@ const user = page.props.auth?.user
       </div>
     </div>
 
-    <Link href="/logout" method="post" as="button" class="flex items-center gap-3 bg-gray-200 px-3 py-2 rounded-lg w-full text-left hover:bg-gray-300 transition-all hover:scale-105 active:scale-95 group">
+    <Link href="/logout" method="post" as="button"
+      class="flex items-center gap-3 bg-gray-200 px-3 py-2 rounded-lg w-full text-left hover:bg-gray-300 transition-all hover:scale-105 active:scale-95 group">
       <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-white shadow-sm group-hover:bg-red-50 transition-colors">
         <LogOut class="w-5 h-5 text-red-600" />
       </span>
