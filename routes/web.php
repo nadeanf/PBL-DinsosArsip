@@ -102,7 +102,9 @@ Route::get('/pimpinan/dashboard', function () {
         abort(403);
     }
 
-    return inertia('Pimpinan/DashboardPimpinan');
+    return inertia('Pimpinan/DashboardPimpinan', [
+        'title' => 'Dashboard'
+    ]);
 })->middleware('auth');
 
 // STATISTIK PIMPINAN
@@ -111,7 +113,9 @@ Route::get('/pimpinan/statistik', function () {
         abort(403);
     }
 
-    return inertia('Pimpinan/StatistikPimpinan');
+    return inertia('Pimpinan/StatistikPimpinan', [
+        'title' => 'Statistik'
+    ]);
 })->middleware('auth');
 
 // GROUP UTAMA (MIDDLEWARE AUTH)
@@ -170,6 +174,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/unggah/{folder}', function ($folder) {
         return inertia('UnggahVital', [
+            'title' => 'Unggah Dokumen', // Tambahkan title di sini juga biar konsisten
             'folder' => $folder 
         ]);
     })->name('unggah.valid');
