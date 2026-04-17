@@ -7,6 +7,15 @@ use Illuminate\Http\Request;
 use App\Models\Arsip; 
 use Illuminate\Support\Facades\Password;
 use Inertia\Inertia;
+use App\Http\Controllers\ArsipController;
+
+/*
+|---------------------------------------
+| PUBLIC ROUTES
+|---------------------------------------
+*/
+
+Route::post('/arsip', [ArsipController::class, 'store']);
 
 Route::get('/sampah', function () {
     return inertia('Sampah', [
@@ -14,11 +23,8 @@ Route::get('/sampah', function () {
     ]);
 });
 
-Route::get('/edit-dokumen', function () {
-    return inertia('EditDokumen', [
-        'title' => 'EditDokumen'
-    ]);
-});
+Route::get('/edit-dokumen/{id}', [ArsipController::class, 'edit'])
+    ->name('arsip.edit');
 
 Route::get('/riwayat', function () {
     return inertia('Riwayat', ['title' => 'Riwayat']);
@@ -32,7 +38,9 @@ Route::get('/arsipsaya', function () {
 
 Route::post('/register', [AuthController::class, 'register']);
 
-// LOGIN
+/*
+| LOGIN
+*/
 Route::get('/login', function () {
     return inertia('Login', [
         'status' => session('status'),
@@ -43,6 +51,9 @@ Route::get('/register', function () {
     return inertia('Register');
 });
 
+/*
+| PASSWORD RESET
+*/
 Route::get('/forgot-password', function () {
     return Inertia::render('auth/ForgotPassword'); 
 })->name('password.request');
@@ -84,13 +95,16 @@ Route::post('/reset-password', function (Request $request) {
     return redirect('/login')->with('status', 'Password berhasil diubah!');
 })->name('password.update');
 
-// LANDING
+/*
+| LANDING
+*/
 Route::inertia('/', 'Landing', [
     'canRegister' => Features::enabled(Features::registration()),
 ])->name('home');
 
-
-// ✅ LOGOUT (INI YANG BARU DITAMBAHIN)
+/*
+| LOGOUT
+*/
 Route::post('/logout', function () {
     auth()->logout();
     request()->session()->invalidate();
@@ -100,15 +114,22 @@ Route::post('/logout', function () {
 })->name('logout');
 
 
-// GROUP UTAMA
+/*
+|---------------------------------------
+| AUTH ROUTES
+|---------------------------------------
+*/
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    Route::inertia('dashboard', 'Dashboard', [
+    Route::inertia('/dashboard', 'Dashboard', [
         'title' => 'Beranda'
     ])->name('dashboard');
 
-    // CONNECT FILTER
-    Route::get('daftar-arsip', function (Request $request) {
+    Route::put('/arsip/{id}', [ArsipController::class, 'update'])
+    ->name('arsip.update');
+
+    // LIST ARSIP
+    Route::get('/daftar-arsip', function (Request $request) {
 
         return inertia('ListArsip', [
             'title' => 'Daftar Arsip',
@@ -123,27 +144,32 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     })->name('arsip');
 
-    Route::get('/unggah', function () {
-        return inertia('Unggah', ['title' => 'Unggah']);
-    })->name('unggah');
+    // UPLOAD
+    Route::inertia('/unggah', 'Unggah', [
+        'title' => 'Unggah'
+    ])->name('unggah');
 
+    // ❌ FIX UTAMA (INI YANG BIKIN ERROR SEBELUMNYA)
+    // Route lama dihapus / tidak dipakai lagi
+
+    // OPTIONAL: biar tidak error kalau masih kepencet link lama
     Route::get('/unggah/aktif&inaktif', function () {
-        return inertia('UnggahAktif', ['title' => 'Pilih Folder']);
-    })->name('unggah.aktif');
+        return redirect('/unggah');
+    });
 
-    Route::get('/unggah/{folder}', function ($folder) {
-        return inertia('UnggahVital', [
-            'folder' => $folder 
-        ]);
-    })->name('unggah.valid');
+    // FIX: jangan pakai closure UnggahVital kalau file tidak ada
+    Route::get('/unggah/{folder}', [ArsipController::class, 'create'])
+        ->name('unggah.valid');
 
-    Route::get('/kelola-arsip', function () {
-        return inertia('KelolaArsip', [
-            'title' => 'Kelola Arsip Saya'
-        ]);
-    })->name('kelola.arsip');
+    // SIMPAN ARSIP
+    Route::post('/arsip', [ArsipController::class, 'store']);
 
-    Route::get('arsip/{id}', function ($id) {
+    // KELOLA ARSIP
+    Route::get('/kelola-arsip', [ArsipController::class, 'index'])
+        ->name('kelola.arsip');
+
+    // DETAIL ARSIP
+    Route::get('/arsip/{id}', function ($id) {
 
         $documents = [
             [
@@ -165,10 +191,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 });
 
+
 Route::get('/edit-profile', function () {
     return inertia('settings/EditProfil', [
         'title' => 'Edit Profil'
     ]);
 });
+
+
 
 require __DIR__.'/settings.php';
