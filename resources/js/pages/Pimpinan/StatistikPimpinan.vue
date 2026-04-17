@@ -13,7 +13,7 @@ const kategori = ref('')
 const tanggal_awal = ref('')
 const tanggal_akhir = ref('')
 
-// 🔥 DATA DINAMIS (DUMMY)
+// DATA DINAMIS (DUMMY)
 const statistik = ref({
   dokumen: 68,
   foto: 20,
@@ -24,7 +24,7 @@ const statistik = ref({
   favorit: 12
 })
 
-// 🔥 DATA AKSES CEPAT
+// DATA AKSES CEPAT
 const aksesCepat = ref([
   { nama: 'Peraturan Daerah' },
   { nama: 'Galeri Foto' },

@@ -20,8 +20,6 @@ Route::get('/edit-dokumen', function () {
     ]);
 });
 
-// --- ROUTE RIWAYAT PINDAH KE BAWAH (DALAM GROUP AUTH) AGAR BISA CEK ROLE ---
-
 Route::get('/arsipsaya', function () {
     return inertia('ArsipSaya', [
         'title' => 'ArsipSaya'
@@ -118,6 +116,40 @@ Route::get('/pimpinan/statistik', function () {
     ]);
 })->middleware('auth');
 
+// --- TAMBAHAN ROUTE KHUSUS SUPER ADMIN ---
+Route::middleware(['auth'])->group(function () {
+    Route::get('/super-admin/dashboard', function () {
+        if (auth()->user()->role !== 'superadmin') abort(403);
+        return inertia('SuperAdmin/DashboardSuperAdmin', ['title' => 'Dashboard Super Admin']);
+    });
+
+    Route::get('/super-admin/statistik', function () {
+        if (auth()->user()->role !== 'superadmin') abort(403);
+        return inertia('SuperAdmin/StatistikSuperAdmin', ['title' => 'Statistik Sistem']);
+    });
+
+    Route::get('/super-admin/kelolauser', function () {
+        if (auth()->user()->role !== 'superadmin') abort(403);
+        return inertia('SuperAdmin/KelolaUser', ['title' => 'Kelola Pengguna']);
+    });
+
+    Route::get('/super-admin/riwayat', function () {
+        if (auth()->user()->role !== 'superadmin') abort(403);
+        return inertia('SuperAdmin/RiwayatSuperAdmin', ['title' => 'Riwayat']);
+    })->name('superadmin.riwayat');
+
+    // 🔥 ROUTE PENGATURAN & EDIT STORAGE LIMIT
+    Route::get('/super-admin/pengaturan', function () {
+        if (auth()->user()->role !== 'superadmin') abort(403);
+        return inertia('SuperAdmin/Pengaturan', ['title' => 'Pengaturan']);
+    })->name('superadmin.pengaturan');
+
+    Route::get('/super-admin/editstoragelimit', function () {
+        if (auth()->user()->role !== 'superadmin') abort(403);
+        return inertia('SuperAdmin/EditStorageLimit', ['title' => 'Edit Limit Penyimpanan']);
+    })->name('superadmin.editlimit');
+});
+
 // GROUP UTAMA (MIDDLEWARE AUTH)
 Route::middleware(['auth', 'verified'])->group(function () {
 
@@ -127,41 +159,42 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Riwayat (Logic Direct Berdasarkan Role)
     Route::get('/riwayat', function () {
-        if (auth()->user()->role === 'pimpinan') {
+        $role = auth()->user()->role; 
+
+        if ($role === 'pimpinan') {
             return inertia('Pimpinan/RiwayatPimpinan', ['title' => 'Riwayat']);
         }
+        
+        if ($role === 'superadmin') {
+            return inertia('SuperAdmin/RiwayatSuperAdmin', ['title' => 'Riwayat']);
+        }
+
         return inertia('Riwayat', ['title' => 'Riwayat']);
     })->name('riwayat');
 
     // Daftar Arsip
     Route::get('daftar-arsip', function (Request $request) {
-
-        // Pimpinan
         if (auth()->user()->role === 'pimpinan') {
             return inertia('Pimpinan/ListArsipPimpinan', [
                 'title' => 'Daftar Arsip',
                 'data' => [],
-                'filters' => [
-                    'search' => $request->search,
-                    'kategori' => $request->kategori,
-                    'tanggal_awal' => $request->tanggal_awal,
-                    'tanggal_akhir' => $request->tanggal_akhir,
-                ]
+                'filters' => $request->only(['search', 'kategori', 'tanggal_awal', 'tanggal_akhir'])
             ]);
         }
 
-        // role user, admin, superadmin
+        if (auth()->user()->role === 'superadmin') {
+            return inertia('SuperAdmin/ListArsipSuperAdmin', [
+                'title' => 'Manajemen Arsip Global',
+                'data' => [],
+                'filters' => $request->only(['search', 'kategori', 'tanggal_awal', 'tanggal_akhir'])
+            ]);
+        }
+
         return inertia('ListArsip', [
             'title' => 'Daftar Arsip',
             'data' => [],
-            'filters' => [
-                'search' => $request->search,
-                'kategori' => $request->kategori,
-                'tanggal_awal' => $request->tanggal_awal,
-                'tanggal_akhir' => $request->tanggal_akhir,
-            ]
+            'filters' => $request->only(['search', 'kategori', 'tanggal_awal', 'tanggal_akhir'])
         ]);
-
     })->name('arsip');
 
     Route::get('/unggah', function () {
@@ -174,7 +207,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/unggah/{folder}', function ($folder) {
         return inertia('UnggahVital', [
-            'title' => 'Unggah Dokumen', // Tambahkan title di sini juga biar konsisten
+            'title' => 'Unggah Dokumen', 
             'folder' => $folder 
         ]);
     })->name('unggah.valid');
@@ -185,37 +218,26 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ]);
     })->name('kelola.arsip');
 
-    // ROUTE DETAIL ARSIP DENGAN LOGIKA DIRECT ROLE
     Route::get('arsip/{id}', function ($id) {
+        $doc = [
+            "id" => 0,
+            "title" => "Proposal Program Pemberdayaan Masyarakat",
+            "nomor" => "DOK/012/11/2026",
+            "jenis" => "Proposal",
+            "tanggal" => "25 Januari 2026",
+            "status" => "Public",
+            "file" => "/dummy.pdf"
+        ]; // Dummy data
 
-        $documents = [
-            [
-                "id" => 0,
-                "title" => "Proposal Program Pemberdayaan Masyarakat",
-                "nomor" => "DOK/012/11/2026",
-                "jenis" => "Proposal",
-                "tanggal" => "25 Januari 2026",
-                "status" => "Public",
-                "file" => "/dummy.pdf"
-            ]
-        ];
-
-        $doc = $documents[$id] ?? abort(404);
-
-        // Jika Pimpinan, arahkan ke DetailArsipPimpinan.vue
         if (auth()->user()->role === 'pimpinan') {
-            return inertia('Pimpinan/DetailArsipPimpinan', [
-                'title' => 'Detail Arsip',
-                'doc' => $doc
-            ]);
+            return inertia('Pimpinan/DetailArsipPimpinan', ['title' => 'Detail Arsip', 'doc' => $doc]);
         }
 
-        // Jika bukan Pimpinan (User/Admin), arahkan ke DetailArsip.vue
-        return inertia('DetailArsip', [
-            'title' => 'Detail Arsip',
-            'doc' => $doc
-        ]);
+        if (auth()->user()->role === 'superadmin') {
+            return inertia('SuperAdmin/DetailArsipSuperAdmin', ['title' => 'Detail Arsip', 'doc' => $doc]);
+        }
 
+        return inertia('DetailArsip', ['title' => 'Detail Arsip', 'doc' => $doc]);
     })->name('arsip.detail');
 
 });
