@@ -42,7 +42,8 @@ const user = page.props.auth?.user
           <span class="text-sm font-medium">Unggah</span>
         </Link>
 
-        <!-- ARSIP SAYA (pakai punyamu) -->
+        
+        <!-- KELOLA ARSIP -->
         <Link href="/kelola-arsip" 
           :class="page.url.startsWith('/kelola-arsip') ? 'bg-[#2f4fa2] text-white shadow-md' : 'bg-gray-200 hover:bg-gray-300 text-gray-800'"
           class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all">

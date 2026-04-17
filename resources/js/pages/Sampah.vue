@@ -23,7 +23,7 @@ const props = defineProps({
   }
 })
 
-// --- DATA DUMMY (Disesuaikan agar bisa mencoba banyak halaman) ---
+// --- DATA DUMMY ---
 const displayItems = ref([
   { id: 1, title: 'Dokumentasi Rapat Penandatanganan Peresmian', date: '22/01/2026', doc_no: 'DOK/1012/11/2026', type: 'PNG' },
   { id: 2, title: 'Dokumentasi Rapat Penandatanganan Peresmian', date: '22/01/2026', doc_no: 'DOK/1012/11/2026', type: 'PDF' },
@@ -64,7 +64,7 @@ const openConfirm = (type, id) => {
 const handleExecute = () => {
   const { id } = modalConfig.value
   
-  // Efek Berkurang 1 (Dummy filter)
+  // Dummy filter
   displayItems.value = displayItems.value.filter(item => item.id !== id)
   
   // Balik ke halaman sebelumnya jika halaman saat ini jadi kosong
@@ -218,7 +218,6 @@ const handleExecute = () => {
 </template>
 
 <style scoped>
-/* Tambahan agar font terasa lebih clean */
 .font-sans {
   font-family: 'Inter', 'Segoe UI', sans-serif;
 }

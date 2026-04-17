@@ -1,9 +1,9 @@
 <script setup>
-import AuthLayout from '@/layouts/AuthLayout.vue'
+import AuthLayoutPimpinan from '@/layouts/AuthLayoutPimpinan.vue'
 import ListArsipContent from '@/components/ListArsipContent.vue'
 
 defineOptions({
-  layout: AuthLayout
+  layout: AuthLayoutPimpinan
 })
 </script>
 
