@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -20,11 +22,36 @@ class AuthController extends Controller
         User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => $request->password,
+            'password' => Hash::make($request->password),
             'nip' => $request->nip,
-            'bagian' => $request->bagian, 
+            'bagian' => $request->bagian,
+            'role' => 'user'
         ]);
 
         return redirect('/login');
+    }
+
+    public function login(Request $request)
+    {
+        $credentials = $request->only('email', 'password');
+
+        if (Auth::attempt($credentials)) {
+
+            $user = Auth::user();
+
+            // 🔥 AUTO DETECT PIMPINAN
+            if ($user->email === 'pimpinan@gmail.com') {
+                $user->role = 'pimpinan';
+                $user->save();
+
+                return redirect('/pimpinan/dashboard');
+            }
+
+            return redirect('/dashboard');
+        }
+
+        return back()->withErrors([
+            'email' => 'Email atau password salah'
+        ]);
     }
 }

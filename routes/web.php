@@ -20,9 +20,7 @@ Route::get('/edit-dokumen', function () {
     ]);
 });
 
-Route::get('/riwayat', function () {
-    return inertia('Riwayat', ['title' => 'Riwayat']);
-})->name('riwayat');
+// --- ROUTE RIWAYAT PINDAH KE BAWAH (DALAM GROUP AUTH) AGAR BISA CEK ROLE ---
 
 Route::get('/arsipsaya', function () {
     return inertia('ArsipSaya', [
@@ -31,13 +29,13 @@ Route::get('/arsipsaya', function () {
 });
 
 Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
 
-// LOGIN
 Route::get('/login', function () {
     return inertia('Login', [
         'status' => session('status'),
     ]);
-});
+})->name('login');
 
 Route::get('/register', function () {
     return inertia('Register');
@@ -89,8 +87,7 @@ Route::inertia('/', 'Landing', [
     'canRegister' => Features::enabled(Features::registration()),
 ])->name('home');
 
-
-// ✅ LOGOUT (INI YANG BARU DITAMBAHIN)
+// LOGOUT
 Route::post('/logout', function () {
     auth()->logout();
     request()->session()->invalidate();
@@ -99,17 +96,57 @@ Route::post('/logout', function () {
     return redirect('/');
 })->name('logout');
 
+// DASHBOARD PIMPINAN
+Route::get('/pimpinan/dashboard', function () {
+    if (auth()->user()->role !== 'pimpinan') {
+        abort(403);
+    }
 
-// GROUP UTAMA
+    return inertia('Pimpinan/DashboardPimpinan');
+})->middleware('auth');
+
+// STATISTIK PIMPINAN
+Route::get('/pimpinan/statistik', function () {
+    if (auth()->user()->role !== 'pimpinan') {
+        abort(403);
+    }
+
+    return inertia('Pimpinan/StatistikPimpinan');
+})->middleware('auth');
+
+// GROUP UTAMA (MIDDLEWARE AUTH)
 Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::inertia('dashboard', 'Dashboard', [
         'title' => 'Beranda'
     ])->name('dashboard');
 
-    // CONNECT FILTER
+    // Riwayat (Logic Direct Berdasarkan Role)
+    Route::get('/riwayat', function () {
+        if (auth()->user()->role === 'pimpinan') {
+            return inertia('Pimpinan/RiwayatPimpinan', ['title' => 'Riwayat']);
+        }
+        return inertia('Riwayat', ['title' => 'Riwayat']);
+    })->name('riwayat');
+
+    // Daftar Arsip
     Route::get('daftar-arsip', function (Request $request) {
 
+        // Pimpinan
+        if (auth()->user()->role === 'pimpinan') {
+            return inertia('Pimpinan/ListArsipPimpinan', [
+                'title' => 'Daftar Arsip',
+                'data' => [],
+                'filters' => [
+                    'search' => $request->search,
+                    'kategori' => $request->kategori,
+                    'tanggal_awal' => $request->tanggal_awal,
+                    'tanggal_akhir' => $request->tanggal_akhir,
+                ]
+            ]);
+        }
+
+        // role user, admin, superadmin
         return inertia('ListArsip', [
             'title' => 'Daftar Arsip',
             'data' => [],
@@ -143,22 +180,35 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ]);
     })->name('kelola.arsip');
 
+    // ROUTE DETAIL ARSIP DENGAN LOGIKA DIRECT ROLE
     Route::get('arsip/{id}', function ($id) {
 
         $documents = [
             [
                 "id" => 0,
                 "title" => "Proposal Program Pemberdayaan Masyarakat",
-                "kategori" => "Proposal",
+                "nomor" => "DOK/012/11/2026",
+                "jenis" => "Proposal",
                 "tanggal" => "25 Januari 2026",
                 "status" => "Public",
                 "file" => "/dummy.pdf"
             ]
         ];
 
+        $doc = $documents[$id] ?? abort(404);
+
+        // Jika Pimpinan, arahkan ke DetailArsipPimpinan.vue
+        if (auth()->user()->role === 'pimpinan') {
+            return inertia('Pimpinan/DetailArsipPimpinan', [
+                'title' => 'Detail Arsip',
+                'doc' => $doc
+            ]);
+        }
+
+        // Jika bukan Pimpinan (User/Admin), arahkan ke DetailArsip.vue
         return inertia('DetailArsip', [
             'title' => 'Detail Arsip',
-            'doc' => $documents[$id] ?? null
+            'doc' => $doc
         ]);
 
     })->name('arsip.detail');

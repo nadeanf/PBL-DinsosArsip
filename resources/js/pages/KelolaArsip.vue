@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
-import AuthLayout from '@/Layouts/AuthLayout.vue';
+import AuthLayout from '@/layouts/AuthLayout.vue';
 // Import icon jika menggunakan lucide-vue-next, jika tidak, pakai SVG biasa di bawah
 import { AlertTriangle } from 'lucide-vue-next';
 

@@ -1,12 +1,12 @@
 <script setup>
-import AuthLayout from '@/layouts/AuthLayout.vue'
+import AuthLayoutPimpinan from '@/layouts/AuthLayoutPimpinan.vue'
 import RiwayatContent from '@/components/RiwayatContent.vue'
 import { Head } from '@inertiajs/vue3'
 
-defineOptions({ layout: AuthLayout })
+defineOptions({ layout: AuthLayoutPimpinan })
 </script>
 
 <template>
-    <Head title="Riwayat - User" />
+    <Head title="Riwayat - Pimpinan" />
     <RiwayatContent />
 </template>
