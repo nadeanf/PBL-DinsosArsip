@@ -1,51 +1,47 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, useForm, router } from '@inertiajs/vue3';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 
 defineOptions({ layout: AuthLayout });
 
-// =====================
-// AMBIL DATA DARI BACKEND
-// =====================
+/* =====================
+   PROPS
+===================== */
 const props = defineProps<{
-    arsip: any
+    arsip: any,
+    kategori: any[]
 }>();
 
 const arsip = props.arsip;
+const kategori = props.kategori;
 
-// =====================
-// FORM TERISI OTOMATIS
-// =====================
+/* =====================
+   FORM
+===================== */
 const form = useForm({
     judul: arsip?.judul || '',
     nomor: arsip?.nomor || '',
     tahun: arsip?.tahun || '',
     status_akses: arsip?.status_akses || 'Publik',
-    kategori_kelompok: '',
-    kategori: arsip?.id_kategori || '',
+
+    id_kategori: arsip?.id_kategori || '',
+
     lokasi: arsip?.lokasi || '',
     deskripsi: arsip?.deskripsi || '',
     files: null as any,
 });
 
-// =====================
-// FILE LIST (PREVIEW)
-// =====================
+/* =====================
+   FILE PREVIEW
+===================== */
 const fileList = computed(() => {
     return form.files ? Array.from(form.files as FileList) : [];
 });
 
-// =====================
-// BACK BUTTON
-// =====================
-const goBack = () => {
-    window.history.back();
-};
-
-// =====================
-// FILE HANDLING
-// =====================
+/* =====================
+   FILE INPUT
+===================== */
 const fileInput = ref<HTMLInputElement | null>(null);
 
 const triggerUpload = () => {
@@ -59,12 +55,23 @@ const handleFileChange = (e: Event) => {
     }
 };
 
-// =====================
-// SUBMIT UPDATE
-// =====================
+/* =====================
+   BACK
+===================== */
+const goBack = () => {
+    window.history.back();
+};
+
+/* =====================
+   SUBMIT (FIXED REDIRECT)
+===================== */
 const submit = () => {
     form.put(`/arsip/${arsip.id}`, {
         forceFormData: true,
+
+        onSuccess: () => {
+            router.visit('/kelola-arsip');
+        }
     });
 };
 </script>
@@ -79,15 +86,15 @@ const submit = () => {
             Edit Dokumen
         </h1>
 
-        <form @submit.prevent="submit" class="bg-white p-8 rounded-3xl shadow">
+        <form @submit.prevent="submit" class="bg-white p-8 rounded-3xl shadow space-y-5">
 
-            <!-- FILE UPLOAD -->
-            <div class="mb-6">
-
+            <!-- FILE -->
+            <div>
                 <input
                     type="file"
                     ref="fileInput"
                     class="hidden"
+                    multiple
                     @change="handleFileChange"
                 />
 
@@ -99,62 +106,77 @@ const submit = () => {
                     Upload File Baru
                 </button>
 
-                <!-- PREVIEW FILE -->
-                <div v-if="fileList.length > 0" class="mt-4">
+                <div v-if="fileList.length" class="mt-3">
                     <p class="font-bold mb-2">
                         File dipilih ({{ fileList.length }})
                     </p>
 
-                    <ul class="text-sm text-gray-700 space-y-1">
-                        <li v-for="(file, index) in fileList" :key="index">
+                    <ul class="text-sm text-gray-600">
+                        <li v-for="(file, i) in fileList" :key="i">
                             📄 {{ file.name }}
                         </li>
                     </ul>
                 </div>
-
             </div>
 
             <!-- JUDUL -->
-            <div class="mb-4">
-                <label>Judul</label>
+            <div>
+                <label class="font-bold">Judul</label>
                 <input v-model="form.judul" class="w-full border p-3 rounded-xl" />
             </div>
 
             <!-- NOMOR -->
-            <div class="mb-4">
-                <label>Nomor</label>
+            <div>
+                <label class="font-bold">Nomor</label>
                 <input v-model="form.nomor" class="w-full border p-3 rounded-xl" />
             </div>
 
             <!-- TAHUN -->
-            <div class="mb-4">
-                <label>Tahun</label>
+            <div>
+                <label class="font-bold">Tahun</label>
                 <input v-model="form.tahun" class="w-full border p-3 rounded-xl" />
             </div>
 
             <!-- STATUS -->
-            <div class="mb-4">
-                <label>Status Akses</label>
+            <div>
+                <label class="font-bold">Status Akses</label>
                 <select v-model="form.status_akses" class="w-full border p-3 rounded-xl">
                     <option value="Publik">Publik</option>
                     <option value="Private">Private</option>
                 </select>
             </div>
 
+            <!-- KATEGORI -->
+            <div>
+                <label class="font-bold">Kategori</label>
+
+                <select v-model="form.id_kategori" class="w-full border p-3 rounded-xl">
+                    <option value="">Pilih Kategori</option>
+
+                    <option
+                        v-for="kat in kategori"
+                        :key="kat.id"
+                        :value="kat.id"
+                    >
+                        {{ kat.nama }}
+                    </option>
+                </select>
+            </div>
+
             <!-- LOKASI -->
-            <div class="mb-4">
-                <label>Lokasi</label>
+            <div>
+                <label class="font-bold">Lokasi</label>
                 <input v-model="form.lokasi" class="w-full border p-3 rounded-xl" />
             </div>
 
             <!-- DESKRIPSI -->
-            <div class="mb-4">
-                <label>Deskripsi</label>
+            <div>
+                <label class="font-bold">Deskripsi</label>
                 <textarea v-model="form.deskripsi" class="w-full border p-3 rounded-xl"></textarea>
             </div>
 
             <!-- BUTTON -->
-            <div class="flex gap-3 mt-6">
+            <div class="flex gap-3 pt-4">
 
                 <button
                     type="button"
@@ -174,6 +196,7 @@ const submit = () => {
             </div>
 
         </form>
+
     </div>
 </div>
 </template>

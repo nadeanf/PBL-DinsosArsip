@@ -1,10 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { Head, useForm } from '@inertiajs/vue3'
 import AuthLayout from '@/layouts/AuthLayout.vue'
-import { computed } from 'vue'
-
-const isPrivate = computed(() => form.status_akses === 'private')
 
 defineOptions({ layout: AuthLayout })
 
@@ -20,13 +17,15 @@ const form = useForm({
   nomor: '',
   tahun: '',
   status_akses: 'publik',
-  kategori: '', // id_kategori
+  kategori: '',
   lokasi: '',
   deskripsi: '',
   files: null as any,
   bagian: '',
   folder: props.folder
 })
+
+const isPrivate = computed(() => form.status_akses === 'private')
 
 const fileInput = ref<HTMLInputElement | null>(null)
 const filePreviews = ref<any[]>([])
@@ -42,6 +41,18 @@ const handleFileChange = (e: any) => {
     type: file.type,
     url: URL.createObjectURL(file)
   }))
+}
+
+// 🔥 ambil parent (kategori utama)
+const parents = computed(() =>
+  props.kategoriData.filter((item: any) => !item.parent_id)
+)
+
+// 🔥 ambil child
+const getChildren = (parentId: number) => {
+  return props.kategoriData.filter(
+    (item: any) => item.parent_id === parentId
+  )
 }
 
 const submit = () => {
@@ -121,26 +132,33 @@ const submit = () => {
             <input v-model="form.tahun" class="w-full p-4 bg-white rounded-2xl border" />
           </div>
 
+          <!-- 🔥 KATEGORI (RAPI OPTGROUP) -->
           <div>
-  <label class="block text-black font-black mb-1.5 ml-3 text-sm uppercase">
-    Kategori
-  </label>
+            <label class="block text-black font-black mb-1.5 ml-3 text-sm uppercase">
+              Kategori
+            </label>
 
-  <select
-    v-model="form.kategori"
-    class="w-full p-4 bg-white text-black font-medium rounded-2xl border"
-  >
-    <option value="">-- Pilih Kategori --</option>
+            <select
+              v-model="form.kategori"
+              class="w-full p-4 bg-white text-black font-medium rounded-2xl border"
+            >
+              <option value="">-- Pilih Kategori --</option>
 
-    <option
-      v-for="item in props.kategoriData"
-      :key="item.id"
-      :value="item.id"
-    >
-      {{ item.nama }}
-    </option>
-  </select>
-</div>
+              <optgroup
+                v-for="parent in parents"
+                :key="parent.id"
+                :label="parent.nama"
+              >
+                <option
+                  v-for="child in getChildren(parent.id)"
+                  :key="child.id"
+                  :value="child.id"
+                >
+                  {{ child.nama }}
+                </option>
+              </optgroup>
+            </select>
+          </div>
 
           <!-- STATUS -->
           <div>

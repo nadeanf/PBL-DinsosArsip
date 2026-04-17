@@ -25,7 +25,7 @@ class ArsipController extends Controller
         $request->validate([
             'judul' => 'required|string',
             'tahun' => 'required',
-            'kategori' => 'required|exists:kategori,id',
+            'id_kategori' => 'required|exists:kategori,id',
             'status_akses' => 'required'
         ]);
 
@@ -40,7 +40,8 @@ class ArsipController extends Controller
                 : 'aktif';
         }
 
-        Arsip::create([
+        $arsip = Arsip::create([
+            
             'user_id' => $user->id,
             'judul' => $request->judul,
             'nomor' => $request->nomor,
@@ -53,36 +54,46 @@ class ArsipController extends Controller
             'deskripsi' => $request->deskripsi,
             'status_approval' => 'pending'
         ]);
+         if ($request->hasFile('files')) {
+        foreach ($request->file('files') as $file) {
 
+            $path = $file->store('arsip', 'public');
+
+            \App\Models\File::create([
+                'arsip_id' => $arsip->id,
+                'path_file' => $path,
+                'nama_file' => $file->getClientOriginalName()
+            ]);
+        }
+    }
         return redirect()->route('kelola.arsip');
     }
 
     // UPDATE ARSIP (EDIT)
     public function update(Request $request, $id)
-    {
-        $request->validate([
-            'judul' => 'required|string',
-            'nomor' => 'nullable',
-            'tahun' => 'required',
-            'kategori' => 'required',
-            'status_akses' => 'required'
-        ]);
+{
+    $request->validate([
+        'judul' => 'required|string',
+        'nomor' => 'nullable|string',
+        'tahun' => 'required|integer',
+        'id_kategori' => 'required|exists:kategori,id',
+        'status_akses' => 'required'
+    ]);
 
-        $arsip = Arsip::findOrFail($id);
+    $arsip = Arsip::findOrFail($id);
 
-        $arsip->update([
-            'judul' => $request->judul,
-            'nomor' => $request->nomor,
-            'tahun' => $request->tahun,
-            'id_kategori' => $request->kategori,
-            'status_akses' => $request->status_akses,
-            'lokasi' => $request->lokasi,
-            'deskripsi' => $request->deskripsi,
-        ]);
+    $arsip->update([
+        'judul' => $request->judul,
+        'nomor' => $request->nomor,
+        'tahun' => $request->tahun,
+        'id_kategori' => $request->id_kategori,
+        'status_akses' => $request->status_akses,
+        'lokasi' => $request->lokasi,
+        'deskripsi' => $request->deskripsi,
+    ]);
 
-        return redirect()->route('kelola.arsip');
-    }
-
+    return redirect()->route('kelola.arsip');
+}
     // LIST ARSIP
     public function index()
     {
@@ -98,12 +109,49 @@ class ArsipController extends Controller
     }
 
     // EDIT PAGE
-    public function edit($id)
-    {
-        $arsip = Arsip::with(['kategori', 'user'])->findOrFail($id);
+   public function edit($id)
+{
+    $arsip = Arsip::with(['kategori', 'user'])->findOrFail($id);
 
-        return Inertia::render('EditDokumen', [
-            'arsip' => $arsip
-        ]);
-    }
+    return Inertia::render('EditDokumen', [
+        'arsip' => $arsip,
+        'kategori' => Kategori::all()
+    ]);
+}
+
+    public function destroy($id)
+{
+    $arsip = Arsip::findOrFail($id);
+    $arsip->delete(); // 🔥 masuk sampah (soft delete)
+
+    return back();
+}
+
+public function restore($id)
+{
+    $arsip = Arsip::onlyTrashed()->findOrFail($id);
+    $arsip->restore();
+
+    return back();
+}
+
+public function forceDelete($id)
+{
+    $arsip = Arsip::onlyTrashed()->findOrFail($id);
+    $arsip->forceDelete();
+
+    return back();
+}
+
+public function trash()
+{
+    $arsip = Arsip::onlyTrashed()
+        ->with('files')
+        ->latest()
+        ->get();
+
+    return Inertia::render('Sampah', [
+        'items' => $arsip
+    ]);
+}
 }

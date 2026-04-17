@@ -198,6 +198,10 @@ Route::get('/edit-profile', function () {
     ]);
 });
 
+Route::delete('/arsip/{id}', [ArsipController::class, 'destroy']);
+Route::get('/sampah', [ArsipController::class, 'trash']);
+Route::post('/arsip/{id}/restore', [ArsipController::class, 'restore']);
+Route::delete('/arsip/{id}/force', [ArsipController::class, 'forceDelete']);
 
 
 require __DIR__.'/settings.php';
