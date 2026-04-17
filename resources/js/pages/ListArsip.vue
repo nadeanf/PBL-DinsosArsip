@@ -1,9 +1,9 @@
 <script setup>
-import AuthLayout from '@/layouts/AuthLayout.vue'
+import UserLayout from '@/layouts/UserLayout.vue'
 import { computed, ref } from 'vue'
 
 defineOptions({
-  layout: AuthLayout
+  layout: UserLayout
 })
 
 const documents = [

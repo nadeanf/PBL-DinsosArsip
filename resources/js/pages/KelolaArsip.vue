@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
-import AuthLayout from '@/Layouts/AuthLayout.vue';
+import UserLayout from '@/layouts/UserLayout.vue';
 // Import icon jika menggunakan lucide-vue-next, jika tidak, pakai SVG biasa di bawah
 import { AlertTriangle } from 'lucide-vue-next';
 
-defineOptions({ layout: AuthLayout });
+defineOptions({ layout: UserLayout });
 
 const handleEdit = (id: number) => {
     // Navigasi ke route /edit-dokumen
@@ -22,14 +22,18 @@ const allDocuments = ref(Array.from({ length: 20 }, (_, i) => ({
 
 // 2. State untuk Modal Konfirmasi
 const showModal = ref(false);
-const modalConfig = ref({
-    id: null,
-    title: '',
-    message: ''
+const modalConfig = ref<{
+  id: number | null;
+  title: string;
+  message: string;
+}>({
+  id: null,
+  title: '',
+  message: ''
 });
 
 // Fungsi untuk Membuka Modal
-const openConfirmDelete = (id) => {
+const openConfirmDelete = (id: number) => {
     modalConfig.value = {
         id: id,
         title: 'Hapus',

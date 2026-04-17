@@ -4,10 +4,10 @@ import { arsip } from '@/routes'
 import { ref } from 'vue'
 import { Eye, Download, Heart } from 'lucide-vue-next'
 import { Link } from '@inertiajs/vue3'
-import AuthLayout from '@/layouts/AuthLayout.vue'
+import UserLayout from '@/layouts/UserLayout.vue'
 
 defineOptions({
-  layout: AuthLayout
+  layout: UserLayout
 })
 
 // state input

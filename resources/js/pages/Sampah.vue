@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { Head, router } from '@inertiajs/vue3'
-import AuthLayout from '@/layouts/AuthLayout.vue'
+import UserLayout from '@/layouts/UserLayout.vue'
 import { 
   Trash2, 
   RotateCcw, 
@@ -13,7 +13,7 @@ import {
 } from 'lucide-vue-next'
 
 defineOptions({
-  layout: AuthLayout
+  layout: UserLayout
 })
 
 const props = defineProps({

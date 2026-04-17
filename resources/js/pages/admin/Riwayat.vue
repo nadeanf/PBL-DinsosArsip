@@ -1,10 +1,10 @@
 <script setup>
 import { Head } from '@inertiajs/vue3'
-import UserLayout from '@/layouts/UserLayout.vue'
+import AdminLayout from '@/layouts/AdminLayout.vue'
 import { Search, FileText, Image as ImageIcon, Video, Clock } from 'lucide-vue-next'
 
 defineOptions({
-  layout: UserLayout
+  layout: AdminLayout
 })
 
 const riwayatData = [

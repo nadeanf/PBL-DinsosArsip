@@ -1,10 +1,10 @@
 <script setup>
 import { usePage } from '@inertiajs/vue3'
-import AuthLayout from '@/layouts/AuthLayout.vue'
+import UserLayout from '@/layouts/UserLayout.vue'
 import { FileText, Eye, Download } from 'lucide-vue-next'
 
 defineOptions({
-  layout: AuthLayout
+  layout: UserLayout
 })
 
 //AMBIL PROPS + FALLBACK (TANPA DB)

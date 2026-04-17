@@ -1,6 +1,6 @@
 <script setup>
 import Navbar from '@/components/Navbar.vue'
-import Sidebar from '@/components/AppSidebar.vue'
+import UserSidebar from '@/components/sidebar/UserSidebar.vue'
 import Footer from '@/components/footer.vue'
 </script>
 
@@ -12,8 +12,8 @@ import Footer from '@/components/footer.vue'
 
     <div class="flex flex-1">
 
-      <!-- SIDEBAR -->
-      <Sidebar />
+      <!-- SIDEBAR USER -->
+      <UserSidebar />
 
       <!-- CONTENT -->
       <main class="flex-1 bg-gray-100">

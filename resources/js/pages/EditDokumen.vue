@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { Head, useForm } from '@inertiajs/vue3';
-import AuthLayout from '@/Layouts/AuthLayout.vue';
+import UserLayout from '@/layouts/UserLayout.vue';
 
-defineOptions({ layout: AuthLayout });
+defineOptions({ layout: UserLayout });
 
 const props = defineProps<{ folder: string }>();
 
@@ -16,7 +16,7 @@ const kategoriVital = [
   'Pembinaan Komunitas Adat Terpencil (PKAT)'
 ];
 
-const kategoriAktifInaktif = {
+const kategoriAktifInaktif: Record<string, string[]> = {
   'Umum': [
     'Telekomunikasi', 'Perjalanan Dinas Dalam Negeri', 'Perjalanan Dinas Luar Negeri', 
     'Penggunaan Fasilitas Kantor', 'Rapat Pimpinan', 'Penyediaan Konsumsi', 
@@ -32,7 +32,7 @@ const kategoriAktifInaktif = {
     'Penanggulangan Kemiskinan', 'Kepahlawanan dan Kesetiakawanan Sosial'
   ],
   'Keuangan': [
-    'Surat Penyedia Dana (SPP, SPM dan SP2D)', 'Pendapatan', 'Belanja', 
+    'Surat Penyedia Dana (SPP, SPM dan SP2D): UP, GU, TU, LS', 'Pendapatan', 'Belanja', 
     'Pembiayaan Daerah', 'Laporan Keuangan'
   ]
 };
@@ -197,7 +197,7 @@ const submit = () => {
   
   <button 
     type="button" 
-    @click="window.history.back()" 
+    @click="goBack()" 
     class="bg-gray-400 hover:bg-gray-500 text-white font-black px-10 py-4 rounded-2xl transition shadow-md uppercase text-xs tracking-widest"
   >
     Batal
@@ -218,3 +218,11 @@ const submit = () => {
     </div>
   </div>
 </template>
+
+<script>
+const goBack = () => {
+  if (typeof window !== 'undefined') {
+    window.history.back();
+  }
+};
+</script>

@@ -17,7 +17,7 @@
 
         <div class="item">
           <span>📍</span>
-          <p>Jl. xxxx No. 123, Kota, Provinsi Kode pos</p>
+          <p>Jalan Kebo Kenongo Tegalarum, Kemiri, Kecamatan Mojosongo, Kabupaten Boyolali, Jawa Tengah 57311</p>
         </div>
 
         <div class="item">
@@ -33,21 +33,19 @@
         <div class="item">
           <span>🕒</span>
           <p>
-            Senin - Kamis: xx.xx - xx.xx <br>
-            Jumat: xx.xx - xx.xx <br>
+            Senin - Jum'at: 07.00 - 17.00 <br>
             Sabtu - Minggu: Tutup
           </p>
         </div>
       </div>
 
       <!-- Kanan -->
-      <div class="section">
-        <h3>Lokasi Kami</h3>
-        <img 
-          src="https://maps.googleapis.com/maps/api/staticmap?center=-7.5333,110.5958&zoom=15&size=300x200"
-          alt="Map"
-        />
-      </div>
+     <div class="section">
+  <h3>Lokasi Kami</h3>
+
+  <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3955.2409728676066!2d110.60317497357615!3d-7.548680674525139!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e7a695aa55a4367%3A0x444b7fb94b08e7c2!2sDinas%20Sosial%20Kabupaten%20Boyolali!5e0!3m2!1sen!2sid!4v1776332122826!5m2!1sen!2sid" width="400" height="220" style="border:0;" allowfullscreen="true" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+
+</div>
 
     </div>
   </footer>
