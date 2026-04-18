@@ -121,12 +121,18 @@ Route::post('/logout', function () {
 */
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    Route::inertia('/dashboard', 'Dashboard', [
-        'title' => 'Beranda'
-    ])->name('dashboard');
+    Route::get('/dashboard', [ArsipController::class, 'dashboard'])
+    ->name('dashboard');
 
     Route::put('/arsip/{id}', [ArsipController::class, 'update'])
-    ->name('arsip.update');
+        ->name('arsip.update');
+
+    // ✅ FIX DI SINI (MASUKIN DELETE KE AUTH)
+    Route::delete('/arsip/{id}', [ArsipController::class, 'destroy'])
+        ->name('arsip.destroy');
+
+    Route::post('/arsip/{id}/restore', [ArsipController::class, 'restore']);
+    Route::delete('/arsip/{id}/force', [ArsipController::class, 'forceDelete']);
 
     // LIST ARSIP
     Route::get('/daftar-arsip', function (Request $request) {
@@ -149,15 +155,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         'title' => 'Unggah'
     ])->name('unggah');
 
-    // ❌ FIX UTAMA (INI YANG BIKIN ERROR SEBELUMNYA)
-    // Route lama dihapus / tidak dipakai lagi
-
-    // OPTIONAL: biar tidak error kalau masih kepencet link lama
     Route::get('/unggah/aktif&inaktif', function () {
         return redirect('/unggah');
     });
 
-    // FIX: jangan pakai closure UnggahVital kalau file tidak ada
     Route::get('/unggah/{folder}', [ArsipController::class, 'create'])
         ->name('unggah.valid');
 
@@ -198,10 +199,11 @@ Route::get('/edit-profile', function () {
     ]);
 });
 
-Route::delete('/arsip/{id}', [ArsipController::class, 'destroy']);
-Route::get('/sampah', [ArsipController::class, 'trash']);
-Route::post('/arsip/{id}/restore', [ArsipController::class, 'restore']);
-Route::delete('/arsip/{id}/force', [ArsipController::class, 'forceDelete']);
+// ❌ DIHAPUS DARI SINI (BIAR GA DOUBLE & GA 404)
+// Route::delete('/arsip/{id}', ...)
+// Route::post('/arsip/{id}/restore', ...)
+// Route::delete('/arsip/{id}/force', ...)
 
+Route::get('/sampah', [ArsipController::class, 'trash']);
 
 require __DIR__.'/settings.php';

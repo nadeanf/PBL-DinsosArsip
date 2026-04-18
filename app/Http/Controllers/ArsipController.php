@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Arsip;
 use App\Models\Kategori;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Storage;
+use App\Models\File;
 
 class ArsipController extends Controller
 {
@@ -80,7 +82,7 @@ class ArsipController extends Controller
         'status_akses' => 'required'
     ]);
 
-    $arsip = Arsip::findOrFail($id);
+    $arsip = Arsip::with('files')->findOrFail($id);
 
     $arsip->update([
         'judul' => $request->judul,
@@ -91,6 +93,27 @@ class ArsipController extends Controller
         'lokasi' => $request->lokasi,
         'deskripsi' => $request->deskripsi,
     ]);
+
+    // 🔥 HANDLE FILE BARU
+    if ($request->hasFile('files')) {
+
+        // 🧨 hapus file lama
+        foreach ($arsip->files as $old) {
+            Storage::disk('public')->delete($old->path_file);
+            $old->delete();
+        }
+
+        // 🚀 simpan file baru
+        foreach ($request->file('files') as $file) {
+            $path = $file->store('arsip', 'public');
+
+            File::create([
+                'arsip_id' => $arsip->id,
+                'path_file' => $path,
+                'nama_file' => $file->getClientOriginalName()
+            ]);
+        }
+    }
 
     return redirect()->route('kelola.arsip');
 }
@@ -154,4 +177,5 @@ public function trash()
         'items' => $arsip
     ]);
 }
+public function dashboard() { $arsip = Arsip::with(['kategori', 'user', 'files']) ->where(function ($query) { $query->where('status_akses', 'publik') ->orWhere('user_id', Auth::id()); }) ->latest() ->get(); return Inertia::render('Dashboard', [ 'arsip' => $arsip, 'kategori' => Kategori::all() ]); }
 }
