@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { Head, router, usePage } from '@inertiajs/vue3'
 import AuthLayout from '@/layouts/AuthLayout.vue'
+import { FileText, FileImage, File, FileSpreadsheet } from 'lucide-vue-next'
 
 defineOptions({ layout: AuthLayout })
 
@@ -148,9 +149,34 @@ const handleExecute = () => {
         <!-- LEFT -->
         <div class="flex items-center gap-6 flex-1">
 
-          <div class="w-20 h-20 bg-white rounded-2xl flex items-center justify-center">
-            📄
-          </div>
+         <div class="w-20 h-20 bg-white rounded-2xl flex items-center justify-center shadow-sm">
+
+  <FileText
+    v-if="item.format === 'PDF'"
+    class="w-10 h-10 text-red-500"
+  />
+
+  <FileImage
+    v-else-if="item.format === 'IMAGE'"
+    class="w-10 h-10 text-blue-500"
+  />
+
+  <FileText
+    v-else-if="item.format === 'DOC'"
+    class="w-10 h-10 text-indigo-500"
+  />
+
+  <FileSpreadsheet
+    v-else-if="item.format === 'EXCEL'"
+    class="w-10 h-10 text-green-500"
+  />
+
+  <File
+    v-else
+    class="w-10 h-10 text-gray-400"
+  />
+
+</div>
 
           <div class="text-white">
 

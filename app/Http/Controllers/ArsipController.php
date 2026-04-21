@@ -48,7 +48,7 @@ class ArsipController extends Controller
             'judul' => $request->judul,
             'nomor' => $request->nomor,
             'tahun' => $request->tahun,
-            'id_kategori' => $request->kategori,
+            'id_kategori' => $request->id_kategori,
             'jenis_arsip' => $jenisArsip,
             'status_akses' => $request->status_akses,
             'bagian' => $request->status_akses === 'private' ? $user->bagian : null,
@@ -177,5 +177,41 @@ public function trash()
         'items' => $arsip
     ]);
 }
-public function dashboard() { $arsip = Arsip::with(['kategori', 'user', 'files']) ->where(function ($query) { $query->where('status_akses', 'publik') ->orWhere('user_id', Auth::id()); }) ->latest() ->get(); return Inertia::render('Dashboard', [ 'arsip' => $arsip, 'kategori' => Kategori::all() ]); }
+public function dashboard(Request $request)
+{
+    $query = Arsip::with(['kategori', 'user', 'files'])
+        ->where(function ($q) {
+            $q->where('status_akses', 'publik')
+              ->orWhere('user_id', Auth::id());
+        });
+
+    // 🔍 SEARCH
+    if ($request->search) {
+        $query->where(function ($q) use ($request) {
+            $q->where('judul', 'like', '%' . $request->search . '%')
+              ->orWhere('nomor', 'like', '%' . $request->search . '%');
+        });
+    }
+
+    // 🗂️ FILTER KATEGORI
+    if ($request->kategori) {
+        $query->where('id_kategori', $request->kategori);
+    }
+
+    // 📅 FILTER TANGGAL (tahun)
+    if ($request->tanggal_awal) {
+        $query->where('tahun', '>=', date('Y', strtotime($request->tanggal_awal)));
+    }
+
+    if ($request->tanggal_akhir) {
+        $query->where('tahun', '<=', date('Y', strtotime($request->tanggal_akhir)));
+    }
+
+    $arsip = $query->latest()->get();
+
+    return Inertia::render('Dashboard', [
+        'arsip' => $arsip,
+        'kategori' => Kategori::all()
+    ]);
+}
 }

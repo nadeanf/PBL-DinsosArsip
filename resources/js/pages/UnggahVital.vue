@@ -39,7 +39,7 @@ const form = useForm({
   tahun: '',
   status_akses: 'publik',
   kategori_kelompok: '',
-  kategori: '',
+  id_kategori: '',
   lokasi: '',
   deskripsi: '',
   files: null as any,
@@ -61,7 +61,7 @@ const subKategoriList = computed(() => {
 // WATCH
 // =====================
 watch(() => form.kategori_kelompok, () => {
-  form.kategori = ''
+  form.id_kategori = ''
 })
 
 // =====================
@@ -90,7 +90,7 @@ const submit = () => {
   form
     .transform((data) => ({
       ...data,
-      id_kategori: data.kategori
+      id_kategori: data.id_kategori
     }))
     .post('/arsip', {
       forceFormData: true
@@ -153,7 +153,7 @@ const submit = () => {
           <!-- VITAL -->
           <div v-if="isVital">
             <label>Kategori Vital</label>
-            <select v-model="form.kategori" class="w-full p-3 border rounded">
+            <select v-model="form.id_kategori" class="w-full p-3 border rounded">
               <option value="">-- Pilih Kategori --</option>
 
               <option
@@ -181,7 +181,7 @@ const submit = () => {
 
             <div>
               <label>Detail</label>
-              <select v-model="form.kategori" class="w-full p-3 border rounded">
+              <select v-model="form.id_kategori" class="w-full p-3 border rounded">
                 <option value="">-- Pilih --</option>
                 <option v-for="item in subKategoriList" :key="item" :value="item">
                   {{ item }}

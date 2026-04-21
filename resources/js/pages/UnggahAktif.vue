@@ -17,7 +17,7 @@ const form = useForm({
   nomor: '',
   tahun: '',
   status_akses: 'publik',
-  kategori: '',
+  id_kategori: '',
   lokasi: '',
   deskripsi: '',
   files: null as any,
@@ -59,7 +59,7 @@ const submit = () => {
   form
     .transform((data) => ({
       ...data,
-      id_kategori: data.kategori
+      id_kategori: data.id_kategori
     }))
     .post('/arsip', {
       forceFormData: true
@@ -139,7 +139,7 @@ const submit = () => {
             </label>
 
             <select
-              v-model="form.kategori"
+              v-model="form.id_kategori"
               class="w-full p-4 bg-white text-black font-medium rounded-2xl border"
             >
               <option value="">-- Pilih Kategori --</option>

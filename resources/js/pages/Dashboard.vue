@@ -1,34 +1,104 @@
 <script setup>
-import { router, usePage } from '@inertiajs/vue3'
-import { arsip } from '@/routes'
-import { ref } from 'vue'
-import { Eye, Download, Heart } from 'lucide-vue-next'
-import { Link } from '@inertiajs/vue3'
+import { usePage } from '@inertiajs/vue3'
+import { ref, computed } from 'vue'
+import { Eye, Download, Heart, FileText, FileImage, File } from 'lucide-vue-next'
 import AuthLayout from '@/layouts/AuthLayout.vue'
 
 defineOptions({
   layout: AuthLayout
 })
 
-/* =====================
-   PROPS (DATA DARI BACKEND)
-===================== */
-const { arsip: dataArsip, kategori: kategoriData } = usePage().props
+const page = usePage()
 
-// state input
+/* =========================
+   DATA DARI BACKEND (REAL)
+========================= */
+const dataArsip = page.props.arsip || []
+const kategoriData = page.props.kategori || []
+
+/* =========================
+   STATE FILTER
+========================= */
 const search = ref('')
 const kategori = ref('')
 const tanggal_awal = ref('')
 const tanggal_akhir = ref('')
 
-// function search
-const handleSearch = () => {
-  router.get(arsip().url, {
-    search: search.value,
-    kategori: kategori.value,
-    tanggal_awal: tanggal_awal.value,
-    tanggal_akhir: tanggal_akhir.value
+/* =========================
+   HELPER FILE TYPE
+========================= */
+const getFileType = (path) => {
+  if (!path) return 'FILE'
+  const ext = path.split('.').pop()?.toLowerCase()
+
+  if (['jpg','jpeg','png','gif','webp'].includes(ext)) return 'IMAGE'
+  if (ext === 'pdf') return 'PDF'
+  return 'FILE'
+}
+
+/* =========================
+   MAPPING DATA (REAL → CLEAN)
+========================= */
+const allDocuments = computed(() => {
+  return dataArsip.map(item => ({
+    id: item.id,
+    title: item.judul,
+    nomor: item.nomor || '',
+    deskripsi: item.deskripsi,
+
+    kategori_id: item.id_kategori,
+    kategori: item.kategori?.nama || '-',
+    jenis: item.jenis_arsip || '-',
+
+    // 🔥 TAMBAHAN (BIDANG)
+    bidang: item.user?.bagian || '-',
+
+    tahun: item.tahun,
+    lokasi: item.lokasi,
+    status: item.status_akses,
+
+    files: item.files || [],
+    format: item.files?.length
+      ? getFileType(item.files[0].path_file)
+      : 'FILE',
+
+    tanggal: item.created_at
+      ? new Date(item.created_at).toLocaleDateString()
+      : '-'
+  }))
+})
+
+/* =========================
+   FILTER
+========================= */
+const filteredDocuments = computed(() => {
+  return allDocuments.value.filter(item => {
+
+    const matchSearch =
+      item.title.toLowerCase().includes(search.value.toLowerCase()) ||
+      item.nomor.toLowerCase().includes(search.value.toLowerCase())
+
+    const matchKategori = kategori.value
+      ? item.kategori_id == kategori.value
+      : true
+
+    const matchTanggal =
+      (!tanggal_awal.value || item.tahun >= new Date(tanggal_awal.value).getFullYear()) &&
+      (!tanggal_akhir.value || item.tahun <= new Date(tanggal_akhir.value).getFullYear())
+
+    return matchSearch && matchKategori && matchTanggal
   })
+})
+
+/* =========================
+   PREVIEW
+========================= */
+const previewModal = ref(false)
+const selectedDoc = ref(null)
+
+const openPreview = (item) => {
+  selectedDoc.value = item
+  previewModal.value = true
 }
 </script>
 
@@ -36,161 +106,116 @@ const handleSearch = () => {
 
   <div class="p-6 bg-[#f3f4f6] min-h-screen space-y-6">
 
-    <!-- Judul -->
     <h1 class="text-2xl font-bold text-gray-800">Selamat Datang!</h1>
 
-    <!-- Bar abu -->
     <div class="h-4 bg-gray-300 rounded-full w-full"></div>
 
     <!-- FORM -->
-    <form @submit.prevent="handleSearch" class="bg-[#2f6f7e] p-4 rounded-xl shadow-md flex flex-wrap gap-4 items-center">
+    <form @submit.prevent class="bg-[#2f6f7e] p-4 rounded-xl shadow-md flex flex-wrap gap-4 items-center">
 
-      <!-- SEARCH -->
       <div class="bg-white rounded-lg px-4 py-3 flex items-center shadow-sm flex-1 min-w-[200px]">
         <span class="text-gray-400 mr-2">🔍</span>
-        <input
-          type="text"
-          v-model="search"
-          placeholder="Cari dokumen..."
-          class="w-full outline-none text-sm"
-        />
+        <input v-model="search" type="text" placeholder="Cari dokumen..." class="w-full outline-none text-sm"/>
       </div>
 
-      <!-- KATEGORI -->
       <div class="bg-white rounded-lg px-4 py-3 flex items-center shadow-sm w-[180px]">
         <select v-model="kategori" class="text-sm outline-none w-full">
           <option value="">Semua Kategori</option>
-
-          <option
-            v-for="kat in kategoriData"
-            :key="kat.id"
-            :value="kat.id"
-          >
+          <option v-for="kat in kategoriData" :key="kat.id" :value="kat.id">
             {{ kat.nama }}
           </option>
-
         </select>
       </div>
 
-      <!-- TANGGAL AWAL -->
-      <div class="bg-white rounded-lg px-4 py-3 flex items-center shadow-sm w-[160px]">
-        <input
-          type="date"
-          v-model="tanggal_awal"
-          class="text-sm outline-none w-full"
-        />
+      <div class="bg-white rounded-lg px-4 py-3 w-[160px]">
+        <input type="date" v-model="tanggal_awal" class="w-full text-sm outline-none"/>
       </div>
 
       <div class="text-white font-bold px-1">-</div>
 
-      <!-- TANGGAL AKHIR -->
-      <div class="bg-white rounded-lg px-4 py-3 flex items-center shadow-sm w-[160px]">
-        <input
-          type="date"
-          v-model="tanggal_akhir"
-          class="text-sm outline-none w-full"
-        />
+      <div class="bg-white rounded-lg px-4 py-3 w-[160px]">
+        <input type="date" v-model="tanggal_akhir" class="w-full text-sm outline-none"/>
       </div>
 
-      <!-- BUTTON -->
-      <div>
-        <button 
-          type="submit"
-          class="bg-white rounded-lg px-4 py-2 shadow-sm text-sm font-semibold text-gray-700 hover:bg-gray-100 transition"
-        >
-          Cari
-        </button>
-      </div>
+      <button type="button" class="bg-white rounded-lg px-4 py-2 text-sm font-semibold">
+        Cari
+      </button>
 
     </form>
 
-    <!-- CARD STAT -->
+    <!-- STAT -->
     <div class="grid md:grid-cols-3 gap-4">
-      
+
       <div class="bg-[#7fa6b3] rounded-xl p-4 shadow-md flex justify-between items-center">
         <div>
           <div class="bg-white text-xs px-2 py-1 rounded w-fit mb-1">
-            {{ dataArsip.length }}
+            {{ filteredDocuments.length }}
           </div>
           <p class="text-sm text-white">Dokumen terlihat</p>
         </div>
-        <div class="bg-white p-2 rounded flex items-center justify-center">
+        <div class="bg-white p-2 rounded">
           <Eye class="w-5 h-5 text-gray-700" />
         </div>
       </div>
 
       <div class="bg-[#7fa6b3] rounded-xl p-4 shadow-md flex justify-between items-center">
         <div>
-          <div class="bg-white text-xs px-2 py-1 rounded w-fit mb-1">2</div>
+          <div class="bg-white text-xs px-2 py-1 rounded w-fit mb-1">-</div>
           <p class="text-sm text-white">Dokumen diunduh</p>
         </div>
-        <div class="bg-white p-2 rounded flex items-center justify-center">
+        <div class="bg-white p-2 rounded">
           <Download class="w-5 h-5 text-gray-700" />
         </div>
       </div>
 
       <div class="bg-[#7fa6b3] rounded-xl p-4 shadow-md flex justify-between items-center">
         <div>
-          <div class="bg-white text-xs px-2 py-1 rounded w-fit mb-1">3</div>
+          <div class="bg-white text-xs px-2 py-1 rounded w-fit mb-1">-</div>
           <p class="text-sm text-white">Favorit</p>
         </div>
-        <div class="bg-white p-2 rounded flex items-center justify-center">
+        <div class="bg-white p-2 rounded">
           <Heart class="w-5 h-5 text-gray-700" />
         </div>
       </div>
 
     </div>
 
-    <!-- HEADER -->
-    <div class="flex items-center justify-between">
-      <h2 class="bg-[#2f4fa2] text-white px-4 py-1 rounded-md text-sm">
-        Dokumen Terbaru
-      </h2>
-
-      <div class="flex items-center gap-2">
-        <Link
-          :href="arsip().url"
-          class="text-xs bg-gray-200 px-2 py-1 rounded hover:bg-gray-300 transition"
-        >
-          Lihat Semua
-        </Link>
-      </div>
-    </div>
-
-    <!-- LIST DOKUMEN -->
+    <!-- LIST -->
     <div class="space-y-4">
 
       <div
-        v-for="item in dataArsip"
+        v-for="item in filteredDocuments"
         :key="item.id"
-        class="bg-[#7fa6b3] rounded-xl p-4 shadow-md flex items-center gap-4 border border-transparent hover:border-blue-500 transition"
+        @click="openPreview(item)"
+        class="cursor-pointer bg-[#7fa6b3] rounded-xl p-4 shadow-md flex items-center gap-4 border border-transparent hover:border-blue-500 transition"
       >
-        <!-- icon -->
-        <div class="bg-gray-200 w-12 h-12 rounded"></div>
 
-        <!-- isi -->
+        <!-- ICON -->
+        <div class="w-12 h-12 flex items-center justify-center rounded-xl bg-gray-100">
+          <FileText v-if="item.format === 'PDF'" class="w-6 h-6 text-red-500"/>
+          <FileImage v-else-if="item.format === 'IMAGE'" class="w-6 h-6 text-blue-500"/>
+          <File v-else class="w-6 h-6 text-gray-500"/>
+        </div>
+
+        <!-- DATA -->
         <div class="flex-1 text-xs text-gray-900">
-          <p class="font-semibold text-sm mb-1">
-            {{ item.judul }}
-          </p>
+          <p class="font-semibold text-sm mb-1">{{ item.title }}</p>
 
           <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-            <span>No : {{ item.nomor }}</span>
-            <span>Kategori : {{ item.kategori?.nama }}</span>
-            <span>Divisi : {{ item.user?.bagian }}</span>
-            <span>Tanggal : {{ item.tahun }}</span>
-            <span>Ukuran : -</span>
-          </div>
+  <span>No : {{ item.nomor }}</span>
+  <span>Kategori : {{ item.kategori }}</span>
+  <span>Bidang : {{ item.bidang }}</span>
+  <span>Tanggal : {{ item.tahun }}</span>
+</div>
         </div>
 
-        <!-- badge -->
-        <div class="bg-white text-xs px-3 py-1 rounded-full shadow">
-          {{ item.status_akses }}
+        <div class="bg-white text-xs px-3 py-1 rounded-full">
+          {{ item.status }}
         </div>
+
       </div>
 
-      <!-- kalau kosong -->
-      <div v-if="!dataArsip.length" class="text-center text-gray-500">
+      <div v-if="!filteredDocuments.length" class="text-center text-gray-500">
         Tidak ada dokumen
       </div>
 
@@ -198,4 +223,109 @@ const handleSearch = () => {
 
   </div>
 
+<div v-if="previewModal"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-6">
+
+  <div class="bg-white w-full max-w-5xl rounded-[30px] shadow-2xl overflow-hidden flex flex-col md:flex-row">
+
+    <!-- LEFT (PREVIEW FILE) -->
+    <div class="w-full md:w-1/2 bg-gray-100 flex items-center justify-center p-6">
+
+      <!-- IMAGE -->
+      <img v-if="selectedDoc.format === 'IMAGE'"
+        :src="`/storage/${selectedDoc.files[0].path_file}`"
+        class="max-h-[400px] object-contain rounded-xl shadow" />
+
+      <!-- PDF -->
+      <iframe v-else-if="selectedDoc.format === 'PDF'"
+        :src="`/storage/${selectedDoc.files[0].path_file}`"
+        class="w-full h-[400px] rounded-xl"></iframe>
+
+      <!-- OTHER -->
+      <div v-else class="text-gray-500 text-center">
+        📄<br/>Preview tidak tersedia
+      </div>
+
+    </div>
+
+    <!-- RIGHT (DETAIL) -->
+    <div class="w-full md:w-1/2 p-8 flex flex-col justify-between">
+
+      <div>
+        <div class="flex justify-between items-start mb-4">
+          <h2 class="text-2xl font-black text-gray-800">
+            {{ selectedDoc?.title }}
+          </h2>
+
+          <button @click="previewModal = false">✕</button>
+        </div>
+
+        <!-- BADGE -->
+        <div class="flex flex-wrap gap-2 mb-4">
+          <span class="bg-gray-200 px-3 py-1 rounded-full text-xs font-bold">
+            No: {{ selectedDoc?.nomor }}
+          </span>
+
+          <span class="bg-blue-100 px-3 py-1 rounded-full text-xs font-bold">
+            {{ selectedDoc?.kategori }}
+          </span>
+
+          <span class="bg-green-100 px-3 py-1 rounded-full text-xs font-bold uppercase">
+            {{ selectedDoc?.jenis }}
+          </span>
+        </div>
+
+        <!-- DETAIL -->
+        <div class="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <p class="font-bold">Bidang</p>
+            <p>{{ selectedDoc?.bidang }}</p>
+          </div>
+
+          <div>
+            <p class="font-bold">Tahun</p>
+            <p>{{ selectedDoc?.tahun }}</p>
+          </div>
+
+          <div>
+            <p class="font-bold">Status</p>
+            <p>{{ selectedDoc?.status }}</p>
+          </div>
+
+          <div class="col-span-2">
+            <p class="font-bold">Lokasi</p>
+            <p>{{ selectedDoc?.lokasi }}</p>
+          </div>
+        </div>
+
+        <!-- DESKRIPSI -->
+        <div class="mt-6">
+          <p class="font-bold">Deskripsi</p>
+          <p>{{ selectedDoc?.deskripsi || '-' }}</p>
+        </div>
+      </div>
+
+      <!-- ACTION -->
+      <div class="flex justify-end gap-3 mt-6">
+        <a
+          v-if="selectedDoc?.files?.length"
+          :href="`/storage/${selectedDoc.files[0].path_file}`"
+          download
+          class="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold"
+        >
+          Download
+        </a>
+
+        <button
+          @click="previewModal = false"
+          class="bg-gray-300 px-4 py-2 rounded-xl font-bold"
+        >
+          Tutup
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+</div>
 </template>
