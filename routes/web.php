@@ -166,6 +166,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('admin/riwayat', 'admin/Riwayat', [
         'title' => 'Riwayat Admin'
     ])->name('admin.riwayat');
+    Route::inertia('admin/statistik', 'admin/StatistikLaporan', [
+        'title' => 'Statistik & Laporan'
+    ])->name('admin.statistik');
 });
 
 

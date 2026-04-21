@@ -15,7 +15,7 @@ import {
 
 const menu = [
   { name: 'Dashboard', icon: Home, href: '/admin/dashboard' },
-  { name: 'Statistik', icon: BarChart3, href: '/statistik' },
+  { name: 'Statistik', icon: BarChart3, href: '/admin/statistik' }, 
   { name: 'Unggah', icon: Upload, href: '/admin/unggah' },
   { name: 'Kelola Arsip Saya', icon: FileText, href: '/admin/arsip' },
   { name: 'Kelola Arsip User', icon: Users, href: '/admin/arsip-user' },
