@@ -132,92 +132,83 @@ const submit = () => {
         <div class="space-y-4 mt-6">
 
           <div>
-            <label>Judul</label>
-            <input v-model="form.judul" class="w-full p-3 border rounded" />
+            <label class="block font-black mb-1 text-sm uppercase text-gray-800">Judul</label>
+            <input v-model="form.judul" class="w-full p-4 bg-white text-black rounded-2xl border border-gray-300 outline-none focus:ring-2 focus:ring-blue-500" />
           </div>
 
           <div>
-            <label>Nomor</label>
-            <input v-model="form.nomor" class="w-full p-3 border rounded" />
+            <label class="block font-black mb-1 text-sm uppercase text-gray-800">Nomor</label>
+            <input v-model="form.nomor" class="w-full p-4 bg-white text-black rounded-2xl border border-gray-300 outline-none focus:ring-2 focus:ring-blue-500" />
           </div>
 
           <div>
-            <label>Tahun</label>
-            <input v-model="form.tahun" class="w-full p-3 border rounded" />
+            <label class="block font-black mb-1 text-sm uppercase text-gray-800">Tahun</label>
+            <input v-model="form.tahun" class="w-full p-4 bg-white text-black rounded-2xl border border-gray-300 outline-none focus:ring-2 focus:ring-blue-500" />
           </div>
 
-          <!-- ===================== -->
-          <!-- KATEGORI -->
-          <!-- ===================== -->
-
-          <!-- VITAL -->
           <div v-if="isVital">
-            <label>Kategori Vital</label>
-            <select v-model="form.id_kategori" class="w-full p-3 border rounded">
-              <option value="">-- Pilih Kategori --</option>
-
+            <label class="block font-black mb-1 text-sm uppercase text-gray-800">Kategori Vital</label>
+            <select v-model="form.id_kategori" class="w-full p-4 bg-white text-black rounded-2xl border border-gray-300 outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="" class="text-black">-- Pilih Kategori --</option>
               <option
                 v-for="item in kategoriData"
                 :key="item.id"
                 :value="item.id"
+                class="text-black"
               >
                 {{ item.nama }}
               </option>
             </select>
           </div>
 
-          <!-- AKTIF / INAKTIF -->
           <div v-else class="grid grid-cols-2 gap-4">
-
             <div>
-              <label>Kelompok</label>
-              <select v-model="form.kategori_kelompok" class="w-full p-3 border rounded">
-                <option value="">-- Pilih --</option>
-                <option v-for="(v,k) in kategoriAktifInaktif" :key="k" :value="k">
+              <label class="block font-black mb-1 text-sm uppercase text-gray-800">Kelompok</label>
+              <select v-model="form.kategori_kelompok" class="w-full p-4 bg-white text-black rounded-2xl border border-gray-300 outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="" class="text-black">-- Pilih --</option>
+                <option v-for="(v,k) in kategoriAktifInaktif" :key="k" :value="k" class="text-black">
                   {{ k }}
                 </option>
               </select>
             </div>
 
             <div>
-              <label>Detail</label>
-              <select v-model="form.id_kategori" class="w-full p-3 border rounded">
-                <option value="">-- Pilih --</option>
-                <option v-for="item in subKategoriList" :key="item" :value="item">
+              <label class="block font-black mb-1 text-sm uppercase text-gray-800">Detail</label>
+              <select v-model="form.id_kategori" class="w-full p-4 bg-white text-black rounded-2xl border border-gray-300 outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="" class="text-black">-- Pilih --</option>
+                <option v-for="item in subKategoriList" :key="item" :value="item" class="text-black">
                   {{ item }}
                 </option>
               </select>
             </div>
-
           </div>
 
-          <!-- STATUS -->
           <div>
-            <label>Status</label>
-            <select v-model="form.status_akses" class="w-full p-3 border rounded">
-              <option value="publik">Publik</option>
-              <option value="private">Private</option>
+            <label class="block font-black mb-1 text-sm uppercase text-gray-800">Status</label>
+            <select v-model="form.status_akses" class="w-full p-4 bg-white text-black rounded-2xl border border-gray-300 outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="publik" class="text-black">Publik</option>
+              <option value="private" class="text-black">Private</option>
             </select>
           </div>
 
           <div v-if="isPrivate">
-            <label>Bidang</label>
-            <select v-model="form.bagian" class="w-full p-3 border rounded">
-              <option value="">-- Pilih --</option>
-              <option v-for="b in bidangList" :key="b" :value="b">
+            <label class="block font-black mb-1 text-sm uppercase text-gray-800">Bidang</label>
+            <select v-model="form.bagian" class="w-full p-4 bg-white text-black rounded-2xl border border-gray-300 outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="" class="text-black">-- Pilih --</option>
+              <option v-for="b in bidangList" :key="b" :value="b" class="text-black">
                 {{ b }}
               </option>
             </select>
           </div>
 
           <div>
-            <label>Lokasi</label>
-            <input v-model="form.lokasi" class="w-full p-3 border rounded" />
+            <label class="block font-black mb-1 text-sm uppercase text-gray-800">Lokasi</label>
+            <input v-model="form.lokasi" class="w-full p-4 bg-white text-black rounded-2xl border border-gray-300 outline-none focus:ring-2 focus:ring-blue-500" />
           </div>
 
           <div>
-            <label>Deskripsi</label>
-            <textarea v-model="form.deskripsi" class="w-full p-3 border rounded"></textarea>
+            <label class="block font-black mb-1 text-sm uppercase text-gray-800">Deskripsi</label>
+            <textarea v-model="form.deskripsi" class="w-full p-4 bg-white text-black rounded-2xl border border-gray-300 outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px]"></textarea>
           </div>
 
         </div>

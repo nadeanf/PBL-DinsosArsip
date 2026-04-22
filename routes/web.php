@@ -26,9 +26,7 @@ Route::get('/sampah', function () {
 Route::get('/edit-dokumen/{id}', [ArsipController::class, 'edit'])
     ->name('arsip.edit');
 
-Route::get('/riwayat', function () {
-    return inertia('Riwayat', ['title' => 'Riwayat']);
-})->name('riwayat');
+Route::get('/riwayat', [ArsipController::class, 'riwayat'])->name('riwayat');
 
 Route::get('/arsipsaya', function () {
     return inertia('ArsipSaya', [

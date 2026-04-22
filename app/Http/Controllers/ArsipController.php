@@ -54,7 +54,9 @@ class ArsipController extends Controller
             'bagian' => $request->status_akses === 'private' ? $user->bagian : null,
             'lokasi' => $request->lokasi,
             'deskripsi' => $request->deskripsi,
-            'status_approval' => 'pending'
+            'status_approval' => 'pending',
+            'aktivitas' => 'Mengunggah arsip baru',
+            'waktu_aktivitas' => now()
         ]);
          if ($request->hasFile('files')) {
         foreach ($request->file('files') as $file) {
@@ -92,6 +94,8 @@ class ArsipController extends Controller
         'status_akses' => $request->status_akses,
         'lokasi' => $request->lokasi,
         'deskripsi' => $request->deskripsi,
+        'aktivitas' => 'Mengedit arsip',
+        'waktu_aktivitas' => now()
     ]);
 
     // 🔥 HANDLE FILE BARU
@@ -145,6 +149,10 @@ class ArsipController extends Controller
     public function destroy($id)
 {
     $arsip = Arsip::findOrFail($id);
+    $arsip->update([
+        'aktivitas' => 'Menghapus arsip ke sampah',
+        'waktu_aktivitas' => now()
+    ]);
     $arsip->delete(); // 🔥 masuk sampah (soft delete)
 
     return back();
@@ -154,6 +162,10 @@ public function restore($id)
 {
     $arsip = Arsip::onlyTrashed()->findOrFail($id);
     $arsip->restore();
+    $arsip->update([
+        'aktivitas' => 'Memulihkan arsip dari sampah',
+        'waktu_aktivitas' => now()
+    ]);
 
     return back();
 }
@@ -164,6 +176,20 @@ public function forceDelete($id)
     $arsip->forceDelete();
 
     return back();
+}
+
+// 🔥 RIWAYAT - Ambil semua arsip yang memiliki aktivitas
+public function riwayat()
+{
+    $riwayat = Arsip::with(['user', 'kategori'])
+        ->whereNotNull('aktivitas')
+        ->whereNotNull('waktu_aktivitas')
+        ->orderBy('waktu_aktivitas', 'desc')
+        ->get();
+
+    return Inertia::render('Riwayat', [
+        'riwayat' => $riwayat
+    ]);
 }
 
 public function trash()

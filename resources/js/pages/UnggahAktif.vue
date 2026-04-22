@@ -117,74 +117,70 @@ const submit = () => {
         <!-- FORM INPUT -->
         <div class="space-y-4 mt-6">
 
-          <div>
-            <label class="block font-black mb-1 text-sm uppercase">Judul Dokumen</label>
-            <input v-model="form.judul" class="w-full p-4 bg-white rounded-2xl border" />
-          </div>
+  <div>
+    <label class="block font-black mb-1 text-sm uppercase text-gray-800">Judul Dokumen</label>
+    <input v-model="form.judul" class="w-full p-4 bg-white text-black rounded-2xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none" />
+  </div>
 
-          <div>
-            <label class="block font-black mb-1 text-sm uppercase">Nomor</label>
-            <input v-model="form.nomor" class="w-full p-4 bg-white rounded-2xl border" />
-          </div>
+  <div>
+    <label class="block font-black mb-1 text-sm uppercase text-gray-800">Nomor</label>
+    <input v-model="form.nomor" class="w-full p-4 bg-white text-black rounded-2xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none" />
+  </div>
 
-          <div>
-            <label class="block font-black mb-1 text-sm uppercase">Tahun</label>
-            <input v-model="form.tahun" class="w-full p-4 bg-white rounded-2xl border" />
-          </div>
+  <div>
+    <label class="block font-black mb-1 text-sm uppercase text-gray-800">Tahun</label>
+    <input v-model="form.tahun" class="w-full p-4 bg-white text-black rounded-2xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none" />
+  </div>
 
-          <!-- 🔥 KATEGORI (RAPI OPTGROUP) -->
-          <div>
-            <label class="block text-black font-black mb-1.5 ml-3 text-sm uppercase">
-              Kategori
-            </label>
+  <div>
+    <label class="block text-black font-black mb-1.5 ml-3 text-sm uppercase">Kategori</label>
+    <select
+      v-model="form.id_kategori"
+      class="w-full p-4 bg-white text-black font-medium rounded-2xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none"
+    >
+      <option value="" class="text-black">-- Pilih Kategori --</option>
+      <optgroup
+        v-for="parent in parents"
+        :key="parent.id"
+        :label="parent.nama"
+        class="text-black font-bold"
+      >
+        <option
+          v-for="child in getChildren(parent.id)"
+          :key="child.id"
+          :value="child.id"
+          class="text-black font-normal"
+        >
+          {{ child.nama }}
+        </option>
+      </optgroup>
+    </select>
+  </div>
 
-            <select
-              v-model="form.id_kategori"
-              class="w-full p-4 bg-white text-black font-medium rounded-2xl border"
-            >
-              <option value="">-- Pilih Kategori --</option>
+  <div>
+    <label class="block font-black mb-1 text-sm uppercase text-gray-800">Status Akses</label>
+    <select v-model="form.status_akses" class="w-full p-4 bg-white text-black rounded-2xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none">
+      <option value="publik" class="text-black">Publik</option>
+      <option value="private" class="text-black">Private</option>
+    </select>
+  </div>
 
-              <optgroup
-                v-for="parent in parents"
-                :key="parent.id"
-                :label="parent.nama"
-              >
-                <option
-                  v-for="child in getChildren(parent.id)"
-                  :key="child.id"
-                  :value="child.id"
-                >
-                  {{ child.nama }}
-                </option>
-              </optgroup>
-            </select>
-          </div>
+  <div v-if="isPrivate">
+    <label class="block font-black mb-1 text-sm uppercase text-gray-800">Bidang</label>
+    <input v-model="form.bagian" class="w-full p-4 bg-white text-black rounded-2xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none" />
+  </div>
 
-          <!-- STATUS -->
-          <div>
-            <label class="block font-black mb-1 text-sm uppercase">Status Akses</label>
-            <select v-model="form.status_akses" class="w-full p-4 bg-white rounded-2xl border">
-              <option value="publik">Publik</option>
-              <option value="private">Private</option>
-            </select>
-          </div>
+  <div>
+    <label class="block font-black mb-1 text-sm uppercase text-gray-800">Lokasi</label>
+    <input v-model="form.lokasi" class="w-full p-4 bg-white text-black rounded-2xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none" />
+  </div>
 
-          <div v-if="isPrivate">
-            <label class="block font-black mb-1 text-sm uppercase">Bidang</label>
-            <input v-model="form.bagian" class="w-full p-4 bg-white rounded-2xl border" />
-          </div>
+  <div>
+    <label class="block font-black mb-1 text-sm uppercase text-gray-800">Deskripsi</label>
+    <textarea v-model="form.deskripsi" class="w-full p-4 bg-white text-black rounded-2xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none min-h-[100px]"></textarea>
+  </div>
 
-          <div>
-            <label class="block font-black mb-1 text-sm uppercase">Lokasi</label>
-            <input v-model="form.lokasi" class="w-full p-4 bg-white rounded-2xl border" />
-          </div>
-
-          <div>
-            <label class="block font-black mb-1 text-sm uppercase">Deskripsi</label>
-            <textarea v-model="form.deskripsi" class="w-full p-4 bg-white rounded-2xl border"></textarea>
-          </div>
-
-        </div>
+</div>
 
         <!-- BUTTON -->
         <div class="flex justify-end gap-4 mt-10">

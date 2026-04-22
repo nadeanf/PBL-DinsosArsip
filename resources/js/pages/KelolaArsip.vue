@@ -127,14 +127,20 @@ const handleExecute = () => {
     </h1>
 
     <!-- FILTER -->
-    <div class="flex gap-4 mb-6">
-      <select v-model="filterJenis" class="p-3 rounded-xl border">
-        <option value="">Semua Jenis</option>
-        <option value="aktif">Aktif</option>
-        <option value="inaktif">Inaktif</option>
-        <option value="vital">Vital</option>
-      </select>
-    </div>
+    <div class="flex gap-4 mb-6 relative z-50">
+  <div class="relative w-[200px]">
+    <select 
+      v-model="filterJenis" 
+      class="w-full p-3 rounded-xl border border-gray-300 bg-white text-black font-bold outline-none appearance-none pr-10 shadow-sm"
+    >
+      <option value="" class="text-black bg-white">Semua Jenis</option>
+      <option value="aktif" class="text-black bg-white">Aktif</option>
+      <option value="inaktif" class="text-black bg-white">Inaktif</option>
+      <option value="vital" class="text-black bg-white">Vital</option>
+    </select>
+    <span class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-black text-[10px]">▼</span>
+  </div>
+</div>
 
     <!-- LIST -->
     <div class="space-y-4 mb-8">
@@ -256,6 +262,21 @@ const handleExecute = () => {
     <div v-if="filteredDocuments.length === 0" class="text-center py-10">
       Tidak ada arsip
     </div>
+    <div v-if="filteredDocuments.length > itemsPerPage" class="flex justify-end gap-2 mt-10">
+      <button 
+        v-for="pageNumber in Math.ceil(filteredDocuments.length / itemsPerPage)" 
+        :key="pageNumber"
+        @click="currentPage = pageNumber"
+        :class="[
+          'px-4 py-2 rounded-xl font-black text-xs transition-all border shadow-sm',
+          currentPage === pageNumber 
+            ? 'bg-[#7fa1b1] text-white border-[#7fa1b1]' 
+            : 'bg-white text-black border-gray-300 hover:bg-gray-100'
+        ]"
+      >
+        {{ pageNumber }}
+      </button>
+    </div>  
 
   </div>
 

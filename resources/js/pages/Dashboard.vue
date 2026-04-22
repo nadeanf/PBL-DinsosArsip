@@ -111,37 +111,46 @@ const openPreview = (item) => {
     <div class="h-4 bg-gray-300 rounded-full w-full"></div>
 
     <!-- FORM -->
-    <form @submit.prevent class="bg-[#2f6f7e] p-4 rounded-xl shadow-md flex flex-wrap gap-4 items-center">
+    <form @submit.prevent class="bg-[#2f6f7e] p-4 rounded-xl shadow-md flex flex-wrap gap-3 items-center relative z-30">
 
-      <div class="bg-white rounded-lg px-4 py-3 flex items-center shadow-sm flex-1 min-w-[200px]">
-        <span class="text-gray-400 mr-2">🔍</span>
-        <input v-model="search" type="text" placeholder="Cari dokumen..." class="w-full outline-none text-sm"/>
-      </div>
+  <div class="bg-white rounded-lg px-4 py-2 flex items-center shadow-sm flex-1 min-w-[200px] h-11">
+    <span class="text-gray-400 mr-2 text-lg">🔍</span>
+    <input v-model="search" type="text" placeholder="Cari dokumen..." class="w-full outline-none text-sm bg-transparent text-gray-800"/>
+  </div>
 
-      <div class="bg-white rounded-lg px-4 py-3 flex items-center shadow-sm w-[180px]">
-        <select v-model="kategori" class="text-sm outline-none w-full">
-          <option value="">Semua Kategori</option>
-          <option v-for="kat in kategoriData" :key="kat.id" :value="kat.id">
-            {{ kat.nama }}
-          </option>
-        </select>
-      </div>
+  <div class="bg-white rounded-lg px-3 py-2 flex items-center shadow-sm w-[220px] h-11 relative">
+    <select 
+      v-model="kategori" 
+      class="text-sm outline-none w-full bg-white text-gray-900 cursor-pointer appearance-none pr-8 relative z-10"
+    >
+      <option value="" class="bg-white text-gray-900">Semua Kategori</option>
+      <option 
+        v-for="kat in kategoriData" 
+        :key="kat.id" 
+        :value="kat.id" 
+        class="bg-white text-gray-900"
+      >
+        {{ kat.nama }}
+      </option>
+    </select>
+    <span class="text-gray-500 absolute right-3 pointer-events-none z-0">▼</span>
+  </div>
 
-      <div class="bg-white rounded-lg px-4 py-3 w-[160px]">
-        <input type="date" v-model="tanggal_awal" class="w-full text-sm outline-none"/>
-      </div>
+  <div class="bg-white rounded-lg px-3 py-2 w-[175px] h-11 flex items-center shadow-sm">
+    <input type="date" v-model="tanggal_awal" class="w-full text-sm outline-none bg-white text-gray-900 uppercase"/>
+  </div>
 
-      <div class="text-white font-bold px-1">-</div>
+  <div class="text-white font-bold px-1 text-lg">-</div>
 
-      <div class="bg-white rounded-lg px-4 py-3 w-[160px]">
-        <input type="date" v-model="tanggal_akhir" class="w-full text-sm outline-none"/>
-      </div>
+  <div class="bg-white rounded-lg px-3 py-2 w-[175px] h-11 flex items-center shadow-sm">
+    <input type="date" v-model="tanggal_akhir" class="w-full text-sm outline-none bg-white text-gray-900 uppercase"/>
+  </div>
 
-      <button type="button" class="bg-white rounded-lg px-4 py-2 text-sm font-semibold">
-        Cari
-      </button>
+  <button type="submit" class="bg-white hover:bg-gray-100 text-[#2f6f7e] rounded-lg px-6 h-11 text-sm font-bold shadow-sm transition-all active:scale-95">
+    Cari
+  </button>
 
-    </form>
+</form>
 
     <!-- STAT -->
     <div class="grid md:grid-cols-3 gap-4">
