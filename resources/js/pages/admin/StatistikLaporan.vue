@@ -1,6 +1,7 @@
 <script setup>
 import { Head } from '@inertiajs/vue3'
 import AdminLayout from '@/layouts/AdminLayout.vue'
+import { computed } from 'vue' // Tambahkan ini untuk perhitungan otomatis
 import { 
   Download, 
   Eye, 
@@ -16,7 +17,34 @@ defineOptions({
   layout: AdminLayout
 })
 
-// Data Dummy untuk Tabel Pengguna Teraktif
+// 1. DATA UTAMA (Ubah di sini, semua tampilan akan ikut berubah)
+const stats = {
+  dokumen: 9,
+  foto: 10,
+  video: 6,
+  audio: 8
+}
+
+// 2. PERHITUNGAN DINAMIS UNTUK DIAGRAM
+const totalItem = computed(() => stats.dokumen + stats.foto + stats.video + stats.audio)
+
+// Menghitung persentase untuk teks di tengah
+const persenDokumen = computed(() => Math.round((stats.dokumen / totalItem.value) * 100))
+const persenFoto = computed(() => Math.round((stats.foto / totalItem.value) * 100))
+const persenVideo = computed(() => Math.round((stats.video / totalItem.value) * 100))
+const persenAudio = computed(() => Math.round((stats.audio / totalItem.value) * 100))
+
+// Menghitung offset lingkaran SVG (agar warna tidak tumpang tindih)
+const strokeDokumen = computed(() => `${persenDokumen.value}, 100`)
+const strokeFoto = computed(() => `${persenFoto.value}, 100`)
+const strokeVideo = computed(() => `${persenVideo.value}, 100`)
+const strokeAudio = computed(() => `${persenAudio.value}, 100`)
+
+const offsetFoto = computed(() => `-${persenDokumen.value}`)
+const offsetVideo = computed(() => `-${persenDokumen.value + persenFoto.value}`)
+const offsetAudio = computed(() => `-${persenDokumen.value + persenFoto.value + persenVideo.value}`)
+
+// Data Dummy untuk Tabel
 const activeUsers = [
   { 
     id: 1, 
@@ -58,105 +86,93 @@ const activeUsers = [
     <div class="grid lg:grid-cols-4 gap-6">
       
       <div class="lg:col-span-3 bg-[#6a97ac] p-8 rounded-2xl shadow-sm flex flex-col md:flex-row items-center gap-10">
-        <div class="relative w-56 h-56 flex-shrink-0">
+        
+        <div class="relative w-56 h-56 flex-shrink-0 flex items-center justify-center">
           <svg viewBox="0 0 36 36" class="w-full h-full drop-shadow-lg">
-            <path class="text-[#3498db]" stroke-dasharray="68, 100" stroke-width="8" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-            <path class="text-[#f1c40f]" stroke-dasharray="20, 100" stroke-dashoffset="-68" stroke-width="8" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-            <path class="text-[#e67e22]" stroke-dasharray="10, 100" stroke-dashoffset="-88" stroke-width="8" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-            <path class="text-[#2ecc71]" stroke-dasharray="2, 100" stroke-dashoffset="-98" stroke-width="8" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+            <path class="text-[#3498db]" :stroke-dasharray="strokeDokumen" stroke-width="8" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+            <path class="text-[#f1c40f]" :stroke-dasharray="strokeFoto" :stroke-dashoffset="offsetFoto" stroke-width="8" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+            <path class="text-[#e67e22]" :stroke-dasharray="strokeVideo" :stroke-dashoffset="offsetVideo" stroke-width="8" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+            <path class="text-[#2ecc71]" :stroke-dasharray="strokeAudio" :stroke-dashoffset="offsetAudio" stroke-width="8" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
           </svg>
-          <div class="absolute inset-0 flex items-center justify-center flex-col text-[12px] font-black text-black leading-none bg-white/20 rounded-full m-8">
-            <span class="text-black">DOKUMEN</span>
-            <span class="text-black">68%</span>
+
+          <div class="absolute flex flex-col items-center justify-center text-center">
+            <span class="text-[14px] font-black text-black leading-none uppercase">DOKUMEN</span>
+            <span class="text-[24px] font-black text-black">{{ persenDokumen }}%</span>
           </div>
         </div>
 
         <div class="flex-1 space-y-3 w-full">
-          <div class="bg-white p-3 rounded-xl flex justify-between items-center shadow-sm">
-            <span class="font-bold text-black uppercase tracking-tight">Total Dokumen :</span>
-            <span class="font-black text-black">9 Item</span>
+          <div class="bg-white p-3 rounded-xl flex justify-between items-center shadow-sm border-l-8 border-[#3498db]">
+            <span class="font-bold text-black uppercase tracking-tight">TOTAL DOKUMEN :</span>
+            <span class="font-black text-black">{{ stats.dokumen }} Item</span>
           </div>
-          <div class="bg-white p-3 rounded-xl flex justify-between items-center shadow-sm">
-            <span class="font-bold text-black uppercase tracking-tight">Total Foto :</span>
-            <span class="font-black text-black">10 Item</span>
+          <div class="bg-white p-3 rounded-xl flex justify-between items-center shadow-sm border-l-8 border-[#f1c40f]">
+            <span class="font-bold text-black uppercase tracking-tight">TOTAL FOTO :</span>
+            <span class="font-black text-black">{{ stats.foto }} Item</span>
           </div>
-          <div class="bg-white p-3 rounded-xl flex justify-between items-center shadow-sm">
-            <span class="font-bold text-black uppercase tracking-tight">Total Video :</span>
-            <span class="font-black text-black">6 Item</span>
+          <div class="bg-white p-3 rounded-xl flex justify-between items-center shadow-sm border-l-8 border-[#e67e22]">
+            <span class="font-bold text-black uppercase tracking-tight">TOTAL VIDEO :</span>
+            <span class="font-black text-black">{{ stats.video }} Item</span>
           </div>
-          <div class="bg-white p-3 rounded-xl flex justify-between items-center shadow-sm">
-            <span class="font-bold text-black uppercase tracking-tight">Total Audio :</span>
-            <span class="font-black text-black">8 Item</span>
+          <div class="bg-white p-3 rounded-xl flex justify-between items-center shadow-sm border-l-8 border-[#2ecc71]">
+            <span class="font-bold text-black uppercase tracking-tight">TOTAL AUDIO :</span>
+            <span class="font-black text-black">{{ stats.audio }} Item</span>
           </div>
         </div>
       </div>
 
       <div class="flex flex-col gap-4">
-        <div class="bg-[#6a97ac] p-4 rounded-2xl flex items-center justify-between shadow-sm">
+        <div class="bg-white p-4 rounded-2xl flex items-center justify-between shadow-sm">
           <div>
-            <div class="bg-white text-[10px] px-2 py-0.5 rounded w-fit mb-1 font-black text-black">3</div>
+            <div class="bg-[#6a97ac] text-[10px] px-2 py-0.5 rounded w-fit mb-1 font-black text-white">3</div>
             <p class="text-sm font-bold text-black">Total Unduhan</p>
           </div>
-          <div class="bg-white p-2 rounded-lg text-[#6a97ac]">
-            <Download class="w-6 h-6 text-black" />
-          </div>
+          <div class="bg-[#6a97ac] p-2 rounded-lg text-white"><Download class="w-6 h-6" /></div>
         </div>
-        <div class="bg-[#6a97ac] p-4 rounded-2xl flex items-center justify-between shadow-sm">
+        <div class="bg-white p-4 rounded-2xl flex items-center justify-between shadow-sm">
           <div>
-            <div class="bg-white text-[10px] px-2 py-0.5 rounded w-fit mb-1 font-black text-black">12</div>
+            <div class="bg-[#6a97ac] text-[10px] px-2 py-0.5 rounded w-fit mb-1 font-black text-white">12</div>
             <p class="text-sm font-bold text-black">Total Dilihat</p>
           </div>
-          <div class="bg-white p-2 rounded-lg text-[#6a97ac]">
-            <Eye class="w-6 h-6 text-black" />
-          </div>
+          <div class="bg-[#6a97ac] p-2 rounded-lg text-white"><Eye class="w-6 h-6" /></div>
         </div>
-        <div class="bg-[#6a97ac] p-4 rounded-2xl flex items-center justify-between shadow-sm">
+        <div class="bg-white p-4 rounded-2xl flex items-center justify-between shadow-sm">
           <div>
-            <div class="bg-white text-[10px] px-2 py-0.5 rounded w-fit mb-1 font-black text-black">15</div>
+            <div class="bg-[#6a97ac] text-[10px] px-2 py-0.5 rounded w-fit mb-1 font-black text-white">15</div>
             <p class="text-sm font-bold text-black">Total Favorit</p>
           </div>
-          <div class="bg-white p-2 rounded-lg text-[#6a97ac]">
-            <Star class="w-6 h-6 text-black" />
-          </div>
+          <div class="bg-[#6a97ac] p-2 rounded-lg text-white"><Star class="w-6 h-6" /></div>
         </div>
       </div>
     </div>
 
     <section>
-      <div class="inline-block bg-[#2c5d73] text-white px-6 py-2 rounded-lg mb-6 font-bold tracking-wide">
+      <div class="inline-block bg-[#2c5d73] text-white px-6 py-2 rounded-lg mb-6 font-bold tracking-wide shadow-md uppercase">
         Akses Cepat
       </div>
       <div class="grid md:grid-cols-3 gap-6">
         <div class="bg-[#6a97ac] p-6 rounded-2xl shadow-sm flex flex-col items-center">
-          <div class="bg-white p-4 rounded-2xl mb-4 shadow-inner">
-            <FileText class="w-12 h-12 text-black" />
-          </div>
+          <div class="bg-white p-4 rounded-2xl mb-4 shadow-inner"><FileText class="w-12 h-12 text-black" /></div>
           <div class="bg-red-400 w-full py-2 rounded-lg text-center font-black text-sm mb-2 text-black uppercase">Peraturan Daerah</div>
-          <div class="bg-gray-300 w-3/4 py-1 rounded-full text-center text-[10px] font-black text-black">9 DOKUMEN</div>
+          <div class="bg-white w-3/4 py-1 rounded-full text-center text-[10px] font-black text-black">{{ stats.dokumen }} DOKUMEN</div>
         </div>
-        
         <div class="bg-[#6a97ac] p-6 rounded-2xl shadow-sm flex flex-col items-center relative">
           <MoreHorizontal class="absolute top-4 right-4 text-black cursor-pointer" />
-          <div class="bg-white p-4 rounded-2xl mb-4 shadow-inner">
-            <ImageIcon class="w-12 h-12 text-black" />
-          </div>
+          <div class="bg-white p-4 rounded-2xl mb-4 shadow-inner"><ImageIcon class="w-12 h-12 text-black" /></div>
           <div class="bg-blue-400 w-full py-2 rounded-lg text-center font-black text-sm mb-2 text-black uppercase">Galeri Foto</div>
-          <div class="bg-gray-300 w-3/4 py-1 rounded-full text-center text-[10px] font-black text-black">10 FOTO</div>
+          <div class="bg-white w-3/4 py-1 rounded-full text-center text-[10px] font-black text-black">{{ stats.foto }} FOTO</div>
         </div>
-
         <div class="bg-[#6a97ac] p-6 rounded-2xl shadow-sm flex flex-col items-center relative">
           <MoreHorizontal class="absolute top-4 right-4 text-black cursor-pointer" />
-          <div class="bg-white p-4 rounded-2xl mb-4 shadow-inner">
-            <Video class="w-12 h-12 text-black" />
-          </div>
+          <div class="bg-white p-4 rounded-2xl mb-4 shadow-inner"><Video class="w-12 h-12 text-black" /></div>
           <div class="bg-yellow-400 w-full py-2 rounded-lg text-center font-black text-sm mb-2 text-black uppercase">Galeri Video</div>
-          <div class="bg-gray-300 w-3/4 py-1 rounded-full text-center text-[10px] font-black text-black">6 VIDEO</div>
+          <div class="bg-white w-3/4 py-1 rounded-full text-center text-[10px] font-black text-black">{{ stats.video }} VIDEO</div>
         </div>
       </div>
     </section>
 
     <section>
-      <div class="inline-block bg-[#2c5d73] text-white px-6 py-2 rounded-t-xl font-bold tracking-wide">
+      <div class="inline-block bg-[#2c5d73] text-white px-6 py-2 rounded-t-xl font-bold tracking-wide shadow-md uppercase">
         Pengguna Teraktif
       </div>
       <div class="bg-[#6a97ac] rounded-b-2xl rounded-tr-2xl overflow-hidden shadow-lg border border-white/20">
@@ -178,22 +194,18 @@ const activeUsers = [
                   <div class="font-black text-black">{{ user.name }}</div>
                   <div class="text-[10px] font-bold text-black/70">{{ user.email }}</div>
                 </td>
-                <td class="px-6 py-4 font-black uppercase text-[11px] text-black">{{ user.role }}</td>
+                <td class="px-6 py-4 font-black uppercase text-black">{{ user.role }}</td>
                 <td class="px-6 py-4">
                   <span class="bg-blue-200 text-black px-3 py-0.5 rounded text-[10px] font-black uppercase">{{ user.status }}</span>
                 </td>
                 <td class="px-6 py-4 text-xs font-bold text-black">{{ user.joined }}</td>
                 <td class="px-6 py-4">
                   <div class="flex gap-2">
-                    <button class="p-1.5 bg-red-600 rounded hover:bg-red-700 transition shadow">
-                      <Trash2 class="w-4 h-4 text-white" />
-                    </button>
-                    <button class="p-1.5 bg-blue-800 rounded hover:bg-blue-900 transition shadow">
-                      <Eye class="w-4 h-4 text-white" />
-                    </button>
+                    <button class="p-1.5 bg-red-600 rounded hover:bg-red-700 shadow-md"><Trash2 class="w-4 h-4 text-white" /></button>
+                    <button class="p-1.5 bg-blue-800 rounded hover:bg-blue-900 shadow-md"><Eye class="w-4 h-4 text-white" /></button>
                   </div>
                 </td>
-                <td class="px-6 py-4 text-[11px] max-w-[250px] font-bold text-black leading-tight italic">
+                <td class="px-6 py-4 text-[11px] max-w-[250px] font-bold text-black italic">
                   {{ user.docs }}
                 </td>
               </tr>

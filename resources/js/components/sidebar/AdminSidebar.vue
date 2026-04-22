@@ -17,12 +17,12 @@ const menu = [
   { name: 'Dashboard', icon: Home, href: '/admin/dashboard' },
   { name: 'Statistik', icon: BarChart3, href: '/admin/statistik' }, 
   { name: 'Unggah', icon: Upload, href: '/admin/unggah' },
-  { name: 'Kelola Arsip Saya', icon: FileText, href: '/admin/arsip' },
+  { name: 'Kelola Arsip Saya', icon: FileText, href: '/admin/arsip-saya' },
   { name: 'Kelola Arsip User', icon: Users, href: '/admin/arsip-user' },
   { name: 'Kelola Kategori', icon: Folder, href: '/kategori' },
   { name: 'Persetujuan Akses', icon: CheckCircle, href: '/admin/persetujuan' },
   { name: 'Lihat Riwayat', icon: History, href: '/admin/riwayat' },
-  { name: 'Pengumuman', icon: Megaphone, href: '/pengumuman' },
+  { name: 'Pengumuman', icon: Megaphone, href: '/admin/pengumuman' },
 ]
 </script>
 

@@ -147,6 +147,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     'title' => 'Kelola Arsip User'
     ])->name('admin.arsip-user');
 
+    Route::inertia('admin/arsip-saya', 'admin/KelolaArsipSaya', [
+        'title' => 'Kelola Arsip Saya'
+    ])->name('admin.arsip.saya');
+
     Route::inertia('admin/persetujuan', 'admin/PersetujuanAkses' , [
         'title' => 'Persetujuan Akses'
     ])->name('admin.persetujuan');
@@ -166,9 +170,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('admin/riwayat', 'admin/Riwayat', [
         'title' => 'Riwayat Admin'
     ])->name('admin.riwayat');
+    
     Route::inertia('admin/statistik', 'admin/StatistikLaporan', [
-        'title' => 'Statistik & Laporan'
+        'title' => 'Statistik & Laporan Admin'
     ])->name('admin.statistik');
+
+    Route::inertia('admin/pengumuman', 'admin/UnggahPengumuman', [
+    'title' => 'Unggah Pengumuman'
+])->name('admin.unggah.pengumuman');
 });
 
 
