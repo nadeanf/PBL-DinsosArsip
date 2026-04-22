@@ -9,7 +9,6 @@ const user = page.props.auth?.user
 <template>
   <aside class="w-64 min-h-screen bg-gradient-to-b from-[#dbe3e7] to-[#2f6f7e] p-4 flex flex-col justify-between">
 
-    <!-- TOP -->
     <div>
       <!-- PROFILE -->
       <Link href="/edit-profile" class="flex items-center gap-3 mb-6">
@@ -24,7 +23,7 @@ const user = page.props.auth?.user
 
       <hr class="mb-4 border-gray-400" />
 
-      <!-- MENU -->
+      
       <div class="space-y-3">
 
         <!-- DASHBOARD -->
@@ -66,7 +65,7 @@ const user = page.props.auth?.user
             <Clock class="w-5 h-5 text-gray-700" />
           </span>
 
-          <span class="text-sm font-medium">Lihat Riwayat</span>
+          <span class="text-sm font-medium">Riwayat</span>
         </Link>
 
       </div>

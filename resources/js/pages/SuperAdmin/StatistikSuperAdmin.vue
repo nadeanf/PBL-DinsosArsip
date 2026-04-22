@@ -14,7 +14,7 @@ const kategori = ref('')
 const tanggal_awal = ref('')
 const tanggal_akhir = ref('')
 
-// DATA DINAMIS (DUMMY)
+// DUMMY
 const statistik = ref({
   dokumen: 68,
   foto: 20,
@@ -32,7 +32,7 @@ const aksesCepat = ref([
   { nama: 'Galeri Video' }
 ])
 
-// 🔥 DATA USER
+// DUMMY USER
 const users = ref([
   {
     nama: 'Admin Arsip',
@@ -57,7 +57,7 @@ const users = ref([
   }
 ])
 
-// ✅ FUNCTION AKSI
+
 const handleDelete = (user) => {
   console.log('Hapus user:', user)
 }

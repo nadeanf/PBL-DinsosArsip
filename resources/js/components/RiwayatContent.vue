@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 
-// Kita buat props supaya data riwayat bisa dikirim dari parent (optional)
-// Tapi untuk sekarang kita pakai data dummy yang kamu punya di dalam sini
+
 const allHistory = ref([
     { id: 1, title: 'Laporan Keuangan Kesekretariatan - Oktober 2025', time: '10.35', date: '25 Februari 2026', type: 'doc' },
     { id: 2, title: 'Dokumentasi Rapat Anggaran Pendapatan dan Belanja Daerah 2014', time: '10.35', date: '25 Februari 2026', type: 'image' },

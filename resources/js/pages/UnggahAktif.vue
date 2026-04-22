@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { Head, useForm } from '@inertiajs/vue3';
-import AuthLayout from '@/layouts/AuthLayout.vue';
+import UserLayout from '@/layouts/UserLayout.vue';
 
-defineOptions({ layout: AuthLayout });
+defineOptions({ layout: UserLayout });
 
 const props = defineProps<{ folder: string }>();
 
-// 1. Data Kategori Statis
+// Data Kategori 
 const kategoriVital = [
   'Kebijakan dan program pemerintah tentang masalah sosial', 
   'Bantuan Sosial', 'Penghargaan kepada pahlawan', 'Perintis kemerdekaan', 
@@ -37,7 +37,7 @@ const kategoriAktifInaktif = {
   ]
 };
 
-// 3. Data Bidang (TAMBAHAN)
+// Data Bidang 
 const bidangList = [
   'Sekretariat',
   'Rehabilitasi Sosial',
@@ -45,7 +45,7 @@ const bidangList = [
   'Pemberdayaan Sosial'
 ];
 
-// 2. Form State
+// Form State
 const form = useForm({
     judul: '',
     nomor: '',
@@ -59,18 +59,14 @@ const form = useForm({
     bidang: '', // TAMBAHAN
 });
 
-// Ganti baris 54 (logika isVital) menjadi ini:
+
 const isVital = computed(() => props.folder?.toLowerCase() === 'vital');
-
-// TAMBAHAN
 const isPrivate = computed(() => form.status_akses === 'Private');
-
-// Sub-kategori dinamis untuk Aktif/Inaktif
 const subKategoriList = computed(() => {
     return form.kategori_kelompok ? kategoriAktifInaktif[form.kategori_kelompok] : [];
 });
 
-// Reset kategori jika kelompok berubah
+// Reset kategori jika berubah
 watch(() => form.kategori_kelompok, () => {
     form.kategori = '';
 });
@@ -191,7 +187,7 @@ const submit = () => {
                 </select>
               </div>
 
-              <!-- TAMBAHAN: MUNCUL HANYA SAAT PRIVATE -->
+              <!-- SAAT PRIVATE MUNCUL BIDANG -->
               <div v-if="isPrivate">
                 <label class="block text-black font-black mb-1.5 ml-3 text-sm uppercase">Bidang</label>
                 <select v-model="form.bidang" class="w-full p-4 bg-white text-black font-medium rounded-2xl border border-gray-300 shadow-sm outline-none appearance-none">

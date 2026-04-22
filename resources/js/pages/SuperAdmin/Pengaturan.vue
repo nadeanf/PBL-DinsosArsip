@@ -14,7 +14,7 @@ const storageUsers = [
     { id: 3, nama: 'Ahmad Yani', email: 'ahmad.yani@pemerintah.go.id', role: 'User', terpakai: 'xx GB', limit: 'xx GB' },
 ];
 
-// Logika Jenis File
+
 const fileExtensions = ['PDF', 'Images (PNG, JPG, JPEG)', 'DOC', 'Excel', 'ZIP'];
 const selectedFiles = ref(['PDF', 'DOC']); 
 

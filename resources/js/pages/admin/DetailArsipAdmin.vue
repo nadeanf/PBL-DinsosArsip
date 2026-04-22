@@ -2,10 +2,10 @@
 import { computed } from 'vue'
 import { usePage } from '@inertiajs/vue3'
 import DetailArsipContent from '@/components/DetailArsipContent.vue'
-import SuperAdminLayout from '@/layouts/SuperAdminLayout.vue'
+import AdminLayout from '@/layouts/AdminLayout.vue'
 
 defineOptions({
-  layout: SuperAdminLayout
+  layout: AdminLayout
 })
 
 const { props } = usePage()

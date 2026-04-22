@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { Head, useForm } from '@inertiajs/vue3';
-import AuthLayout from '@/Layouts/AuthLayout.vue';
+import UserLayout from '@/layouts/UserLayout.vue';
 
-defineOptions({ layout: AuthLayout });
+defineOptions({ layout: UserLayout });
 
 const props = defineProps<{ folder: string }>();
 
-// 1. Data Kategori Statis
+// 1. Data Kategori
 const kategoriVital = [
   'Kebijakan dan program pemerintah tentang masalah sosial', 
   'Bantuan Sosial', 'Penghargaan kepada pahlawan', 'Perintis kemerdekaan', 
@@ -50,15 +50,15 @@ const form = useForm({
     files: null as any, 
 });
 
-// Ganti baris 54 (logika isVital) menjadi ini:
+
 const isVital = computed(() => props.folder?.toLowerCase() === 'vital');
 
-// Sub-kategori dinamis untuk Aktif/Inaktif
+
 const subKategoriList = computed(() => {
     return form.kategori_kelompok ? kategoriAktifInaktif[form.kategori_kelompok] : [];
 });
 
-// Reset kategori jika kelompok berubah
+// Reset kategori jika berubah
 watch(() => form.kategori_kelompok, () => {
     form.kategori = '';
 });
@@ -218,3 +218,4 @@ const submit = () => {
     </div>
   </div>
 </template>
+

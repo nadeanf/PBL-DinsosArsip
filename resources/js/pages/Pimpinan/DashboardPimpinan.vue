@@ -8,13 +8,13 @@ defineOptions({
   layout: AuthLayoutPimpinan
 })
 
-// --- STATE SEARCH ---
+// STATE SEARCH 
 const search = ref('')
 const kategori = ref('')
 const tanggal_awal = ref('')
 const tanggal_akhir = ref('')
 
-// --- DATA DUMMY (Aktivitas Terbaru) ---
+// DUMMY
 const aktivitasTerbaru = ref([
   {
     id: 0,

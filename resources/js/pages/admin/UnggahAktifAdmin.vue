@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { Head, useForm } from '@inertiajs/vue3';
-import UserLayout from '@/layouts/UserLayout.vue';
+import AdminLayout from '@/layouts/AdminLayout.vue';
 
-defineOptions({ layout: UserLayout });
+defineOptions({ layout: AdminLayout });
 
 const props = defineProps<{ folder: string }>();
 
-// Data Kategori 
+// 1. Data Kategori Statis
 const kategoriVital = [
   'Kebijakan dan program pemerintah tentang masalah sosial', 
   'Bantuan Sosial', 'Penghargaan kepada pahlawan', 'Perintis kemerdekaan', 
@@ -32,12 +32,20 @@ const kategoriAktifInaktif = {
     'Penanggulangan Kemiskinan', 'Kepahlawanan dan Kesetiakawanan Sosial'
   ],
   'Keuangan': [
-    'Surat Penyedia Dana (SPP, SPM dan SP2D): UP, GU, TU, LS', 'Pendapatan', 'Belanja', 
+    'Surat Penyedia Dana (SPP, SPM dan SP2D)', 'Pendapatan', 'Belanja', 
     'Pembiayaan Daerah', 'Laporan Keuangan'
   ]
 };
 
-// Form State
+// 3. Data Bidang (TAMBAHAN)
+const bidangList = [
+  'Sekretariat',
+  'Rehabilitasi Sosial',
+  'Perlindungan dan Jaminan Sosial',
+  'Pemberdayaan Sosial'
+];
+
+// 2. Form State
 const form = useForm({
     judul: '',
     nomor: '',
@@ -48,38 +56,18 @@ const form = useForm({
     lokasi: '',
     deskripsi: '',
     files: null as any, 
-    // TAMBAHAN
-    // @ts-ignore
-    bidang: '',
+    bidang: '', // TAMBAHAN
 });
 
-// Logika Filter
-const isVital = computed(() => props.folder.toLowerCase() === 'vital');
-
-
-const bidangList = [
-  'Sekretariat',
-  'Rehabilitasi Sosial',
-  'Perlindungan dan Jaminan Sosial',
-  'Pemberdayaan Sosial'
-];
-
+const isVital = computed(() => props.folder?.toLowerCase() === 'vital');
 const isPrivate = computed(() => form.status_akses === 'Private');
 const subKategoriList = computed(() => {
     return form.kategori_kelompok ? kategoriAktifInaktif[form.kategori_kelompok] : [];
 });
 
-// Reset kategori jika berubah
+// Reset kategori jika kelompok berubah
 watch(() => form.kategori_kelompok, () => {
     form.kategori = '';
-});
-
-// Reset bidang
-watch(() => form.status_akses, (val) => {
-  if (val !== 'Private') {
-    // @ts-ignore
-    form.bidang = '';
-  }
 });
 
 const fileInput = ref<HTMLInputElement | null>(null);
@@ -156,7 +144,7 @@ const submit = () => {
             <div class="grid grid-cols-1 gap-4">
               <div>
                 <label class="block text-black font-black mb-1.5 ml-3 text-sm uppercase">Nomor Dokumen</label>
-                <input v-model="form.nomor" type="text" placeholder="Nomor dokumen arsip..." class="w-full p-4 bg-white text-black font-medium rounded-2xl border border-gray-300 shadow-sm outline-none" />
+                <input v-model="form.nomor" type="text" placeholder="Nomor dokumen..." class="w-full p-4 bg-white text-black font-medium rounded-2xl border border-gray-300 shadow-sm outline-none" />
               </div>
               <div>
                 <label class="block text-black font-black mb-1.5 ml-3 text-sm uppercase">Tahun Arsip</label>
@@ -166,7 +154,7 @@ const submit = () => {
 
             <div v-if="isVital">
               <label class="block text-black font-black mb-1.5 ml-3 text-sm uppercase">Kategori Vital</label>
-              <select v-model="form.kategori" class="w-full p-4 bg-white text-black font-medium rounded-2xl border border-gray-300 shadow-sm outline-none appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg...')] bg-no-repeat bg-[right_1.5rem_center] bg-[length:1.2em]">
+              <select v-model="form.kategori" class="w-full p-4 bg-white text-black font-medium rounded-2xl border border-gray-300 shadow-sm outline-none appearance-none">
                 <option value="">-- Pilih Kategori Vital --</option>
                 <option v-for="item in kategoriVital" :key="item" :value="item">{{ item }}</option>
               </select>
@@ -180,30 +168,28 @@ const submit = () => {
                   <option v-for="(subs, parent) in kategoriAktifInaktif" :key="parent" :value="parent">{{ parent }}</option>
                 </select>
               </div>
-
               <div>
                 <label class="block text-black font-black mb-1.5 ml-3 text-sm uppercase">Detail Kategori</label>
-                <select v-model="form.kategori" :disabled="!form.kategori_kelompok" class="w-full p-4 bg-white text-black font-medium rounded-2xl border border-gray-300 shadow-sm outline-none appearance-none">
+                <select v-model="form.kategori" :disabled="!form.kategori_kelompok" class="w-full p-4 bg-white text-black font-medium rounded-2xl border border-gray-300 shadow-sm outline-none appearance-none disabled:bg-gray-100">
                   <option value="">-- Pilih Detail --</option>
                   <option v-for="item in subKategoriList" :key="item" :value="item">{{ item }}</option>
                 </select>
               </div>
             </div>
 
-            <!-- STATUS -->
-            <div class="grid grid-cols- gap-4">
+            <div class="grid grid-cols-1 gap-4">
               <div>
                 <label class="block text-black font-black mb-1.5 ml-3 text-sm uppercase">Status Akses</label>
-                <select v-model="form.status_akses" class="w-full p-4 bg-white text-black font-medium rounded-2xl border border-gray-300 shadow-sm outline-none">
+                <select v-model="form.status_akses" class="w-full p-4 bg-white text-black font-medium rounded-2xl border border-gray-300 shadow-sm outline-none appearance-none">
                   <option>Publik</option>
                   <option>Private</option>
                 </select>
               </div>
 
-              <!-- BIDANG MUNCUL SAAT PRIVATE -->
+              <!-- SAAT PRIVATE MUNCUL BIDANG -->
               <div v-if="isPrivate">
                 <label class="block text-black font-black mb-1.5 ml-3 text-sm uppercase">Bidang</label>
-                <select v-model="form.bidang" class="w-full p-4 bg-white text-black font-medium rounded-2xl border border-gray-300 shadow-sm outline-none">
+                <select v-model="form.bidang" class="w-full p-4 bg-white text-black font-medium rounded-2xl border border-gray-300 shadow-sm outline-none appearance-none">
                   <option value="">-- Pilih Bidang --</option>
                   <option v-for="item in bidangList" :key="item" :value="item">{{ item }}</option>
                 </select>
@@ -223,14 +209,13 @@ const submit = () => {
           </div>
 
           <div class="flex justify-end gap-4 mt-10">
-            <button type="submit" :class="isVital ? 'bg-[#4a7a96]' : 'bg-[#2f55a4]'" class="text-white px-10 py-3.5 rounded-2xl font-black shadow-md">
+            <button type="submit" :class="isVital ? 'bg-[#4a7a96]' : 'bg-[#2f55a4]'" class="text-white px-10 py-3.5 rounded-2xl font-black shadow-md hover:opacity-90 transition-all uppercase text-sm tracking-widest">
               Simpan File
             </button>
-            <button type="button" @click="window.history.back()" class="bg-[#ff0000] text-white px-10 py-3.5 rounded-full font-black">
+            <button type="button" @click="window.history.back()" class="bg-[#ff0000] text-white px-10 py-3.5 rounded-full font-black shadow-md hover:bg-red-700 transition-all uppercase text-sm tracking-widest">
               Batal
             </button>
           </div>
-
         </div>
       </form>
     </div>

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
-import UserLayout from '@/layouts/UserLayout.vue';
+import AdminLayout from '@/layouts/AdminLayout.vue';
 
-defineOptions({ layout: UserLayout });
+defineOptions({ layout: AdminLayout });
 const kategoriData = {
   'aktif': {
     'Umum': [

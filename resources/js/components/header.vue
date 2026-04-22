@@ -7,8 +7,6 @@ const user = page.props.auth?.user
 
 <template>
   <nav class="h-20 bg-blue-900 text-white shadow flex items-center justify-between px-8">
-    
-    <!-- KIRI -->
     <div class="flex items-center gap-3">
       <img src="image/logodinsos.png" alt="Logo" class="w-10 h-12" />
       
@@ -22,7 +20,6 @@ const user = page.props.auth?.user
       </div>
     </div>
 
-    <!-- KANAN -->
     <div class="flex gap-3 items-center">
       
       <!-- kalau BELUM login -->

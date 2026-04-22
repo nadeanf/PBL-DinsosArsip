@@ -4,6 +4,7 @@ import { router, Link } from '@inertiajs/vue3'
 
 const documents = [
     {
+        id: 1,
         title: "Proposal Program Pemberdayaan Masyarakat",
         nomor: "DOK/012/11/2026",
         kategori: "Proposal",
@@ -13,6 +14,7 @@ const documents = [
         status: "Public"
     },
     {
+        id: 2,
         title: "Proposal Program Pemberdayaan Masyarakat",
         nomor: "DOK/012/11/2026",
         kategori: "Proposal",
@@ -47,11 +49,19 @@ const handleSearch = () => {
 <div class="p-6 pt-10 bg-[#f3f4f6] min-h-screen space-y-6">
 
     <!-- FORM -->
-    <form @submit.prevent="handleSearch" class="bg-[#2f6f7e] p-4 rounded-xl shadow-md flex flex-wrap gap-4 items-center">
+    <form
+        @submit.prevent="handleSearch"
+        class="bg-[#2f6f7e] p-4 rounded-xl shadow-md flex flex-wrap gap-4 items-center"
+    >
 
       <div class="bg-white rounded-lg px-4 py-3 flex items-center shadow-sm flex-1 min-w-[200px]">
         <span class="text-gray-400 mr-2">🔍</span>
-        <input type="text" v-model="search" placeholder="Cari dokumen..." class="w-full outline-none text-sm"/>
+        <input
+          type="text"
+          v-model="search"
+          placeholder="Cari dokumen..."
+          class="w-full outline-none text-sm"
+        />
       </div>
 
       <div class="bg-white rounded-lg px-4 py-3 flex items-center shadow-sm w-[180px]">
@@ -64,40 +74,43 @@ const handleSearch = () => {
       </div>
 
       <div class="bg-white rounded-lg px-4 py-3 shadow-sm w-[160px]">
-        <input type="date" v-model="tanggal_awal" class="w-full text-sm outline-none"/>
+        <input type="date" v-model="tanggal_awal" class="w-full text-sm outline-none" />
       </div>
 
       <div class="text-white font-bold px-1">-</div>
 
       <div class="bg-white rounded-lg px-4 py-3 shadow-sm w-[160px]">
-        <input type="date" v-model="tanggal_akhir" class="w-full text-sm outline-none"/>
+        <input type="date" v-model="tanggal_akhir" class="w-full text-sm outline-none" />
       </div>
 
-      <button type="submit" class="bg-white rounded-lg px-4 py-2 text-sm font-semibold">
+      <button
+        type="submit"
+        class="bg-white rounded-lg px-4 py-2 text-sm font-semibold"
+      >
         Cari
       </button>
 
     </form>
 
-    <!-- INFO -->
+
     <div class="text-sm">
         Ditemukan <b>{{ totalArsip }}</b> arsip
     </div>
 
-    <!-- LIST -->
+
     <div v-if="documents.length > 0" class="space-y-4">
 
         <Link
-            v-for="(doc, i) in documents"
-            :key="i"
-            :href="`/arsip/${i}`"
+            v-for="doc in documents"
+            :key="doc.id"
+            :href="`/arsip/${doc.id}`"
             class="bg-[#7fa6b5] p-5 rounded-xl flex gap-4 cursor-pointer hover:shadow-xl transition relative block"
         >
 
-            <!-- ICON -->
+
             <div class="w-16 h-16 bg-gray-200 rounded"></div>
 
-            <!-- CONTENT -->
+            
             <div class="flex-1">
 
                 <p class="font-semibold text-gray-900">

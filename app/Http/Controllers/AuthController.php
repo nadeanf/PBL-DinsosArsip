@@ -39,8 +39,7 @@ class AuthController extends Controller
 
             $user = Auth::user();
 
-            // 🔥 AUTO DETECT SUPER ADMIN
-            // Sesuaikan email ini dengan akun Super Admin kamu
+            // DETECT SUPER ADMIN
             if ($user->email === 'superadmin@gmail.com') {
                 $user->role = 'superadmin';
                 $user->save();
@@ -48,7 +47,7 @@ class AuthController extends Controller
                 return redirect('/super-admin/dashboard');
             }
 
-            // 🔥 AUTO DETECT PIMPINAN
+            // DETECT PIMPINAN
             if ($user->email === 'pimpinan@gmail.com') {
                 $user->role = 'pimpinan';
                 $user->save();
@@ -56,7 +55,16 @@ class AuthController extends Controller
                 return redirect('/pimpinan/dashboard');
             }
 
-            // DEFAULT USER / ADMIN BIASA
+
+            // DETECT ADMIN
+            if ($user->email === 'admin@gmail.com') {
+                $user->role = 'admin';
+                $user->save();
+
+                return redirect('/admin/dashboard');
+        }
+
+            // DEFAULT USER 
             return redirect('/dashboard');
         }
 

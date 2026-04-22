@@ -1,30 +1,34 @@
 <script setup>
 import Navbar from '@/components/Navbar.vue'
-import Sidebar from '@/components/AppSidebarSuperAdmin.vue' // Pastikan path file sesuai
+import Sidebar from '@/components/AppSidebarSuperAdmin.vue' 
 import Footer from '@/components/footer.vue'
 </script>
 
 <template>
-  <div class="flex min-h-screen bg-gray-100">
+  <div class="flex flex-col min-h-screen bg-gray-100">
 
-    <Sidebar />
+    <!-- NAVBAR -->
+    <Navbar />
 
-    <div class="flex flex-col flex-1">
-      
-      <Navbar />
+    <div class="flex flex-1 overflow-hidden">
 
-      <main class="flex-1 p-6">
+      <!-- SIDEBAR -->
+      <Sidebar />
+
+      <!-- CONTENT -->
+      <main class="flex-1 p-6 overflow-y-auto">
         <slot />
       </main>
 
-      <Footer />
     </div>
+
+    <!-- FOOTER -->
+    <Footer />
 
   </div>
 </template>
 
 <style scoped>
-/* Tambahkan transisi halus jika diperlukan */
 main {
   transition: all 0.3s ease-in-out;
 }

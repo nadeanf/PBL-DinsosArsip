@@ -46,14 +46,14 @@ function goToLogin() {
         class="relative flex items-start justify-center min-h-screen pt-6 bg-center bg-cover"
         style="background-image: url('/image/bgregis.jpg')"
     >
-        <!-- Overlay -->
+
         <div class="absolute inset-0 bg-white/30 backdrop-blur-[2px]"></div>
 
-        <!-- Card -->
+
         <div
             class="relative z-10 w-full max-w-sm px-5 py-3 bg-[#e8e8e8]/80 rounded-2xl shadow-xl scale-95 origin-top"
         >
-            <!-- Header -->
+   
             <div class="flex items-center justify-center gap-2 mb-3">
                 <img src="/image/logodinsos.png" class="w-9 h-11 object-contain" />
                 <div class="text-center leading-tight">
@@ -62,13 +62,13 @@ function goToLogin() {
                 </div>
             </div>
 
-            <!-- Title -->
+
             <div class="text-center mb-3">
                 <h1 class="text-lg font-extrabold text-gray-900">BUAT AKUN</h1>
                 <p class="text-xs text-gray-500">Silahkan masuk untuk melanjutkan</p>
             </div>
 
-            <!-- FORM -->
+
             <div class="space-y-2.5 text-sm">
                 
                 <div>
@@ -107,7 +107,7 @@ function goToLogin() {
                 </div>
             </div>
 
-            <!-- Button -->
+    
             <button
                 @click="handleSubmit"
                 class="w-full mt-3 py-2 text-sm font-bold text-white bg-[#2d3282] hover:bg-[#232769] rounded-lg transition"
@@ -115,7 +115,7 @@ function goToLogin() {
                 REGISTER
             </button>
 
-            <!-- Login -->
+         
             <p class="mt-2 text-xs text-center text-gray-700">
                 Sudah punya akun?
                 <span @click="goToLogin" class="text-blue-600 cursor-pointer hover:underline">

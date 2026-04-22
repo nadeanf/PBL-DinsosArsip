@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { Head, useForm } from '@inertiajs/vue3';
-import UserLayout from '@/layouts/UserLayout.vue';
+import AdminLayout from '@/layouts/AdminLayout.vue';
 
-defineOptions({ layout: UserLayout });
+defineOptions({ layout: AdminLayout });
 
 const props = defineProps<{ folder: string }>();
 
-// Data Kategori 
+// 1. Data Kategori Statis
 const kategoriVital = [
   'Kebijakan dan program pemerintah tentang masalah sosial', 
   'Bantuan Sosial', 'Penghargaan kepada pahlawan', 'Perintis kemerdekaan', 
@@ -37,7 +37,7 @@ const kategoriAktifInaktif = {
   ]
 };
 
-// Form State
+// 2. Form State
 const form = useForm({
     judul: '',
     nomor: '',
@@ -53,10 +53,10 @@ const form = useForm({
     bidang: '',
 });
 
-// Logika Filter
+// 3. Logika Filter
 const isVital = computed(() => props.folder.toLowerCase() === 'vital');
 
-
+// TAMBAHAN
 const bidangList = [
   'Sekretariat',
   'Rehabilitasi Sosial',
@@ -74,7 +74,7 @@ watch(() => form.kategori_kelompok, () => {
     form.kategori = '';
 });
 
-// Reset bidang
+// TAMBAHAN reset bidang
 watch(() => form.status_akses, (val) => {
   if (val !== 'Private') {
     // @ts-ignore
@@ -200,7 +200,7 @@ const submit = () => {
                 </select>
               </div>
 
-              <!-- BIDANG MUNCUL SAAT PRIVATE -->
+              <!-- SAAT PRIVATE MUNCUL BIDANG -->
               <div v-if="isPrivate">
                 <label class="block text-black font-black mb-1.5 ml-3 text-sm uppercase">Bidang</label>
                 <select v-model="form.bidang" class="w-full p-4 bg-white text-black font-medium rounded-2xl border border-gray-300 shadow-sm outline-none">

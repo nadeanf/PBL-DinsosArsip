@@ -1,7 +1,7 @@
 <script setup>
 import AuthLayoutPimpinan from '@/layouts/AuthLayoutPimpinan.vue'
 import { ref } from 'vue'
-import { Trash2, Eye } from 'lucide-vue-next' // ✅ TAMBAHAN ICON
+import { Trash2, Eye } from 'lucide-vue-next' 
 
 defineOptions({
   layout: AuthLayoutPimpinan
@@ -13,7 +13,7 @@ const kategori = ref('')
 const tanggal_awal = ref('')
 const tanggal_akhir = ref('')
 
-// DATA DINAMIS (DUMMY)
+// DUMMY
 const statistik = ref({
   dokumen: 68,
   foto: 20,
@@ -31,7 +31,7 @@ const aksesCepat = ref([
   { nama: 'Galeri Video' }
 ])
 
-// 🔥 DATA USER
+// DUMMY USER
 const users = ref([
   {
     nama: 'Admin Arsip',
@@ -56,7 +56,7 @@ const users = ref([
   }
 ])
 
-// ✅ FUNCTION AKSI
+
 const handleDelete = (user) => {
   console.log('Hapus user:', user)
 }

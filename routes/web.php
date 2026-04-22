@@ -8,6 +8,7 @@ use App\Models\Arsip;
 use Illuminate\Support\Facades\Password;
 use Inertia\Inertia;
 
+
 Route::get('/sampah', function () {
     return inertia('Sampah', [
         'title' => 'Sampah'
@@ -26,6 +27,8 @@ Route::get('/arsipsaya', function () {
     ]);
 });
 
+
+/* AUTH BASIC */
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -37,10 +40,12 @@ Route::get('/login', function () {
 
 Route::get('/register', function () {
     return inertia('Register');
-});
+})->name('register');
 
+
+/* FORGOT PASSWORD */
 Route::get('/forgot-password', function () {
-    return Inertia::render('auth/ForgotPassword'); 
+    return Inertia::render('auth/ForgotPassword');
 })->name('password.request');
 
 Route::post('/forgot-password', function (Request $request) {
@@ -80,12 +85,14 @@ Route::post('/reset-password', function (Request $request) {
     return redirect('/login')->with('status', 'Password berhasil diubah!');
 })->name('password.update');
 
-// LANDING
+
+/* LANDING */
 Route::inertia('/', 'Landing', [
     'canRegister' => Features::enabled(Features::registration()),
 ])->name('home');
 
-// LOGOUT
+
+/* LOGOUT */
 Route::post('/logout', function () {
     auth()->logout();
     request()->session()->invalidate();
@@ -94,30 +101,28 @@ Route::post('/logout', function () {
     return redirect('/');
 })->name('logout');
 
-// DASHBOARD PIMPINAN
+
+/* PIMPINAN */
 Route::get('/pimpinan/dashboard', function () {
-    if (auth()->user()->role !== 'pimpinan') {
-        abort(403);
-    }
+    if (auth()->user()->role !== 'pimpinan') abort(403);
 
     return inertia('Pimpinan/DashboardPimpinan', [
         'title' => 'Dashboard'
     ]);
 })->middleware('auth');
 
-// STATISTIK PIMPINAN
 Route::get('/pimpinan/statistik', function () {
-    if (auth()->user()->role !== 'pimpinan') {
-        abort(403);
-    }
+    if (auth()->user()->role !== 'pimpinan') abort(403);
 
     return inertia('Pimpinan/StatistikPimpinan', [
         'title' => 'Statistik'
     ]);
 })->middleware('auth');
 
-// --- TAMBAHAN ROUTE KHUSUS SUPER ADMIN ---
+
+/* SUPER ADMIN */
 Route::middleware(['auth'])->group(function () {
+
     Route::get('/super-admin/dashboard', function () {
         if (auth()->user()->role !== 'superadmin') abort(403);
         return inertia('SuperAdmin/DashboardSuperAdmin', ['title' => 'Dashboard Super Admin']);
@@ -138,7 +143,6 @@ Route::middleware(['auth'])->group(function () {
         return inertia('SuperAdmin/RiwayatSuperAdmin', ['title' => 'Riwayat']);
     })->name('superadmin.riwayat');
 
-    // 🔥 ROUTE PENGATURAN & EDIT STORAGE LIMIT
     Route::get('/super-admin/pengaturan', function () {
         if (auth()->user()->role !== 'superadmin') abort(403);
         return inertia('SuperAdmin/Pengaturan', ['title' => 'Pengaturan']);
@@ -150,19 +154,25 @@ Route::middleware(['auth'])->group(function () {
     })->name('superadmin.editlimit');
 });
 
-// GROUP UTAMA (MIDDLEWARE AUTH)
+
+/* GROUP UTAMA */
 Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::inertia('dashboard', 'Dashboard', [
         'title' => 'Beranda'
     ])->name('dashboard');
 
-    // Riwayat (Logic Direct Berdasarkan Role)
+
+    /* RIWAYAT */
     Route::get('/riwayat', function () {
         $role = auth()->user()->role; 
 
         if ($role === 'pimpinan') {
             return inertia('Pimpinan/RiwayatPimpinan', ['title' => 'Riwayat']);
+        }
+
+        if ($role === 'admin') {
+            return inertia('admin/RiwayatAdmin', ['title' => 'Riwayat']);
         }
         
         if ($role === 'superadmin') {
@@ -172,53 +182,130 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return inertia('Riwayat', ['title' => 'Riwayat']);
     })->name('riwayat');
 
-    // Daftar Arsip
+
+    /* DAFTAR ARSIP */
     Route::get('daftar-arsip', function (Request $request) {
-        if (auth()->user()->role === 'pimpinan') {
+
+        $role = auth()->user()->role;
+
+        if ($role === 'pimpinan') {
             return inertia('Pimpinan/ListArsipPimpinan', [
                 'title' => 'Daftar Arsip',
                 'data' => [],
-                'filters' => $request->only(['search', 'kategori', 'tanggal_awal', 'tanggal_akhir'])
+                'filters' => $request->only(['search','kategori','tanggal_awal','tanggal_akhir'])
             ]);
         }
 
-        if (auth()->user()->role === 'superadmin') {
-            return inertia('SuperAdmin/ListArsipSuperAdmin', [
-                'title' => 'Manajemen Arsip Global',
+        if ($role === 'admin') {
+            return inertia('admin/ListArsipAdmin', [
+                'title' => 'Daftar Arsip',
                 'data' => [],
-                'filters' => $request->only(['search', 'kategori', 'tanggal_awal', 'tanggal_akhir'])
+                'filters' => $request->only(['search','kategori','tanggal_awal','tanggal_akhir'])
+            ]);
+        }
+
+        if ($role === 'superadmin') {
+            return inertia('SuperAdmin/ListArsipSuperAdmin', [
+                'title' => 'Daftar Arsip',
+                'data' => [],
+                'filters' => $request->only(['search','kategori','tanggal_awal','tanggal_akhir'])
             ]);
         }
 
         return inertia('ListArsip', [
             'title' => 'Daftar Arsip',
             'data' => [],
-            'filters' => $request->only(['search', 'kategori', 'tanggal_awal', 'tanggal_akhir'])
+            'filters' => $request->only(['search','kategori','tanggal_awal','tanggal_akhir'])
         ]);
+
     })->name('arsip');
 
+
+   /* UNGGAH (ROLE) */
+    // HALAMAN AWAL UNGGAH
     Route::get('/unggah', function () {
-        return inertia('Unggah', ['title' => 'Unggah']);
+
+        $role = auth()->user()->role;
+
+        if ($role === 'admin') {
+            return inertia('admin/UnggahAdmin', [
+                'title' => 'Unggah Arsip'
+            ]);
+        }
+
+        return inertia('Unggah', [
+            'title' => 'Unggah Arsip'
+        ]);
+
     })->name('unggah');
 
-    Route::get('/unggah/aktif&inaktif', function () {
-        return inertia('UnggahAktif', ['title' => 'Pilih Folder']);
+
+    // PILIH FOLDER (AKTIF/INAKTIF)
+    Route::get('/unggah/aktif-inaktif', function () {
+
+        $role = auth()->user()->role;
+
+        if ($role === 'admin') {
+            return inertia('admin/UnggahAktifAdmin', [
+                'title' => 'Pilih Folder'
+            ]);
+        }
+
+        return inertia('UnggahAktif', [
+            'title' => 'Pilih Folder'
+        ]);
+
     })->name('unggah.aktif');
 
+
+    // HALAMAN UNGGAH BERDASARKAN FOLDER
     Route::get('/unggah/{folder}', function ($folder) {
+
+        // VALIDASI BIAR GA NGACO
+        if (!in_array($folder, ['vital', 'aktif-inaktif'])) {
+            abort(404);
+        }
+
+        $role = auth()->user()->role;
+
+        // ADMIN
+        if ($role === 'admin') {
+            return inertia('admin/UnggahVitalAdmin', [
+                'title' => 'Unggah Dokumen',
+                'folder' => $folder
+            ]);
+        }
+
+        // USER / DEFAULT
         return inertia('UnggahVital', [
-            'title' => 'Unggah Dokumen', 
-            'folder' => $folder 
+            'title' => 'Unggah Dokumen',
+            'folder' => $folder
         ]);
+
     })->name('unggah.valid');
 
+
+    /* KELOLA ARSIP (ROLE) */
     Route::get('/kelola-arsip', function () {
+
+        $role = auth()->user()->role;
+
+        if ($role === 'admin') {
+            return inertia('admin/KelolaArsipRoleAdmin', [
+                'title' => 'Kelola Arsip Saya'
+            ]);
+        }
+
         return inertia('KelolaArsip', [
             'title' => 'Kelola Arsip Saya'
         ]);
+
     })->name('kelola.arsip');
 
+
+    /* DETAIL ARSIP */
     Route::get('arsip/{id}', function ($id) {
+
         $doc = [
             "id" => 0,
             "title" => "Proposal Program Pemberdayaan Masyarakat",
@@ -227,25 +314,62 @@ Route::middleware(['auth', 'verified'])->group(function () {
             "tanggal" => "25 Januari 2026",
             "status" => "Public",
             "file" => "/dummy.pdf"
-        ]; // Dummy data
+        ];
 
-        if (auth()->user()->role === 'pimpinan') {
+        $role = auth()->user()->role;
+
+        if ($role === 'pimpinan') {
             return inertia('Pimpinan/DetailArsipPimpinan', ['title' => 'Detail Arsip', 'doc' => $doc]);
         }
 
-        if (auth()->user()->role === 'superadmin') {
+        if ($role === 'admin') {
+            return inertia('admin/DetailArsipAdmin', ['title' => 'Detail Arsip', 'doc' => $doc]);
+        }
+
+        if ($role === 'superadmin') {
             return inertia('SuperAdmin/DetailArsipSuperAdmin', ['title' => 'Detail Arsip', 'doc' => $doc]);
         }
 
         return inertia('DetailArsip', ['title' => 'Detail Arsip', 'doc' => $doc]);
+
     })->name('arsip.detail');
 
+
+    /* ADMIN */
+    Route::get('/admin/dashboard', function () {
+        if (auth()->user()->role !== 'admin') abort(403);
+        return inertia('admin/DashboardAdmin', ['title' => 'Dashboard Admin']);
+    });
+
+    Route::get('/admin/statistik', function () {
+        if (auth()->user()->role !== 'admin') abort(403);
+        return inertia('admin/StatistikLaporan', ['title' => 'Statistik']);
+    });
+
+    Route::get('/admin/persetujuan', function () {
+        if (auth()->user()->role !== 'admin') abort(403);
+        return inertia('admin/PersetujuanAkses', ['title' => 'Persetujuan']);
+    });
+
+        Route::get('/admin/kelola-user', function () {
+        if (auth()->user()->role !== 'admin') abort(403);
+        return inertia('admin/KelolaArsipUser', ['title' => 'Kelola Arsip User']);
+    });
+
+        Route::get('/admin/pengumuman', function () {
+        if (auth()->user()->role !== 'admin') abort(403);
+
+        return inertia('admin/Pengumuman', [
+            'title' => 'Pengumuman']);
+    });
 });
 
+
+/* SETTINGS */
 Route::get('/edit-profile', function () {
     return inertia('settings/EditProfil', [
         'title' => 'Edit Profil'
     ]);
-});
+})->name('edit.profile');
 
 require __DIR__.'/settings.php';
