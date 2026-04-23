@@ -362,6 +362,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return inertia('admin/Pengumuman', [
             'title' => 'Pengumuman']);
     });
+
+    /* KELOLA KATEGORI (ADMIN) */
+    Route::get('/admin/kelola-kategori', function () {
+    if (auth()->user()->role !== 'admin') abort(403);
+
+    return inertia('admin/KelolaKategori', [
+        'title' => 'Kelola Kategori']);
+    });
 });
 
 
