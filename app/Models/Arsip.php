@@ -20,13 +20,17 @@ class Arsip extends Model
         'judul',
         'nomor',
         'tahun',
+        'kategori',
+        'kategori_kelompok',
         'id_kategori',
         'jenis_arsip',
         'status_akses',
         'bagian',
         'lokasi',
         'deskripsi',
-        'status_approval'
+        'status_approval',
+        'aktivitas',
+        'waktu_aktivitas'
     ];
 
     // 🔥 Relasi ke kategori

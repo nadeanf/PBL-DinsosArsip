@@ -42,12 +42,16 @@ class ArsipController extends Controller
                 : 'aktif';
         }
 
+        $kategoriName = Kategori::find($request->id_kategori)?->nama ?? null;
+
         $arsip = Arsip::create([
             
             'user_id' => $user->id,
             'judul' => $request->judul,
             'nomor' => $request->nomor,
             'tahun' => $request->tahun,
+            'kategori' => $kategoriName,
+            'kategori_kelompok' => $request->kategori_kelompok ?? null,
             'id_kategori' => $request->id_kategori,
             'jenis_arsip' => $jenisArsip,
             'status_akses' => $request->status_akses,
@@ -90,6 +94,7 @@ class ArsipController extends Controller
         'judul' => $request->judul,
         'nomor' => $request->nomor,
         'tahun' => $request->tahun,
+        'kategori' => Kategori::find($request->id_kategori)?->nama ?? $arsip->kategori,
         'id_kategori' => $request->id_kategori,
         'status_akses' => $request->status_akses,
         'lokasi' => $request->lokasi,
