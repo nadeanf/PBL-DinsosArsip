@@ -9,11 +9,12 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
-    {
-        Schema::table('users', function (Blueprint $table) {
-            $table->string('role')->default('user'); // ✅ TAMBAHAN
-        });
+    public function up()
+{
+    Schema::table('arsip', function (Blueprint $table) {
+        $table->string('aktivitas')->nullable();
+        $table->timestamp('waktu_aktivitas')->nullable();
+    });
     }
 
     /**
@@ -21,8 +22,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('role'); // ✅ BIAR BISA ROLLBACK
+        Schema::table('arsip', function (Blueprint $table) {
+            //
         });
     }
 };

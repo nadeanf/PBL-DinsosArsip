@@ -6,7 +6,7 @@ import { Plus, Trash2 } from 'lucide-vue-next'
 
 defineOptions({ layout: AdminLayout })
 
-/* ================= DATA ================= */
+/* DATA */
 
 const kategoriData = reactive({
   aktif_inaktif: {
@@ -76,18 +76,18 @@ const kategoriData = reactive({
   ]
 })
 
-/* ================= STATE ================= */
+/* STATE */
 
 const mode = ref<'aktif' | 'vital'>('aktif')
 const showModal = ref(false)
 const newItem = ref('')
 const selectedKelompok = ref('Umum')
 
-/* ================= COMPUTED ================= */
+/* COMPUTED */
 
 const kelompokList = computed(() => Object.keys(kategoriData.aktif_inaktif))
 
-/* ================= ACTION ================= */
+/* ACTION */
 
 const tambahKategori = () => {
   if (!newItem.value.trim()) return
@@ -137,7 +137,7 @@ const hapusItem = (kelompok: string | null, index: number) => {
       </button>
     </div>
 
-    <!-- ================= AKTIF ================= -->
+    <!-- AKTIF-->
     <div v-if="mode === 'aktif'" class="space-y-8">
 
       <div v-for="(items, kelompok) in kategoriData.aktif_inaktif" :key="kelompok">
@@ -167,7 +167,7 @@ const hapusItem = (kelompok: string | null, index: number) => {
 
     </div>
 
-    <!-- ================= VITAL ================= -->
+    <!-- VITAL -->
     <div v-else class="space-y-3">
 
       <div v-for="(item, i) in kategoriData.vital" :key="i"
@@ -189,7 +189,7 @@ const hapusItem = (kelompok: string | null, index: number) => {
 
   </div>
 
-  <!-- ================= MODAL ================= -->
+  <!-- MODAL -->
   <div v-if="showModal" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
     <div class="bg-white p-6 rounded-2xl w-[400px] shadow-xl">
 

@@ -19,14 +19,14 @@ const user = page.props.auth?.user
         Profile Saya
       </h1>
 
-     
+      <!-- ================= CARD PROFILE ================= -->
       <div class="rounded-xl shadow-md overflow-hidden">
 
         <div class="bg-gradient-to-b from-[#7fa6b3] to-[#4f7d8c] h-6"></div>
 
-      
         <div class="bg-white p-6 text-black">
 
+          <!-- PROFILE -->
           <div class="flex items-center gap-4 mb-4">
             <div class="w-16 h-16 rounded-full bg-gray-300"></div>
 
@@ -43,6 +43,7 @@ const user = page.props.auth?.user
 
           <hr class="my-4">
 
+          <!-- INFORMASI AKUN -->
           <div class="mb-4">
             <div class="bg-[#7fa6b3] text-white px-4 py-1 rounded-md text-sm w-fit mb-3">
               Informasi Akun
@@ -71,57 +72,6 @@ const user = page.props.auth?.user
               </div>
 
             </div>
-          </div>
-
-        </div>
-
-        <div class="bg-gradient-to-t from-[#7fa6b3] to-[#4f7d8c] h-6"></div>
-
-      </div>
-
-
-      <div class="rounded-xl shadow-md overflow-hidden">
-
-        <div class="bg-gradient-to-b from-[#7fa6b3] to-[#4f7d8c] h-6"></div>
-
-        <div class="bg-white p-6 text-black">
-
-          <div class="bg-[#7fa6b3] text-white px-4 py-1 rounded-md text-sm w-fit mb-4">
-            Ubah Password
-          </div>
-
-          <div class="space-y-4">
-
-            <div>
-              <label class="text-sm text-gray-600">Password Saat Ini</label>
-              <input
-                type="password"
-                class="w-full mt-1 px-4 py-2 rounded-full bg-gray-300 text-black placeholder-gray-500 focus:outline-none"
-              />
-            </div>
-
-            <div>
-              <label class="text-sm text-gray-600">Password Baru</label>
-              <input
-                type="password"
-                class="w-full mt-1 px-4 py-2 rounded-full bg-gray-300 text-black placeholder-gray-500 focus:outline-none"
-              />
-            </div>
-
-            <div>
-              <label class="text-sm text-gray-600">Konfirmasi Password</label>
-              <input
-                type="password"
-                class="w-full mt-1 px-4 py-2 rounded-full bg-gray-300 text-black placeholder-gray-500 focus:outline-none"
-              />
-            </div>
-
-          </div>
-
-          <div class="flex justify-end mt-6">
-            <button class="bg-[#7fa6b3] text-white px-4 py-2 rounded-full hover:bg-[#6c95a3]">
-              Ubah Password
-            </button>
           </div>
 
         </div>

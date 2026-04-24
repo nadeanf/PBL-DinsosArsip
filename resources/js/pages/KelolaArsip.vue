@@ -1,170 +1,391 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { Head, router } from '@inertiajs/vue3';
-import UserLayout from '@/layouts/UserLayout.vue';
-import { AlertTriangle } from 'lucide-vue-next';
+import { ref, computed } from 'vue'
+import { Head, router, usePage } from '@inertiajs/vue3'
+import UserLayout from '@/layouts/UserLayout.vue'
+import { FileText, FileImage, File, FileSpreadsheet } from 'lucide-vue-next'
 
-defineOptions({ layout: UserLayout });
+defineOptions({ layout: UserLayout })
 
-const handleEdit = (id: number) => {
-    router.get('/edit-dokumen', { id: id });
-};
-// Dummy 
-const allDocuments = ref(Array.from({ length: 20 }, (_, i) => ({
-    id: i + 1,
-    title: `Surat Tugas Dinas Kabupaten Boyolali - Desember 2026 (${i + 1})`,
-    format: "PDF",
-    tanggal: "8/3/25"
-})));
+const page = usePage()
 
-// State untuk Modal Konfirmasi
-const showModal = ref(false);
-const modalConfig = ref<{
-  id: number | null;
-  title: string;
-  message: string;
-}>({
-  id: null,
-  title: '',
-  message: ''
-});
+/* =========================
+   FILTER (JENIS SAJA)
+========================= */
+const filterJenis = ref('')
 
-// Fungsi untuk Membuka Modal
-const openConfirmDelete = (id: number) => {
-    modalConfig.value = {
-        id: id,
-        title: 'Hapus',
-        message: 'Anda yakin akan menghapus file ini?'
-    }
-    showModal.value = true;
+/* =========================
+   HELPER FILE TYPE
+========================= */
+const getFileType = (path: string) => {
+  if (!path) return 'FILE'
+  const ext = path.split('.').pop()?.toLowerCase()
+
+  if (['jpg','jpeg','png','gif','webp'].includes(ext)) return 'IMAGE'
+  if (ext === 'pdf') return 'PDF'
+  if (['doc','docx'].includes(ext)) return 'DOC'
+  if (['xls','xlsx'].includes(ext)) return 'EXCEL'
+  return 'FILE'
 }
 
-// Fungsi Eksekusi Hapus (Filter Data)
-const handleExecute = () => {
-    // Menghapus data dari array ref berdasarkan ID
-    allDocuments.value = allDocuments.value.filter(doc => doc.id !== modalConfig.value.id);
-    
-    // Tutup modal
-    showModal.value = false;
-    
-    // Reset ke halaman 1 jika data di halaman saat ini habis
-    if (paginatedData.value.length === 0 && currentPage.value > 1) {
-        currentPage.value--;
-    }
-};
+/* =========================
+   DATA MAPPING
+========================= */
+const allDocuments = ref(
+  (page.props.arsip || []).map((item: any) => ({
+    id: item.id,
+    title: item.judul,
+    nomor: item.nomor,
+    deskripsi: item.deskripsi,
 
-// Logika Pagination
-const itemsPerPage = 5;
-const currentPage = ref(1);
+    kategori: item.kategori?.nama || '-',
+    jenis: item.jenis_arsip || '-',
+    tahun: item.tahun,
+    lokasi: item.lokasi,
+    status: item.status_akses,
 
-const totalPages = computed(() => Math.ceil(allDocuments.value.length / itemsPerPage));
+    files: item.files || [],
+    format: item.files?.length
+      ? getFileType(item.files[0].path_file)
+      : 'FILE',
+
+    tanggal: item.created_at
+      ? new Date(item.created_at).toLocaleDateString()
+      : '-'
+  }))
+)
+
+/* =========================
+   FILTER
+========================= */
+const filteredDocuments = computed(() => {
+  return allDocuments.value.filter(item => {
+    return filterJenis.value
+      ? item.jenis === filterJenis.value
+      : true
+  })
+})
+
+/* =========================
+   PAGINATION
+========================= */
+const itemsPerPage = 5
+const currentPage = ref(1)
 
 const paginatedData = computed(() => {
-    const start = (currentPage.value - 1) * itemsPerPage;
-    const end = start + itemsPerPage;
-    return allDocuments.value.slice(start, end);
-});
+  const start = (currentPage.value - 1) * itemsPerPage
+  return filteredDocuments.value.slice(start, start + itemsPerPage)
+})
 
-const setPage = (page: number) => {
-    if (page >= 1 && page <= totalPages.value) {
-        currentPage.value = page;
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+/* =========================
+   PREVIEW
+========================= */
+const previewModal = ref(false)
+const selectedDoc = ref<any>(null)
+
+const openPreview = (item: any) => {
+  selectedDoc.value = item
+  previewModal.value = true
+}
+
+/* =========================
+   ACTION
+========================= */
+const handleEdit = (id: number) => {
+  router.get(`/edit-dokumen/${id}`)
+}
+
+const showModal = ref(false)
+const modalConfig = ref({ id: null as number | null })
+
+const openConfirmDelete = (id: number) => {
+  modalConfig.value.id = id
+  showModal.value = true
+}
+
+const handleExecute = () => {
+  if (!modalConfig.value.id) return
+
+  router.delete(`/arsip/${modalConfig.value.id}`, {
+    onSuccess: () => {
+      showModal.value = false
+    },
+    onError: (err) => {
+      console.log(err)
+      alert('Gagal hapus data')
     }
-};
+  })
+}
+
 </script>
-
 <template>
-    <Head title="Kelola Arsip Saya" />
-    
-    <div class="py-10 px-6 max-w-6xl mx-auto">
-        <h1 class="text-4xl font-black mb-10 text-gray-800 uppercase tracking-tight italic">
-            Kelola Arsip Saya
-        </h1>
+  <Head title="Kelola Arsip Saya" />
 
-        <div class="space-y-4 mb-8">
-            <div v-for="item in paginatedData" :key="item.id" 
-                class="flex items-center justify-between bg-[#7fa1b1] p-4 rounded-2xl shadow-md border-b-4 border-black/10">
-                
-                <div class="flex items-center gap-6 flex-1">
-                    <div class="w-20 h-20 bg-white rounded-2xl flex-shrink-0 flex items-center justify-center shadow-inner text-[#7fa1b1]">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                    </div>
-                    
-                    <div class="text-white">
-                        <h3 class="font-black text-gray-900 text-lg leading-tight tracking-wide mb-1">{{ item.title }}</h3>
-                        <div class="flex gap-3 items-center">
-                            <span class="bg-black/20 px-3 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest">
-                                {{ item.format }}
-                            </span>
-                            <span class="text-xs font-bold text-white/80 italic">{{ item.tanggal }}</span>
-                        </div>
-                    </div>
-                </div>
+  <div class="py-10 px-6 max-w-6xl mx-auto">
 
-                <div class="flex gap-3 ml-4">
-                    <button 
-        @click="handleEdit(item.id)" 
-        class="p-4 bg-white/40 hover:bg-white text-white hover:text-gray-800 rounded-2xl transition-all duration-300"
-    >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-        </svg>
-    </button>
-                    <button @click="openConfirmDelete(item.id)" class="p-4 bg-red-500 hover:bg-red-700 text-white rounded-2xl transition-all duration-300 shadow-sm">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                            <path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-                    </button>
-                </div>
-            </div>
-        </div>
+    <h1 class="text-4xl font-black mb-6 text-gray-800 uppercase">
+      Kelola Arsip Saya
+    </h1>
 
-        <div v-if="totalPages > 1" class="flex justify-center items-center gap-3 mt-12">
-            <button @click="setPage(currentPage - 1)" :disabled="currentPage === 1" class="p-3 rounded-xl bg-white border-2 border-gray-200 disabled:opacity-30">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" /></svg>
-            </button>
-
-            <div class="flex gap-2">
-                <button v-for="page in totalPages" :key="page" @click="setPage(page)"
-                    class="w-12 h-12 rounded-xl text-sm font-black transition-all border-2"
-                    :class="currentPage === page ? 'bg-[#2f55a4] text-white border-[#2f55a4] shadow-lg' : 'bg-white text-gray-600 border-gray-100'">
-                    {{ page }}
-                </button>
-            </div>
-
-            <button @click="setPage(currentPage + 1)" :disabled="currentPage === totalPages" class="p-3 rounded-xl bg-white border-2 border-gray-200">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7" /></svg>
-            </button>
-        </div>
-
-        <div v-if="allDocuments.length === 0" class="text-center py-20 bg-gray-100 rounded-[40px] border-2 border-dashed border-gray-300">
-            <p class="text-gray-500 font-bold uppercase tracking-widest text-lg">Tidak ada arsip ditemukan</p>
-        </div>
+    <!-- FILTER -->
+    <div class="flex gap-4 mb-6">
+      <select v-model="filterJenis" class="p-3 rounded-xl border">
+        <option value="">Semua Jenis</option>
+        <option value="aktif">Aktif</option>
+        <option value="inaktif">Inaktif</option>
+        <option value="vital">Vital</option>
+      </select>
     </div>
 
-    <div v-if="showModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-        <div class="relative bg-[#94B3C1] border-2 border-gray-400 w-full max-w-sm rounded-[40px] overflow-hidden p-10 text-center shadow-2xl"
-             style="background-image: url('https://www.transparenttextures.com/patterns/black-linen.png'); background-blend-mode: soft-light;">
-            
-            <div class="bg-white w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-red-500 shadow-md">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
+    <!-- LIST -->
+    <div class="space-y-4 mb-8">
+
+      <div
+        v-for="item in paginatedData"
+        :key="item.id"
+        @click="openPreview(item)"
+        class="flex items-center justify-between bg-[#7fa1b1] p-4 rounded-2xl shadow-md cursor-pointer hover:scale-[1.01] transition-all"
+      >
+
+        <!-- LEFT -->
+        <div class="flex items-center gap-6 flex-1">
+
+         <div class="w-20 h-20 bg-white rounded-2xl flex items-center justify-center shadow-sm">
+
+  <FileText
+    v-if="item.format === 'PDF'"
+    class="w-10 h-10 text-red-500"
+  />
+
+  <FileImage
+    v-else-if="item.format === 'IMAGE'"
+    class="w-10 h-10 text-blue-500"
+  />
+
+  <FileText
+    v-else-if="item.format === 'DOC'"
+    class="w-10 h-10 text-indigo-500"
+  />
+
+  <FileSpreadsheet
+    v-else-if="item.format === 'EXCEL'"
+    class="w-10 h-10 text-green-500"
+  />
+
+  <File
+    v-else
+    class="w-10 h-10 text-gray-400"
+  />
+
+</div>
+
+          <div class="text-white">
+
+            <h3 class="font-black text-gray-900 text-lg">
+              {{ item.title }}
+            </h3>
+
+            <div class="flex flex-wrap gap-2 mt-1">
+
+              <span class="bg-black/20 px-3 py-0.5 rounded-full text-[10px] font-bold">
+                No: {{ item.nomor }}
+              </span>
+
+              <span class="bg-blue-500/30 px-3 py-0.5 rounded-full text-[10px] font-bold">
+                {{ item.kategori }}
+              </span>
+
+              <span class="bg-green-500/30 px-3 py-0.5 rounded-full text-[10px] font-bold uppercase">
+                {{ item.jenis }}
+              </span>
+
             </div>
 
-            <h3 class="text-2xl font-black text-gray-900 mb-3 uppercase tracking-tight">{{ modalConfig.title }}</h3>
-            <p class="text-sm font-semibold text-gray-800 mb-10 leading-relaxed px-2 italic">{{ modalConfig.message }}</p>
-
-            <div class="flex gap-4">
-                <button @click="showModal = false" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-900 font-black py-4 rounded-2xl transition shadow-md uppercase text-xs tracking-tighter">
-                    Batalkan
-                </button>
-                <button @click="handleExecute" class="flex-1 bg-[#E11D48] hover:bg-red-700 text-white font-black py-4 rounded-2xl transition shadow-md uppercase text-xs tracking-tighter">
-                    Iya
-                </button>
+            <div class="flex gap-3 mt-1">
+              <span class="text-xs italic">
+                {{ item.tanggal }}
+              </span>
             </div>
+
+          </div>
         </div>
+
+        <!-- BUTTON -->
+        <div class="flex gap-2">
+
+          <!-- EDIT -->
+          <button
+            type="button"
+            @click.stop="handleEdit(item.id)"
+            class="group relative p-3 bg-white/30 hover:bg-white rounded-xl shadow transition-all"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15.232 5.232l3.536 3.536M9 11l6-6a2.121 2.121 0 013 3l-6 6-4 1 1-4z" />
+            </svg>
+
+            <!-- TOOLTIP -->
+            <span class="absolute -top-8 left-1/2 -translate-x-1/2 text-[10px] bg-black text-white px-2 py-1 rounded opacity-0 group-hover:opacity-100">
+              Edit
+            </span>
+          </button>
+
+          <!-- DELETE -->
+          <button
+            type="button"
+            @click.stop="openConfirmDelete(item.id)"
+            class="group relative p-3 bg-red-500 hover:bg-red-600 text-white rounded-xl shadow transition-all"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M6 7h12M9 7V4h6v3m-8 0v13m4-13v13m4-13v13" />
+            </svg>
+
+            <!-- TOOLTIP -->
+            <span class="absolute -top-8 left-1/2 -translate-x-1/2 text-[10px] bg-black text-white px-2 py-1 rounded opacity-0 group-hover:opacity-100">
+              Hapus
+            </span>
+          </button>
+
+        </div>
+
+      </div>
+
     </div>
+
+    <!-- EMPTY -->
+    <div v-if="filteredDocuments.length === 0" class="text-center py-10">
+      Tidak ada arsip
+    </div>
+
+  </div>
+
+  <!-- PREVIEW MODAL (TIDAK DIUBAH) -->
+  <div v-if="previewModal"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-6">
+
+  <div class="bg-white w-full max-w-5xl rounded-[30px] shadow-2xl overflow-hidden flex flex-col md:flex-row">
+
+    <!-- LEFT -->
+    <div class="w-full md:w-1/2 bg-gray-100 flex items-center justify-center p-6">
+
+      <img v-if="selectedDoc.format === 'IMAGE'"
+        :src="`/storage/${selectedDoc.files[0].path_file}`"
+        class="max-h-[400px] object-contain rounded-xl shadow" />
+
+      <iframe v-else-if="selectedDoc.format === 'PDF'"
+        :src="`/storage/${selectedDoc.files[0].path_file}`"
+        class="w-full h-[400px] rounded-xl"></iframe>
+
+      <div v-else class="text-gray-500 text-center">
+        📄<br/>Preview tidak tersedia
+      </div>
+
+    </div>
+
+    <!-- RIGHT -->
+    <div class="w-full md:w-1/2 p-8 flex flex-col justify-between">
+
+      <div>
+        <div class="flex justify-between items-start mb-4">
+          <h2 class="text-2xl font-black text-gray-800">
+            {{ selectedDoc.title }}
+          </h2>
+
+          <button @click="previewModal = false">✕</button>
+        </div>
+
+        <div class="flex flex-wrap gap-2 mb-4">
+          <span class="bg-gray-200 px-3 py-1 rounded-full text-xs font-bold">
+            No: {{ selectedDoc.nomor }}
+          </span>
+
+          <span class="bg-blue-100 px-3 py-1 rounded-full text-xs font-bold">
+            {{ selectedDoc.kategori }}
+          </span>
+
+          <span class="bg-green-100 px-3 py-1 rounded-full text-xs font-bold uppercase">
+            {{ selectedDoc.jenis }}
+          </span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <p class="font-bold">Tahun</p>
+            <p>{{ selectedDoc.tahun }}</p>
+          </div>
+
+          <div>
+            <p class="font-bold">Status</p>
+            <p>{{ selectedDoc.status }}</p>
+          </div>
+
+          <div class="col-span-2">
+            <p class="font-bold">Lokasi</p>
+            <p>{{ selectedDoc.lokasi }}</p>
+          </div>
+        </div>
+
+        <div class="mt-6">
+          <p class="font-bold">Deskripsi</p>
+          <p>{{ selectedDoc.deskripsi || '-' }}</p>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3 mt-6">
+        <a
+          v-if="selectedDoc.files.length"
+          :href="`/storage/${selectedDoc.files[0].path_file}`"
+          download
+          class="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold"
+        >
+          Download
+        </a>
+
+        <button
+          @click="previewModal = false"
+          class="bg-gray-300 px-4 py-2 rounded-xl font-bold"
+        >
+          Tutup
+        </button>
+      </div>
+
+    </div>
+   
+  </div>
+</div>
+ <!-- MODAL KONFIRMASI HAPUS -->
+<div v-if="showModal"
+  class="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+
+  <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl">
+
+    <h2 class="text-lg font-bold text-gray-800 mb-3">
+      Konfirmasi Hapus
+    </h2>
+
+    <p class="text-sm text-gray-600 mb-6">
+      Yakin mau hapus arsip ini? 
+    </p>
+
+    <div class="flex justify-end gap-3">
+
+      <button
+        @click="showModal = false"
+        class="px-4 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 text-sm"
+      >
+        Batal
+      </button>
+
+      <button
+        @click="handleExecute"
+        class="px-4 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm"
+      >
+        Hapus
+      </button>
+
+    </div>
+
+  </div>
+</div>
+
 </template>
