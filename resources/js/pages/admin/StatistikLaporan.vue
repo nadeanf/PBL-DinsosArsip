@@ -17,34 +17,7 @@ defineOptions({
   layout: AdminLayout
 })
 
-// 1. DATA UTAMA (Ubah di sini, semua tampilan akan ikut berubah)
-const stats = {
-  dokumen: 9,
-  foto: 10,
-  video: 6,
-  audio: 8
-}
-
-// 2. PERHITUNGAN DINAMIS UNTUK DIAGRAM
-const totalItem = computed(() => stats.dokumen + stats.foto + stats.video + stats.audio)
-
-// Menghitung persentase untuk teks di tengah
-const persenDokumen = computed(() => Math.round((stats.dokumen / totalItem.value) * 100))
-const persenFoto = computed(() => Math.round((stats.foto / totalItem.value) * 100))
-const persenVideo = computed(() => Math.round((stats.video / totalItem.value) * 100))
-const persenAudio = computed(() => Math.round((stats.audio / totalItem.value) * 100))
-
-// Menghitung offset lingkaran SVG (agar warna tidak tumpang tindih)
-const strokeDokumen = computed(() => `${persenDokumen.value}, 100`)
-const strokeFoto = computed(() => `${persenFoto.value}, 100`)
-const strokeVideo = computed(() => `${persenVideo.value}, 100`)
-const strokeAudio = computed(() => `${persenAudio.value}, 100`)
-
-const offsetFoto = computed(() => `-${persenDokumen.value}`)
-const offsetVideo = computed(() => `-${persenDokumen.value + persenFoto.value}`)
-const offsetAudio = computed(() => `-${persenDokumen.value + persenFoto.value + persenVideo.value}`)
-
-// Data Dummy untuk Tabel
+// Data Dummy Pengguna Teraktif
 const activeUsers = [
   { 
     id: 1, 

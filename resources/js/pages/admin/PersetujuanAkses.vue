@@ -7,7 +7,7 @@ defineOptions({
   layout: AdminLayout
 })
 
-// 🔥 Dummy data
+// Dummy 
 const data = [
   { dokumen: '422/07', user: 'adib', tanggal: '24/08/26', divisi: 'Bendahara', status: 'pending' },
   { dokumen: '422/07', user: 'adib', tanggal: '24/08/26', divisi: 'Bendahara', status: 'approved' },
@@ -18,7 +18,7 @@ const data = [
   { dokumen: '422/07', user: 'adib', tanggal: '24/08/26', divisi: 'Bendahara', status: 'rejected' },
 ]
 
-// 🔥 helper warna status
+// Helper warna status
 const statusClass = (status: string) => {
   if (status === 'pending') return 'bg-yellow-300 text-black'
   if (status === 'approved') return 'bg-green-400 text-black'

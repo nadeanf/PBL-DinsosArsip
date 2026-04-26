@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { Head, useForm } from '@inertiajs/vue3';
-import UserLayout from '@/layouts/UserLayout.vue';
+import AdminLayout from '@/layouts/AdminLayout.vue';
 
-defineOptions({ layout: UserLayout });
+defineOptions({ layout: AdminLayout });
 
 const props = defineProps<{ folder: string }>();
 
-// 1. Data Kategori
+// 1. Data Kategori Statis
 const kategoriVital = [
   'Kebijakan dan program pemerintah tentang masalah sosial', 
   'Bantuan Sosial', 'Penghargaan kepada pahlawan', 'Perintis kemerdekaan', 
@@ -32,7 +32,7 @@ const kategoriAktifInaktif = {
     'Penanggulangan Kemiskinan', 'Kepahlawanan dan Kesetiakawanan Sosial'
   ],
   'Keuangan': [
-    'Surat Penyedia Dana (SPP, SPM dan SP2D)', 'Pendapatan', 'Belanja', 
+    'Surat Penyedia Dana (SPP, SPM dan SP2D): UP, GU, TU, LS', 'Pendapatan', 'Belanja', 
     'Pembiayaan Daerah', 'Laporan Keuangan'
   ]
 };
@@ -43,26 +43,43 @@ const form = useForm({
     nomor: '',
     tahun: '',
     status_akses: 'Publik',
-    kategori_kelompok: '', // Khusus Aktif/Inaktif (Level 1)
-    kategori: '',          // Digunakan Vital (Langsung) atau Aktif/Inaktif (Level 2)
+    kategori_kelompok: '',
+    kategori: '',
     lokasi: '',
     deskripsi: '',
     files: null as any, 
+    // TAMBAHAN
+    // @ts-ignore
+    bidang: '',
 });
 
+// 3. Logika Filter
+const isVital = computed(() => props.folder.toLowerCase() === 'vital');
 
-const isVital = computed(() => props.folder?.toLowerCase() === 'vital');
+// TAMBAHAN
+const bidangList = [
+  'Sekretariat',
+  'Rehabilitasi Sosial',
+  'Perlindungan dan Jaminan Sosial',
+  'Pemberdayaan Sosial'
+];
 
-
+const isPrivate = computed(() => form.status_akses === 'Private');
 const subKategoriList = computed(() => {
-    return form.kategori_kelompok && kategoriAktifInaktif.hasOwnProperty(form.kategori_kelompok)
-        ? kategoriAktifInaktif[form.kategori_kelompok as keyof typeof kategoriAktifInaktif]
-        : [];
+    return form.kategori_kelompok ? kategoriAktifInaktif[form.kategori_kelompok] : [];
 });
 
 // Reset kategori jika berubah
 watch(() => form.kategori_kelompok, () => {
     form.kategori = '';
+});
+
+// TAMBAHAN reset bidang
+watch(() => form.status_akses, (val) => {
+  if (val !== 'Private') {
+    // @ts-ignore
+    form.bidang = '';
+  }
 });
 
 const fileInput = ref<HTMLInputElement | null>(null);
@@ -71,10 +88,6 @@ const handleFileChange = (e: any) => { form.files = e.target.files; };
 
 const submit = () => {
     console.log("Data dikirim:", form.data());
-};
-
-const goBack = () => {
-    window.history.back();
 };
 </script>
 
@@ -143,7 +156,7 @@ const goBack = () => {
             <div class="grid grid-cols-1 gap-4">
               <div>
                 <label class="block text-black font-black mb-1.5 ml-3 text-sm uppercase">Nomor Dokumen</label>
-                <input v-model="form.nomor" type="text" placeholder="Nomor dokumen..." class="w-full p-4 bg-white text-black font-medium rounded-2xl border border-gray-300 shadow-sm outline-none" />
+                <input v-model="form.nomor" type="text" placeholder="Nomor dokumen arsip..." class="w-full p-4 bg-white text-black font-medium rounded-2xl border border-gray-300 shadow-sm outline-none" />
               </div>
               <div>
                 <label class="block text-black font-black mb-1.5 ml-3 text-sm uppercase">Tahun Arsip</label>
@@ -153,7 +166,7 @@ const goBack = () => {
 
             <div v-if="isVital">
               <label class="block text-black font-black mb-1.5 ml-3 text-sm uppercase">Kategori Vital</label>
-              <select v-model="form.kategori" class="w-full p-4 bg-white text-black font-medium rounded-2xl border border-gray-300 shadow-sm outline-none appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[right_1.5rem_center] bg-[length:1.2em]">
+              <select v-model="form.kategori" class="w-full p-4 bg-white text-black font-medium rounded-2xl border border-gray-300 shadow-sm outline-none appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg...')] bg-no-repeat bg-[right_1.5rem_center] bg-[length:1.2em]">
                 <option value="">-- Pilih Kategori Vital --</option>
                 <option v-for="item in kategoriVital" :key="item" :value="item">{{ item }}</option>
               </select>
@@ -162,28 +175,40 @@ const goBack = () => {
             <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label class="block text-black font-black mb-1.5 ml-3 text-sm uppercase">Kelompok Kategori</label>
-                <select v-model="form.kategori_kelompok" class="w-full p-4 bg-white text-black font-medium rounded-2xl border border-gray-300 shadow-sm outline-none appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[right_1.5rem_center] bg-[length:1.2em]">
+                <select v-model="form.kategori_kelompok" class="w-full p-4 bg-white text-black font-medium rounded-2xl border border-gray-300 shadow-sm outline-none appearance-none">
                   <option value="">-- Pilih Kelompok --</option>
                   <option v-for="(subs, parent) in kategoriAktifInaktif" :key="parent" :value="parent">{{ parent }}</option>
                 </select>
               </div>
+
               <div>
                 <label class="block text-black font-black mb-1.5 ml-3 text-sm uppercase">Detail Kategori</label>
-                <select v-model="form.kategori" :disabled="!form.kategori_kelompok" class="w-full p-4 bg-white text-black font-medium rounded-2xl border border-gray-300 shadow-sm outline-none appearance-none disabled:bg-gray-100 bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[right_1.5rem_center] bg-[length:1.2em]">
+                <select v-model="form.kategori" :disabled="!form.kategori_kelompok" class="w-full p-4 bg-white text-black font-medium rounded-2xl border border-gray-300 shadow-sm outline-none appearance-none">
                   <option value="">-- Pilih Detail --</option>
                   <option v-for="item in subKategoriList" :key="item" :value="item">{{ item }}</option>
                 </select>
               </div>
             </div>
 
-            <div class="grid grid-cols-1 gap-4">
+            <!-- STATUS -->
+            <div class="grid grid-cols- gap-4">
               <div>
                 <label class="block text-black font-black mb-1.5 ml-3 text-sm uppercase">Status Akses</label>
-                <select v-model="form.status_akses" class="w-full p-4 bg-white text-black font-medium rounded-2xl border border-gray-300 shadow-sm outline-none appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[right_1.5rem_center] bg-[length:1.2em]">
+                <select v-model="form.status_akses" class="w-full p-4 bg-white text-black font-medium rounded-2xl border border-gray-300 shadow-sm outline-none">
                   <option>Publik</option>
                   <option>Private</option>
                 </select>
               </div>
+
+              <!-- SAAT PRIVATE MUNCUL BIDANG -->
+              <div v-if="isPrivate">
+                <label class="block text-black font-black mb-1.5 ml-3 text-sm uppercase">Bidang</label>
+                <select v-model="form.bidang" class="w-full p-4 bg-white text-black font-medium rounded-2xl border border-gray-300 shadow-sm outline-none">
+                  <option value="">-- Pilih Bidang --</option>
+                  <option v-for="item in bidangList" :key="item" :value="item">{{ item }}</option>
+                </select>
+              </div>
+
               <div>
                 <label class="block text-black font-black mb-1.5 ml-3 text-sm uppercase">Lokasi Hardcopy</label>
                 <input v-model="form.lokasi" type="text" placeholder="Rak..." class="w-full p-4 bg-white text-black font-medium rounded-2xl border border-gray-300 shadow-sm outline-none" />
@@ -193,35 +218,21 @@ const goBack = () => {
             <div>
               <label class="block text-black font-black mb-1.5 ml-3 text-sm uppercase tracking-wide">Deskripsi</label>
               <textarea v-model="form.deskripsi" rows="3" placeholder="Tambahkan keterangan..." 
-                class="w-full p-4 bg-white text-black font-medium rounded-2xl border border-gray-300 shadow-sm outline-none focus:ring-2 focus:ring-blue-400 placeholder:text-gray-400"></textarea>
+                class="w-full p-4 bg-white text-black font-medium rounded-2xl border border-gray-300 shadow-sm outline-none"></textarea>
             </div>
           </div>
 
-          <div class="flex justify-start gap-3 mt-8 pt-4">
-        <div class="flex gap-4 mt-10 w-full">
-  <div class="flex justify-start gap-4 mt-10">
-  
-  <button 
-    type="button" 
-    @click="goBack"
-    class="bg-gray-400 hover:bg-gray-500 text-white font-black px-10 py-4 rounded-2xl transition shadow-md uppercase text-xs tracking-widest"
-  >
-    Batal
-  </button>
-  
-  <button 
-    type="submit" 
-    class="bg-[#E11D48] hover:bg-red-700 text-white font-black px-10 py-4 rounded-2xl transition shadow-md uppercase text-xs tracking-widest"
-  >
-    Simpan Perubahan
-  </button>
-
-</div>
-</div>
+          <div class="flex justify-end gap-4 mt-10">
+            <button type="submit" :class="isVital ? 'bg-[#4a7a96]' : 'bg-[#2f55a4]'" class="text-white px-10 py-3.5 rounded-2xl font-black shadow-md">
+              Simpan File
+            </button>
+            <button type="button" @click="window.history.back()" class="bg-[#ff0000] text-white px-10 py-3.5 rounded-full font-black">
+              Batal
+            </button>
           </div>
+
         </div>
       </form>
     </div>
   </div>
 </template>
-

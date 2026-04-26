@@ -1,12 +1,12 @@
 <script setup>
-import UserLayout from '@/layouts/UserLayout.vue'
+import AdminLayout from '@/layouts/AdminLayout.vue'
 import RiwayatContent from '@/components/RiwayatContent.vue'
 import { Head } from '@inertiajs/vue3'
 
-defineOptions({ layout: UserLayout })
+defineOptions({ layout: AdminLayout })
 </script>
 
 <template>
-    <Head title="Riwayat - User" />
+    <Head title="Riwayat - Pimpinan" />
     <RiwayatContent />
 </template>

@@ -42,14 +42,14 @@ const kategoriData = {
     <div class="max-w-7xl mx-auto">
       <h1 class="text-4xl font-extrabold mb-12 tracking-tight">Unggah File</h1>
       <div class="flex gap-16 justify-center mt-20">
-        <Link href="/admin/unggah-aktif" class="group flex flex-col items-center">
+        <Link href="/unggah/aktif-inaktif" class="group flex flex-col items-center">
           <div class="relative w-36 h-28 bg-[#2f55a4] rounded-2xl shadow-2xl group-hover:scale-105 transition-transform flex items-center justify-center">
             <div class="absolute -top-3 left-0 w-16 h-6 bg-[#2f55a4] rounded-t-md"></div>
             <span class="text-5xl">📄</span>
           </div>
           <span class="mt-6 text-2xl font-black text-gray-800 uppercase tracking-tighter">Aktif / Inaktif</span>
         </Link>
-        <Link href="/unggah-vital" class="group flex flex-col items-center">
+        <Link href="/unggah/vital" class="group flex flex-col items-center">
           <div class="relative w-36 h-28 bg-[#94a3d8] rounded-2xl shadow-2xl group-hover:scale-105 transition-transform flex items-center justify-center">
             <div class="absolute -top-3 left-0 w-16 h-6 bg-[#94a3d8] rounded-t-md"></div>
             <span class="text-5xl">🛡️</span>

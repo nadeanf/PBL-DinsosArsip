@@ -23,7 +23,7 @@ const props = defineProps({
   }
 })
 
-// --- DATA DUMMY (Disesuaikan agar bisa mencoba banyak halaman) ---
+// DUMMY
 const displayItems = ref([
   { id: 1, title: 'Dokumentasi Rapat Penandatanganan Peresmian', date: '22/01/2026', doc_no: 'DOK/1012/11/2026', type: 'PNG' },
   { id: 2, title: 'Dokumentasi Rapat Penandatanganan Peresmian', date: '22/01/2026', doc_no: 'DOK/1012/11/2026', type: 'PDF' },
@@ -33,7 +33,7 @@ const displayItems = ref([
   { id: 6, title: 'Data Inventaris Kantor 2026', date: '27/01/2026', doc_no: 'DOK/1012/11/2029', type: 'XLS' },
 ])
 
-// --- LOGIK PAGINATION ---
+// LOGIK PAGINATION
 const currentPage = ref(1)
 const itemsPerPage = 5 // Per halaman tampil 3 item agar pagination muncul
 
@@ -45,7 +45,7 @@ const paginatedItems = computed(() => {
   return displayItems.value.slice(start, end)
 })
 
-// --- LOGIK MODAL ---
+// LOGIK MODAL
 const showModal = ref(false)
 const modalConfig = ref({ type: '', id: null, title: '', message: '' })
 
@@ -64,10 +64,10 @@ const openConfirm = (type, id) => {
 const handleExecute = () => {
   const { id } = modalConfig.value
   
-  // Efek Berkurang 1 (Dummy filter)
+  // Dummy filter
   displayItems.value = displayItems.value.filter(item => item.id !== id)
   
-  // Balik ke halaman sebelumnya jika halaman saat ini jadi kosong
+  // Balik ke halaman sebelumnya jika kosong
   if (paginatedItems.value.length === 0 && currentPage.value > 1) {
     currentPage.value--
   }
@@ -218,7 +218,6 @@ const handleExecute = () => {
 </template>
 
 <style scoped>
-/* Tambahan agar font terasa lebih clean */
 .font-sans {
   font-family: 'Inter', 'Segoe UI', sans-serif;
 }

@@ -1,9 +1,9 @@
 <script setup>
-import UserLayout from '@/layouts/UserLayout.vue'
+import SuperAdminLayout from '@/layouts/SuperAdminLayout.vue'
 import ListArsipContent from '@/components/ListArsipContent.vue'
 
 defineOptions({
-  layout: UserLayout
+  layout: SuperAdminLayout
 })
 </script>
 

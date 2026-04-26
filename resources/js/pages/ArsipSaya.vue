@@ -1,10 +1,10 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3'
-import AuthLayout from '@/layouts/AuthLayout.vue'
+import UserLayout from '@/layouts/UserLayout.vue'
 import { Pencil, Trash2, FileText } from 'lucide-vue-next'
 
 defineOptions({
-  layout: AuthLayout
+  layout: UserLayout
 })
 
 const arsipData = Array(7).fill({

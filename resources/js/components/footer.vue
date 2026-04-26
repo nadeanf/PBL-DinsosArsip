@@ -2,7 +2,6 @@
   <footer class="footer">
     <div class="container">
 
-      <!-- Kiri -->
       <div class="section">
         <h3>Sistem Arsip Digital</h3>
         <p>
@@ -11,7 +10,6 @@
         </p>
       </div>
 
-      <!-- Tengah -->
       <div class="section">
         <h3>Sistem Arsip Digital</h3>
 
@@ -39,7 +37,6 @@
         </div>
       </div>
 
-      <!-- Kanan -->
      <div class="section">
   <h3>Lokasi Kami</h3>
 

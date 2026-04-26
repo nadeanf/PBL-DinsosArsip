@@ -7,7 +7,7 @@ defineOptions({
   layout: AdminLayout
 })
 
-// 🔥 DATA DUMMY
+// DUMMY
 const arsip = [
   {
     id: 1,

@@ -1,6 +1,6 @@
 <script setup>
 import Navbar from '@/components/Navbar.vue'
-import AdminSidebar from '@/components/sidebar/AdminSidebar.vue'
+import Sidebar from '@/components/PimpinanSidebar.vue'
 import Footer from '@/components/footer.vue'
 </script>
 
@@ -10,13 +10,13 @@ import Footer from '@/components/footer.vue'
     <!-- NAVBAR -->
     <Navbar />
 
-    <div class="flex flex-1 overflow-hidden">
+    <div class="flex flex-1">
 
       <!-- SIDEBAR -->
-      <AdminSidebar />
+      <Sidebar />
 
       <!-- CONTENT -->
-      <main class="flex-1 bg-gray-100 overflow-y-auto">
+      <main class="flex-1 bg-gray-100">
         <slot />
       </main>
 

@@ -1,9 +1,9 @@
 <script setup>
 import { usePage } from '@inertiajs/vue3'
-import AuthLayout from '@/layouts/AuthLayout.vue'
+import UserLayout from '@/layouts/UserLayout.vue'
 
 defineOptions({
-  layout: AuthLayout
+  layout: UserLayout
 })
 
 const page = usePage()

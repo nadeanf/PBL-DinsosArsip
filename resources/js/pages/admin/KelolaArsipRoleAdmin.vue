@@ -1,15 +1,17 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
-import UserLayout from '@/layouts/UserLayout.vue';
+import AdminLayout from '@/layouts/AdminLayout.vue';
 import { AlertTriangle } from 'lucide-vue-next';
 
-defineOptions({ layout: UserLayout });
+defineOptions({ layout: AdminLayout });
 
 const handleEdit = (id: number) => {
+    // Navigasi ke route /edit-dokumen
+    // Kamu bisa melempar ID lewat query parameter agar halaman edit tahu file mana yang dibuka
     router.get('/edit-dokumen', { id: id });
 };
-// Dummy 
+// 1. Data Dummy Utama
 const allDocuments = ref(Array.from({ length: 20 }, (_, i) => ({
     id: i + 1,
     title: `Surat Tugas Dinas Kabupaten Boyolali - Desember 2026 (${i + 1})`,
@@ -17,7 +19,7 @@ const allDocuments = ref(Array.from({ length: 20 }, (_, i) => ({
     tanggal: "8/3/25"
 })));
 
-// State untuk Modal Konfirmasi
+// 2. State untuk Modal Konfirmasi
 const showModal = ref(false);
 const modalConfig = ref<{
   id: number | null;
@@ -53,7 +55,7 @@ const handleExecute = () => {
     }
 };
 
-// Logika Pagination
+// 3. Logika Pagination
 const itemsPerPage = 5;
 const currentPage = ref(1);
 

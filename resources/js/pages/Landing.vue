@@ -43,7 +43,7 @@ onMounted(() => {
         <HeaderBaru />
 
         <main class="flex-grow">
-            <!-- HERO -->
+
             <div class="relative h-[480px] bg-cover bg-center flex items-center justify-center overflow-visible"
                  style="background-image: linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url('/image/bgsosis.png');">
 
@@ -52,10 +52,10 @@ onMounted(() => {
                     SOSISBOY
                 </h1>
 
-                <!-- STAT CARDS -->
+
                 <div class="absolute -bottom-14 flex gap-5 px-4 w-full justify-center z-20 max-w-3xl left-1/2 -translate-x-1/2">
 
-                    <!-- Total Dokumen -->
+
                     <div class="bg-white/28 backdrop-blur-2xl px-7 py-5 flex items-center gap-4 shadow-2xl border border-white/40 rounded-[22px] min-w-[210px] animate-stat-1">
                         <span class="text-5xl font-black text-[#1e3a8a] leading-none">{{ docCount }}</span>
                         <div class="text-left leading-tight uppercase font-bold text-slate-900">
@@ -64,7 +64,7 @@ onMounted(() => {
                         </div>
                     </div>
 
-                    <!-- Paperless -->
+
                     <div class="bg-white/28 backdrop-blur-2xl px-7 py-5 flex items-center gap-4 shadow-2xl border border-white/40 rounded-[22px] min-w-[210px] animate-stat-2">
                         <div class="w-11 h-11 bg-[#1e3a8a]/15 rounded-xl flex-shrink-0 border border-white/30 flex items-center justify-center">
                             <svg class="w-5 h-5 stroke-[#1e3a8a]" fill="none" stroke-width="2" viewBox="0 0 24 24">
@@ -78,7 +78,7 @@ onMounted(() => {
                         </div>
                     </div>
 
-                    <!-- 24/7 -->
+
                     <div class="bg-white/28 backdrop-blur-2xl px-7 py-5 flex items-center gap-4 shadow-2xl border border-white/40 rounded-[22px] min-w-[210px] animate-stat-3">
                         <div class="w-11 h-11 bg-[#1e3a8a]/15 rounded-xl flex-shrink-0 border border-white/30 flex items-center justify-center">
                             <svg class="w-5 h-5 stroke-[#1e3a8a]" fill="none" stroke-width="2" viewBox="0 0 24 24">
@@ -94,10 +94,10 @@ onMounted(() => {
                 </div>
                     <div class="absolute bottom-0 left-0 w-full h-28 pointer-events-none z-10">
                     
-                    <!-- blur ringan -->
+
                     <div class="absolute inset-0 backdrop-blur-[2px]"></div>
                     
-                    <!-- gradient halus -->
+
                     <div class="absolute inset-0 bg-gradient-to-b 
                                 from-transparent 
                                 via-white/5
@@ -108,7 +108,7 @@ onMounted(() => {
 
             </div>
 
-            <!-- CONTENT -->
+
             <div class="max-w-5xl mx-auto mt-36 px-6 mb-24">
 
                 <!-- SEARCH BAR -->
@@ -134,7 +134,7 @@ onMounted(() => {
                     </button>
                 </div>
 
-                <!-- FILTER BOX (optional toggle) -->
+                <!-- FILTER -->
                 <div v-if="showFilter"
                      class="bg-white mb-8 p-6 rounded-2xl shadow-xl border border-slate-200 animate-fade-in">
                     <div class="flex flex-col md:flex-row gap-4">
@@ -154,7 +154,7 @@ onMounted(() => {
                     </div>
                 </div>
 
-                <!-- DOCUMENT LIST -->
+                <!-- LIST ARSIP -->
                 <div class="flex flex-col gap-5">
                     <div v-for="(doc, i) in 3" :key="i"
                          :class="['doc-card', i === 0 ? 'fade-left' : i === 1 ? 'fade-up' : 'fade-right']"

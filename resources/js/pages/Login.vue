@@ -38,13 +38,13 @@ function goToForgotPassword() {
         class="relative flex items-center justify-center min-h-screen bg-center bg-cover"
         style="background-image: url('/image/bgregis.jpg')"
     >
-        <!-- Overlay -->
+
         <div class="absolute inset-0 bg-white/30 backdrop-blur-[2px]"></div>
 
-        <!-- Card -->
+
         <div class="relative z-10 w-full max-w-sm px-6 py-4 bg-[#e8e8e8]/80 rounded-2xl shadow-xl">
 
-            <!-- Header -->
+
             <div class="flex items-center justify-center gap-2 mb-3.5">
                 <img
                     src="/image/logodinsos.png"
@@ -57,13 +57,13 @@ function goToForgotPassword() {
                 </div>
             </div>
 
-            <!-- Title -->
+
             <div class="text-center mb-3.5">
                 <h1 class="text-lg font-extrabold text-gray-900">MASUK</h1>
                 <p class="text-xs text-gray-500">Silahkan masuk untuk melanjutkan</p>
             </div>
 
-            <!-- Status -->
+            
             <div
                 v-if="status"
                 class="mb-2 p-2 bg-green-100 text-green-700 rounded-lg text-xs"
@@ -71,10 +71,10 @@ function goToForgotPassword() {
                 {{ status }}
             </div>
 
-            <!-- Form -->
+  
             <form @submit.prevent="handleSubmit" class="space-y-3 text-sm">
 
-                <!-- Email -->
+
                 <div>
                     <label class="block text-xs text-gray-700 mb-1">Email</label>
                     <input
@@ -89,7 +89,7 @@ function goToForgotPassword() {
                     </span>
                 </div>
 
-                <!-- Password -->
+
                 <div>
                     <label class="block text-xs text-gray-700 mb-1">Password</label>
                     <input
@@ -104,7 +104,7 @@ function goToForgotPassword() {
                     </span>
                 </div>
 
-                <!-- Remember + Forgot -->
+
                 <div class="flex items-center justify-between">
                     <label class="flex items-center text-xs text-gray-700">
                         <input
@@ -123,7 +123,7 @@ function goToForgotPassword() {
                     </span>
                 </div>
 
-                <!-- Button -->
+  
                 <button
                     type="submit"
                     :disabled="form.processing"
@@ -133,7 +133,7 @@ function goToForgotPassword() {
                 </button>
             </form>
 
-            <!-- Register -->
+            
             <p class="mt-3 text-xs text-center text-gray-700">
                 Belum punya akun?
                 <span
