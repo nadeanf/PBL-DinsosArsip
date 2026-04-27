@@ -118,6 +118,10 @@ Route::middleware('auth')->group(function () {
         return Inertia::render('SuperAdmin/Pengaturan');
     });
 
+    Route::get('/super-admin/editstoragelimit', function () {
+    if (auth()->user()->role !== 'superadmin') abort(403);
+    return Inertia::render('SuperAdmin/EditStorageLimit');
+    });
     
     Route::get('/super-admin/riwayat', function () {
     if (auth()->user()->role !== 'superadmin') abort(403);

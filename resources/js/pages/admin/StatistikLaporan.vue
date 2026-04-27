@@ -110,15 +110,6 @@ const activeUsers = [
             <Eye class="w-6 h-6 text-black" />
           </div>
         </div>
-        <div class="bg-[#6a97ac] p-4 rounded-2xl flex items-center justify-between shadow-sm">
-          <div>
-            <div class="bg-white text-[10px] px-2 py-0.5 rounded w-fit mb-1 font-black text-black">15</div>
-            <p class="text-sm font-bold text-black">Total Favorit</p>
-          </div>
-          <div class="bg-white p-2 rounded-lg text-[#6a97ac]">
-            <Star class="w-6 h-6 text-black" />
-          </div>
-        </div>
       </div>
     </div>
 

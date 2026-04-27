@@ -138,15 +138,7 @@ const handleView = (user) => {
             <div class="h-full bg-white w-[75%]"></div>
         </div>
       </div>
-
-      <div class="bg-[#6f98a8] p-3 rounded-xl shadow-sm">
-        <div class="text-xs bg-white px-2 py-1 rounded w-fit mb-1 font-bold text-[#2f6f7e]">{{ statistik.favorit }}</div>
-        <p class="text-white text-xs mb-2 font-medium">Favorit</p>
-        <div class="h-2 bg-white/30 rounded overflow-hidden">
-            <div class="h-full bg-white w-[30%]"></div>
-        </div>
-      </div>
-
+      
     </div>
 
   </div>

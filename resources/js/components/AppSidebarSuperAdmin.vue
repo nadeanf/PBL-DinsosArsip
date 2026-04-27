@@ -69,9 +69,10 @@ const user = page.props.auth?.user
         </Link>
 
         <Link href="/super-admin/pengaturan"
-          :class="page.url.startsWith('/super-admin/pengaturan')
-            ? 'bg-[#2f4fa2] text-white shadow-md'
-            : 'bg-gray-200 text-gray-800'"
+          :class="page.url.includes('/super-admin/pengaturan')
+          || page.url.includes('/super-admin/editstoragelimit')
+          ? 'bg-[#2f4fa2] text-white shadow-md'
+          : 'bg-gray-200 text-gray-800'"
           class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all">
           <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-white">
             <Settings :class="page.url.startsWith('/super-admin/pengaturan') ? 'text-[#2f4fa2]' : 'text-gray-700'" class="w-5 h-5" />

@@ -1,7 +1,7 @@
 <script setup>
 import AuthLayoutPimpinan from '@/layouts/AuthLayoutPimpinan.vue'
 import { ref } from 'vue'
-import { Trash2, Eye } from 'lucide-vue-next' 
+import { Trash2, Eye, Download } from 'lucide-vue-next' 
 
 defineOptions({
   layout: AuthLayoutPimpinan
@@ -20,8 +20,7 @@ const statistik = ref({
   video: 10,
   audio: 2,
   download: 45,
-  dilihat: 120,
-  favorit: 12
+  dilihat: 120
 })
 
 // DATA AKSES CEPAT
@@ -116,29 +115,42 @@ const handleView = (user) => {
     </div>
 
     <!-- PROGRESS -->
-    <div class="space-y-3">
+    <div class="space-y-3 flex flex-col justify-between h-full">
 
-      <div class="bg-[#6f98a8] p-3 rounded-xl">
-        <div class="text-xs bg-white px-2 py-1 rounded w-fit mb-1">{{ statistik.download }}</div>
-        <p class="text-white text-xs mb-2">Dokumen diunduh</p>
-        <div class="h-2 bg-gray-300 rounded"></div>
+      <!-- DIUNDUH -->
+      <div class="bg-[#6f98a8] p-4 rounded-xl flex items-center justify-between min-h-[110px]">
+
+        <div class="flex flex-col justify-center">
+          <div class="text-xs bg-white px-2 py-1 rounded w-fit mb-2 font-semibold text-gray-700">
+            {{ statistik.download }}
+          </div>
+          <p class="text-white text-sm font-medium">Dokumen diunduh</p>
+        </div>
+
+        <!-- ICON -->
+        <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-md">
+          <Download class="w-5 h-5 text-[#2f4fa2]" />
+        </div>
+
       </div>
 
-      <div class="bg-[#6f98a8] p-3 rounded-xl">
-        <div class="text-xs bg-white px-2 py-1 rounded w-fit mb-1">{{ statistik.dilihat }}</div>
-        <p class="text-white text-xs mb-2">Dokumen dilihat</p>
-        <div class="h-2 bg-gray-300 rounded"></div>
-      </div>
+      <!-- DILIHAT -->
+      <div class="bg-[#6f98a8] p-4 rounded-xl flex items-center justify-between min-h-[110px]">
 
-      <div class="bg-[#6f98a8] p-3 rounded-xl">
-        <div class="text-xs bg-white px-2 py-1 rounded w-fit mb-1">{{ statistik.favorit }}</div>
-        <p class="text-white text-xs mb-2">Favorit</p>
-        <div class="h-2 bg-gray-300 rounded"></div>
-      </div>
+        <div class="flex flex-col justify-center">
+          <div class="text-xs bg-white px-2 py-1 rounded w-fit mb-2 font-semibold text-gray-700">
+            {{ statistik.dilihat }}
+          </div>
+          <p class="text-white text-sm font-medium">Dokumen dilihat</p>
+        </div>
 
+        <!-- ICON -->
+        <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-md">
+          <Eye class="w-5 h-5 text-[#2f4fa2]" />
+          </div>
+        </div>
+      </div>
     </div>
-
-  </div>
 
   <!-- AKSES CEPAT -->
   <div>
@@ -184,7 +196,7 @@ const handleView = (user) => {
             <td>{{ user.status }}</td>
             <td>{{ user.tanggal }}</td>
 
-            <!-- ✅ ACTION (SUDAH DIGANTI ICON BAGUS) -->
+            <!-- ICON -->
             <td>
               <div class="flex gap-2">
                 <button 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AppSidebarSuperAdminLayout from '@/layouts/app/AppSidebarSuperAdminLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import { FileText } from 'lucide-vue-next';
 import { ref } from 'vue';
 
@@ -65,12 +65,12 @@ const newLimit = ref('');
                     Simpan Pengaturan
                 </button>
                 
-                <Link 
-                    href="/super-admin/pengaturan"
-                    class="flex-1 bg-[#8b0000] text-white py-4 rounded-xl font-bold hover:bg-red-900 transition-all shadow-lg text-center active:scale-95"
+                <button 
+                @click="router.get('/super-admin/pengaturan')"
+                class="flex-1 bg-[#8b0000] text-white py-4 rounded-xl font-bold hover:bg-red-900 transition-all shadow-lg text-center active:scale-95"
                 >
-                    Batal
-                </Link>
+                Batal
+                </button>
             </div>
 
         </div>
