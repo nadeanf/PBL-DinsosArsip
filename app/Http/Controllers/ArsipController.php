@@ -219,16 +219,23 @@ class ArsipController extends Controller
     }
 
     public function trash()
-    {
-        $arsip = Arsip::onlyTrashed()
-            ->with('files')
-            ->latest()
-            ->get();
-
-        return Inertia::render('Sampah', [
-            'items' => $arsip
-        ]);
+{
+    if (!auth()->check()) {
+        abort(403);
     }
+
+    $user = auth()->user();
+
+    $arsip = Arsip::onlyTrashed()
+        ->where('user_id', $user->id) 
+        ->with(['files', 'kategori'])
+        ->latest()
+        ->get();
+
+    return Inertia::render('admin/SampahAdmin', [
+        'items' => $arsip
+    ]);
+}
 
     public function dashboard(Request $request)
     {

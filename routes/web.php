@@ -197,6 +197,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('admin/PersetujuanAkses');
     });
 
+    
     Route::get('/admin/pengumuman', function () {
         if (auth()->user()->role !== 'admin') abort(403);
         return Inertia::render('admin/Pengumuman');
