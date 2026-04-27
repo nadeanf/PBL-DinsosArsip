@@ -299,21 +299,43 @@ class ArsipController extends Controller
 
     // RIWAYAT
     public function riwayat()
-    {
-        $data = Arsip::where('user_id', Auth::id())
-            ->latest()
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'judul' => $item->judul,
-                    'aktivitas' => 'Mengunggah arsip',
-                    'waktu_aktivitas' => $item->created_at
-                ];
-            });
+{
+    $user = Auth::user();
 
-        return Inertia::render('Riwayat', [
+    $data = Arsip::where('user_id', $user->id)
+        ->latest()
+        ->get()
+        ->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'judul' => $item->judul,
+                'aktivitas' => 'Mengunggah arsip',
+                'waktu_aktivitas' => $item->created_at
+            ];
+        });
+
+    // SWITCH VIEW BERDASARKAN ROLE
+    if ($user->role === 'admin') {
+        return Inertia::render('admin/RiwayatAdmin', [
             'riwayat' => $data
         ]);
+    }
+
+    if ($user->role === 'superadmin') {
+        return Inertia::render('super-admin/RiwayatSuperAdmin', [
+            'riwayat' => $data
+        ]);
+    }
+
+    if ($user->role === 'pimpinan') {
+        return Inertia::render('pimpinan/RiwayatPimpinan', [
+            'riwayat' => $data
+        ]);
+    }
+
+    // default user
+    return Inertia::render('Riwayat', [
+        'riwayat' => $data
+    ]);
     }
 }

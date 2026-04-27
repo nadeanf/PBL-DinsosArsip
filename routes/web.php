@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Settings\ProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
 use Inertia\Inertia;
@@ -91,6 +92,11 @@ Route::middleware('auth')->group(function () {
         return Inertia::render('Pimpinan/StatistikPimpinan', ['title' => 'Statistik']);
     });
 
+    Route::get('/pimpinan/riwayat', function () {
+    if (auth()->user()->role !== 'pimpinan') abort(403);
+    return Inertia::render('Pimpinan/RiwayatPimpinan');
+});
+
     // SUPER ADMIN
     Route::get('/super-admin/dashboard', function () {
         if (auth()->user()->role !== 'superadmin') abort(403);
@@ -112,8 +118,13 @@ Route::middleware('auth')->group(function () {
         return Inertia::render('SuperAdmin/Pengaturan');
     });
 
-});
+    
+    Route::get('/super-admin/riwayat', function () {
+    if (auth()->user()->role !== 'superadmin') abort(403);
+    return Inertia::render('SuperAdmin/RiwayatSuperAdmin');
 
+});
+});
 /* AUTH + FITUR */
 Route::middleware(['auth', 'verified'])->group(function () {
 
@@ -167,11 +178,57 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('admin/StatistikLaporan');
     });
 
+    Route::get('/admin/kelola-arsip-user', function () {
+    if (auth()->user()->role !== 'admin') abort(403);
+    return Inertia::render('admin/KelolaArsipUser');
+    });
+
+    Route::get('/admin/kelola-arsip-role-admin', function () {
+        if (auth()->user()->role !== 'admin') abort(403);
+        return Inertia::render('admin/KelolaArsipRoleAdmin');
+    });
+
+    Route::get('/admin/persetujuan', function () {
+        if (auth()->user()->role !== 'admin') abort(403);
+        return Inertia::render('admin/PersetujuanAkses');
+    });
+
+    Route::get('/admin/pengumuman', function () {
+        if (auth()->user()->role !== 'admin') abort(403);
+        return Inertia::render('admin/Pengumuman');
+    });
+
+    Route::get('/admin/kelola-kategori', function () {
+        if (auth()->user()->role !== 'admin') abort(403);
+        return Inertia::render('admin/KelolaKategori');
+    });
+
+    Route::get('/admin/unggah/aktif-inaktif', function () {
+        if (auth()->user()->role !== 'admin') abort(403);
+        return Inertia::render('admin/UnggahAktifAdmin', [
+            'folder' => 'aktif-inaktif',
+        ]);
+    });
+
+    Route::get('/admin/unggah/vital', function () {
+        if (auth()->user()->role !== 'admin') abort(403);
+        return Inertia::render('admin/UnggahVitalAdmin', [
+            'folder' => 'vital',
+        ]);
+    });
+
+    Route::get('/admin/UnggahAdmin', function () {
+        if (auth()->user()->role !== 'admin') abort(403);
+        return Inertia::render('admin/UnggahAdmin');
+    });
+
+    Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.photo.update');
+
 });
 
 /* SETTINGS */
 Route::get('/edit-profile', function () {
-    return Inertia::render('settings/EditProfil');
+    return Inertia::render('settings/EditProfil'); 
 })->name('edit.profile');
 
 require __DIR__.'/settings.php';

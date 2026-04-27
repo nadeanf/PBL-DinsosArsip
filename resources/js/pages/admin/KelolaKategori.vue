@@ -6,7 +6,7 @@ import { Plus, Trash2 } from 'lucide-vue-next'
 
 defineOptions({ layout: AdminLayout })
 
-/* DATA */
+/* DATA DUMMY*/
 
 const kategoriData = reactive({
   aktif_inaktif: {

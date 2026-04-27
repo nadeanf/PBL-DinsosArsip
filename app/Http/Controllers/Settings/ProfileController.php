@@ -9,6 +9,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage; // ✅ tambahan
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -19,7 +20,7 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): Response
     {
-        return Inertia::render('settings/Profile', [
+        return Inertia::render('settings/EditProfil', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => $request->session()->get('status'),
         ]);
@@ -30,15 +31,36 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        // tetap pakai validated bawaan kamu
+        $data = $request->validated();
+
+        // ✅ TAMBAHAN: handle upload foto
+        if ($request->hasFile('photo')) {
+
+            // hapus foto lama kalau ada
+            if ($user->photo) {
+                Storage::delete('public/' . $user->photo);
+            }
+
+            // simpan foto baru
+            $path = $request->file('photo')->store('profile', 'public');
+
+            // masukin ke data
+            $data['photo'] = $path;
         }
 
-        $request->user()->save();
+        // tetap pakai flow kamu
+        $user->fill($data);
 
-        return to_route('profile.edit');
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
+        }
+
+        $user->save();
+
+        return to_route('edit.profile');
     }
 
     /**

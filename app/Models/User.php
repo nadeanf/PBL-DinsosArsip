@@ -10,10 +10,10 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 
-// 🔥 Tambahin ini
+
 use App\Models\Arsip;
 
-#[Fillable(['name', 'email', 'nip', 'bagian', 'password', 'role'])]
+#[Fillable(['name', 'email', 'nip', 'bagian', 'password', 'role', 'photo'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 
 class User extends Authenticatable
@@ -32,7 +32,7 @@ class User extends Authenticatable
         ];
     }
 
-    // 🔥 RELASI KE ARSIP
+    // RELASI KE ARSIP
     public function arsip()
     {
         return $this->hasMany(Arsip::class);
