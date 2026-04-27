@@ -119,7 +119,7 @@ const aktivitasTerbaru = ref([
 
       <div class="bg-[#6f98a8] p-4 rounded-xl flex justify-between items-center shadow-sm">
         <div>
-          <p class="text-white text-sm">Dokumen terlihat</p>
+          <p class="text-white text-sm">Jumlah Arsip</p>
           <h2 class="text-xl font-bold text-white">12</h2>
         </div>
         <div class="bg-white p-3 rounded-lg">

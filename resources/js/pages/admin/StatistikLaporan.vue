@@ -109,13 +109,6 @@ const activeUsers = [
           </div>
           <div class="bg-[#6a97ac] p-2 rounded-lg text-white"><Eye class="w-6 h-6" /></div>
         </div>
-        <div class="bg-white p-4 rounded-2xl flex items-center justify-between shadow-sm">
-          <div>
-            <div class="bg-[#6a97ac] text-[10px] px-2 py-0.5 rounded w-fit mb-1 font-black text-white">15</div>
-            <p class="text-sm font-bold text-black">Total Favorit</p>
-          </div>
-          <div class="bg-[#6a97ac] p-2 rounded-lg text-white"><Star class="w-6 h-6" /></div>
-        </div>
       </div>
     </div>
 

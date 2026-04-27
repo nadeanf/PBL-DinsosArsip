@@ -61,50 +61,57 @@ const page = usePage()
         </Link>
 
         <!-- UNGGAH -->
-        <Link href="/unggah"
-          :class="page.url.startsWith('/unggah')
+      <Link href="/admin/UnggahAdmin"
+          :class="page.url.startsWith('/admin/UnggahAdmin')
             ? 'bg-[#2f4fa2] text-white shadow-md'
             : 'bg-gray-200 text-gray-800'"
           class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all">
           <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-white">
-            <Upload :class="page.url.startsWith('/unggah') ? 'text-[#2f4fa2]' : 'text-gray-700'" class="w-5 h-5" />
+            <Upload :class="page.url.startsWith('/admin/UnggahAdmin') ? 'text-[#2f4fa2]' : 'text-gray-700'" class="w-5 h-5" />
           </span>
           <span class="text-sm font-medium">Unggah</span>
         </Link>
 
         <!-- KELOLA ARSIP SAYA -->
-        <Link href="/kelola-arsip"
-          :class="page.url.startsWith('/kelola-arsip')
+        <Link href="/admin/kelola-arsip-role-admin"
+          :class="page.url.startsWith('/admin/kelola-arsip-role-admin')
             ? 'bg-[#2f4fa2] text-white shadow-md'
             : 'bg-gray-200 text-gray-800'"
           class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all">
           <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-white">
-            <FileText :class="page.url.startsWith('/kelola-arsip') ? 'text-[#2f4fa2]' : 'text-gray-700'" class="w-5 h-5" />
+            <FileText :class="page.url.startsWith('/admin/kelola-arsip-role-admin') ? 'text-[#2f4fa2]' : 'text-gray-700'" class="w-5 h-5" />
           </span>
           <span class="text-sm font-medium">Kelola Arsip Saya</span>
         </Link>
 
         <!-- KELOLA ARSIP USER -->
-        <Link href="/admin/kelola-user"
-          :class="page.url.startsWith('/admin/kelola-user')
+        <Link href="/admin/kelola-arsip-user"
+          :class="page.url.startsWith('/admin/kelola-arsip-user')
             ? 'bg-[#2f4fa2] text-white shadow-md'
             : 'bg-gray-200 text-gray-800'"
           class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all">
           <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-white">
-            <Users :class="page.url.startsWith('/admin/kelola-user') ? 'text-[#2f4fa2]' : 'text-gray-700'" class="w-5 h-5" />
+            <Users :class="page.url.startsWith('/admin/kelola-arsip-user') ? 'text-[#2f4fa2]' : 'text-gray-700'" class="w-5 h-5" />
           </span>
           <span class="text-sm font-medium">Kelola Arsip User</span>
         </Link>
 
         <!-- KATEGORI -->
-        <Link href="/kategori"
-          :class="page.url.startsWith('/kategori')
+        <Link href="/admin/kelola-kategori"
+          :class="page.url.startsWith('/admin/kelola-kategori')
             ? 'bg-[#2f4fa2] text-white shadow-md'
             : 'bg-gray-200 text-gray-800'"
           class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all">
+
           <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-white">
-            <Folder :class="page.url.startsWith('/kategori') ? 'text-[#2f4fa2]' : 'text-gray-700'" class="w-5 h-5" />
+            <Folder 
+              :class="page.url.startsWith('/admin/kelola-kategori') 
+                ? 'text-[#2f4fa2]' 
+                : 'text-gray-700'" 
+              class="w-5 h-5" 
+            />
           </span>
+
           <span class="text-sm font-medium">Kelola Kategori</span>
         </Link>
 
