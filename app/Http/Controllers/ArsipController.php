@@ -229,7 +229,7 @@ class ArsipController extends Controller
             'items' => $arsip
         ]);
     }
-
+//now
     public function dashboard(Request $request)
     {
         $query = Arsip::with(['kategori', 'user', 'files'])
