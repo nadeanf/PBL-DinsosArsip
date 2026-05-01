@@ -115,7 +115,7 @@ const openPreview = (doc) => {
 
   <div class="h-4 bg-gray-300 rounded-full w-full"></div>
 
-  <!-- 🔥 SEARCH -->
+  <!-- SEARCH -->
   <div class="bg-[#2f6f7e] p-4 rounded-xl shadow-md flex flex-wrap gap-4 items-center">
 
     <div class="bg-white rounded-lg px-4 py-3 flex items-center shadow-sm flex-1">
@@ -123,7 +123,7 @@ const openPreview = (doc) => {
       <input v-model="search" placeholder="Cari dokumen..." class="w-full outline-none text-sm"/>
     </div>
 
-    <!-- 🔥 DROPDOWN FIX -->
+    <!-- DROPDOWN FIX -->
     <select v-model="kategori" class="bg-white px-4 py-3 rounded-lg text-sm w-[300px]">
       <option value="">Semua</option>
 
