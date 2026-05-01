@@ -141,6 +141,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // DOWNLOAD
     Route::get('/download/{id}', [ArsipController::class, 'download']);
 
+    Route::post('/request-akses/{id}', [ArsipController::class, 'requestAkses'])
+    ->name('request.akses');
+
     // STORE
     Route::post('/arsip', [ArsipController::class, 'store'])->name('arsip.store');
 
@@ -156,6 +159,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // LIST
     Route::get('/daftar-arsip', [ArsipController::class, 'list'])
     ->name('arsip.index');
+
+    // EXPORT
+    Route::get('/export/pdf', [ArsipController::class, 'exportPDF'])->name('export.pdf');   
 
     // UPLOAD
     Route::get('/unggah', function () {

@@ -30,6 +30,13 @@ const form = useForm({
   bagian: arsip?.bagian || ''
 })
 
+const bidangList = [
+  'Sekretariat',
+  'Rehabilitasi Sosial',
+  'Perlindungan dan Jaminan Sosial',
+  'Pemberdayaan Sosial'
+]
+
 /* =====================
    PRIVATE CHECK
 ===================== */
@@ -167,7 +174,17 @@ const submit = () => {
           <!-- PRIVATE -->
           <div v-if="isPrivate">
             <label class="block font-black mb-1 text-sm uppercase">Bidang</label>
-            <input v-model="form.bagian" class="w-full p-4 bg-white rounded-2xl border" />
+           <select v-model="form.bagian" class="w-full p-4 bg-white rounded-2xl border">
+
+              <option value="">-- Pilih Bidang --</option>
+
+                <option v-for="b in bidangList"
+                  :key="b"
+                  :value="b">
+                  {{ b }}
+                </option>
+
+          </select>
           </div>
 
           <div>

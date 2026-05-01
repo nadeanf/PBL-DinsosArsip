@@ -9,6 +9,8 @@ use App\Models\Kategori;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Storage;
 use App\Models\File;
+use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\RequestAkses;
 
 class ArsipController extends Controller
 {
@@ -134,54 +136,61 @@ class ArsipController extends Controller
             ->latest()
             ->get();
 
+        $requestAkses = RequestAkses::where('user_id', auth()->id())->get();
+
         return Inertia::render('KelolaArsip', [
             'title' => 'Kelola Arsip',
-            'arsip' => $arsip
+            'arsip' => $arsip,
+            'requestAkses' => $requestAkses
         ]);
     }
 
     // 🔥 LIST ARSIP (UNTUK HALAMAN DAFTAR ARSIP)
     public function list(Request $request)
-    {
-        $query = Arsip::with(['kategori', 'user', 'files'])
-            ->where(function ($q) {
-                $q->where('status_akses', 'publik')
-                  ->orWhere('user_id', Auth::id());
-            });
+{
+    $query = Arsip::with(['kategori', 'user', 'files']);
 
-        // SEARCH
-        if ($request->search) {
-            $query->where(function ($q) use ($request) {
-                $q->where('judul', 'like', '%' . $request->search . '%')
-                  ->orWhere('nomor', 'like', '%' . $request->search . '%');
-            });
-        }
-
-        // FILTER KATEGORI
-        if ($request->kategori) {
-            $query->where('id_kategori', $request->kategori);
-        }
-
-        // FILTER TANGGAL
-        if ($request->tanggal_awal) {
-            $query->where('tahun', '>=', date('Y', strtotime($request->tanggal_awal)));
-        }
-
-        if ($request->tanggal_akhir) {
-            $query->where('tahun', '<=', date('Y', strtotime($request->tanggal_akhir)));
-        }
-
-        return Inertia::render('ListArsip', [
-            'arsip' => $query->latest()->get(),
-            'kategori' => Kategori::all(),
-            'filters' => $request->only([
-                'search',
-                'kategori',
-                'tanggal_awal',
-                'tanggal_akhir'
-            ])
-        ]);
+    // SEARCH
+    if ($request->search) {
+        $query->where(function ($q) use ($request) {
+            $q->where('judul', 'like', '%' . $request->search . '%')
+              ->orWhere('nomor', 'like', '%' . $request->search . '%');
+        });
     }
+
+    if ($request->kategori) {
+        $query->where('id_kategori', $request->kategori);
+    }
+
+    if ($request->tanggal_awal) {
+        $query->where('tahun', '>=', date('Y', strtotime($request->tanggal_awal)));
+    }
+
+    if ($request->tanggal_akhir) {
+        $query->where('tahun', '<=', date('Y', strtotime($request->tanggal_akhir)));
+    }
+$arsip = $query->latest()->get()->map(function ($item) {
+    $user = Auth::user();
+
+    $req = RequestAkses::where('user_id', $user->id)
+        ->where('arsip_id', $item->id)
+        ->first();
+
+    $item->request_status = $req?->status; // 🔥 INI WAJIB
+
+    return $item;
+});
+    return Inertia::render('ListArsip', [
+        'arsip' => $arsip,
+        'kategori' => Kategori::all(),
+        'filters' => $request->only([
+            'search',
+            'kategori',
+            'tanggal_awal',
+            'tanggal_akhir'
+        ])
+    ]);
+}
 
     // EDIT PAGE
     public function edit($id)
@@ -229,44 +238,50 @@ class ArsipController extends Controller
             'items' => $arsip
         ]);
     }
-
+//now
     public function dashboard(Request $request)
-    {
-        $query = Arsip::with(['kategori', 'user', 'files'])
-            ->where(function ($q) {
-                $q->where('status_akses', 'publik')
-                  ->orWhere('user_id', Auth::id());
-            });
+{
+    $query = Arsip::with(['kategori', 'user', 'files']);
 
-        if ($request->search) {
-            $query->where(function ($q) use ($request) {
-                $q->where('judul', 'like', '%' . $request->search . '%')
-                  ->orWhere('nomor', 'like', '%' . $request->search . '%');
-            });
-        }
-
-        if ($request->kategori) {
-            $query->where('id_kategori', $request->kategori);
-        }
-
-        if ($request->tanggal_awal) {
-            $query->where('tahun', '>=', date('Y', strtotime($request->tanggal_awal)));
-        }
-
-        if ($request->tanggal_akhir) {
-            $query->where('tahun', '<=', date('Y', strtotime($request->tanggal_akhir)));
-        }
-
-        $arsip = $query->latest()->get();
-
-        $totalDownload = Arsip::sum('download_count');
-
-        return Inertia::render('Dashboard', [
-            'arsip' => $arsip,
-            'kategori' => Kategori::all(),
-            'totalDownload' => $totalDownload
-        ]);
+    if ($request->search) {
+        $query->where(function ($q) use ($request) {
+            $q->where('judul', 'like', '%' . $request->search . '%')
+              ->orWhere('nomor', 'like', '%' . $request->search . '%');
+        });
     }
+
+    if ($request->kategori) {
+        $query->where('id_kategori', $request->kategori);
+    }
+
+    if ($request->tanggal_awal) {
+        $query->where('tahun', '>=', date('Y', strtotime($request->tanggal_awal)));
+    }
+
+    if ($request->tanggal_akhir) {
+        $query->where('tahun', '<=', date('Y', strtotime($request->tanggal_akhir)));
+    }
+
+    $arsip = $query->latest()->get()->map(function ($item) {
+    $user = Auth::user();
+
+    $req = RequestAkses::where('user_id', $user->id)
+        ->where('arsip_id', $item->id)
+        ->first();
+
+    $item->request_status = $req?->status; // 🔥 INI WAJIB
+
+    return $item;
+});
+
+    $totalDownload = Arsip::sum('download_count');
+
+    return Inertia::render('Dashboard', [
+        'arsip' => $arsip,
+        'kategori' => Kategori::all(),
+        'totalDownload' => $totalDownload
+    ]);
+}
 
     public function show($id)
 {
@@ -277,25 +292,27 @@ class ArsipController extends Controller
     ]);
 }
 
-        public function download($id)
-    {
-        $arsip = Arsip::with('files')->findOrFail($id);
+       public function download($id)
+{
+    $arsip = Arsip::with('files')->findOrFail($id);
 
-        // increment download
-        $arsip->increment('download_count');
-
-        // ambil file pertama (sementara)
-        $file = $arsip->files->first();
-
-        if (!$file) {
-            abort(404, 'File tidak ditemukan');
-        }
-
-        return response()->download(
-            storage_path('app/public/' . $file->path_file),
-            $file->nama_file
-        );
+    if (!$this->canAccessFull($arsip)) {
+        abort(403, 'Tidak punya akses');
     }
+
+    $arsip->increment('download_count');
+
+    $file = $arsip->files->first();
+
+    if (!$file) {
+        abort(404, 'File tidak ditemukan');
+    }
+
+    return response()->download(
+        storage_path('app/public/' . $file->path_file),
+        $file->nama_file
+    );
+}
 
     // RIWAYAT
     public function riwayat()
@@ -338,4 +355,86 @@ class ArsipController extends Controller
         'riwayat' => $data
     ]);
     }
+
+public function exportPDF(Request $request)
+{
+    $search = $request->search;
+    $kategori = $request->kategori;
+    $tanggal_awal = $request->tanggal_awal;
+    $tanggal_akhir = $request->tanggal_akhir;
+
+    $query = Arsip::with(['kategori', 'files']);
+
+    if ($search) {
+        $query->where('judul', 'like', "%$search%");
+    }
+
+    if ($kategori) {
+        $query->where('id_kategori', $kategori);
+    }
+
+    if ($tanggal_awal && $tanggal_akhir) {
+        $query->whereBetween('created_at', [$tanggal_awal, $tanggal_akhir]);
+    }
+
+    // 🔥 mapping biar rapi + ada link download
+    $data = $query->get()->map(function ($item) {
+
+        $file = $item->files->first();
+
+        return [
+            'judul' => $item->judul,
+            'nomor' => $item->nomor,
+            'tahun' => $item->tahun,
+            'kategori' => $item->kategori->nama ?? '-',
+            'status' => $item->status_akses,
+
+            // 🔥 ini link download
+            'download_url' => $file 
+                ? url('/download/' . $item->id)
+                : '-'
+        ];
+    });
+
+    $pdf = Pdf::loadView('pdf.laporan-arsip', [
+        'data' => $data
+    ]);
+
+    return $pdf->download('laporan_arsip.pdf');
+}
+
+private function canAccessFull($arsip)
+{
+    $user = Auth::user(); // ✅ pindahin ke atas
+
+    $approved = RequestAkses::where('user_id', $user->id)
+        ->where('arsip_id', $arsip->id)
+        ->where('status', 'approved')
+        ->exists();
+
+    if ($approved) {
+        return true;
+    }
+
+    if ($arsip->status_akses === 'publik') return true;
+
+    if ($arsip->user_id === $user->id) return true;
+
+    if ($arsip->status_akses === 'private' && $arsip->bagian === $user->bagian) return true;
+
+    return false;
+}
+public function requestAkses($id)
+{
+    $user = Auth::user();
+
+    RequestAkses::firstOrCreate([
+        'user_id' => $user->id,
+        'arsip_id' => $id
+    ], [
+        'status' => 'pending'
+    ]);
+
+    return back()->with('success', 'Request akses dikirim');
+}
 }
