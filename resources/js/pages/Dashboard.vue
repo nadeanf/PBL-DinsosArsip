@@ -3,6 +3,8 @@
 import { usePage, router } from '@inertiajs/vue3'
 import { ref, computed, onMounted } from 'vue'
 import { Eye, FileText, FileImage, File } from 'lucide-vue-next'
+import { ChevronRight, ChevronDown } from 'lucide-vue-next'
+import TreeDropdown from '@/components/TreeDropdown.vue'
 import UserLayout from '@/layouts/UserLayout.vue'
 
 
@@ -11,7 +13,7 @@ defineOptions({
 })
 
 const page = usePage()
-console.log(page)
+console.log('KATEGORI:', page.props.kategori)
 
 const canAccessFull = (doc) => {
   const user = page.props.auth?.user
@@ -47,8 +49,27 @@ const requestAkses = (arsipId) => {
    DATA BACKEND (FIX)
 ========================= */
 const dataArsip = computed(() => page.props?.arsip ?? [])
-console.log(dataArsip.value) // 🔥 INI YANG KITA BUTUH
-const kategoriData = computed(() => page.props?.kategori ?? [])
+console.log(dataArsip.value) // 
+const flattenKategori = (data, level = 0) => {
+  let result = []
+
+  data.forEach(kat => {
+    result.push({
+      id: kat.id,
+      nama: kat.nama,
+      level: level // 
+    })
+
+    if (kat.children_recursive && kat.children_recursive.length) {
+      result = result.concat(
+        flattenKategori(kat.children_recursive, level + 1)
+      )
+    }
+  })
+
+  return result
+}
+
 const totalDownload = computed(() => page.props?.totalDownload ?? 0)
 
 /* =========================
@@ -56,6 +77,20 @@ const totalDownload = computed(() => page.props?.totalDownload ?? 0)
 ========================= */
 const search = ref('')
 const kategori = ref('')
+const showDropdown = ref(false)
+
+const selectedKategoriName = computed(() => {
+  const findName = (data) => {
+    for (let item of data) {
+      if (item.id == kategori.value) return item.nama
+      if (item.children_recursive) {
+        const found = findName(item.children_recursive)
+        if (found) return found
+      }
+    }
+  }
+  return findName(page.props.kategori) || ''
+})
 const tanggal_awal = ref('')
 const tanggal_akhir = ref('')
 
@@ -96,7 +131,7 @@ const aktivitasTerbaru = computed(() => {
 
     status: item.status_akses,
 
-    // 🔥 WAJIB TAMBAH INI
+    
     request_status: item.request_status ?? null,
 
     files: item.files ?? [],
@@ -172,26 +207,33 @@ const openPreview = (doc) => {
     </div>
 
     <!-- DROPDOWN FIX -->
-    <select v-model="kategori" class="bg-white px-4 py-3 rounded-lg text-sm w-[300px]">
-      <option value="">Semua</option>
+<div class="relative w-[300px]">
 
-      <optgroup label="Aktif / Inaktif">
-        <option
-          v-for="kat in kategoriData"
-          :key="kat.id"
-          :value="kat.id"
-        >
-          {{ kat.nama }}
-        </option>
-      </optgroup>
+  <!-- BUTTON -->
+  <div 
+    @click="showDropdown = !showDropdown"
+    class="bg-white px-4 py-3 rounded-lg text-sm cursor-pointer flex justify-between items-center"
+  >
+    <span>
+      {{ selectedKategoriName || 'Pilih Kategori' }}
+    </span>
+    <span>▼</span>
+  </div>
 
-      <optgroup label="Kategori Vital">
-        <option value="vital_kepegawaian">Kepegawaian</option>
-        <option value="vital_keuangan">Keuangan</option>
-        <option value="vital_aset">Aset Daerah</option>
-        <option value="vital_hukum">Dokumen Hukum</option>
-      </optgroup>
-    </select>
+  <!-- DROPDOWN -->
+  <div 
+  v-show="showDropdown"
+  class="absolute left-0 top-full mt-2 w-full z-[9999] 
+         bg-white border rounded-xl shadow-lg 
+         max-h-[300px] overflow-y-auto"
+>
+<TreeDropdown
+  :data="page.props.kategori"
+  v-model="kategori"
+/>
+</div>
+
+</div>
 
     <input type="date" v-model="tanggal_awal" class="bg-white px-3 py-2 rounded"/>
     <input type="date" v-model="tanggal_akhir" class="bg-white px-3 py-2 rounded"/>
@@ -321,7 +363,7 @@ class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-
   class="w-full h-[400px] rounded-xl">
 </iframe>
 
-<!-- ❌ TIDAK ADA AKSES -->
+<!-- TIDAK ADA AKSES -->
 <div v-else class="text-gray-500 text-center space-y-3">
   <div>
     🔒 Dokumen ini bersifat privat <br/>

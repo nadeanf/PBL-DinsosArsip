@@ -10,125 +10,324 @@ class KategoriSeeder extends Seeder
 {
     public function run(): void
     {
-        // RESET TOTAL BIAR ID STABIL
+        // Reset data
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         Kategori::truncate();
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
-        // ========================
-        // UMUM
-        // ========================
-        $umum = Kategori::create(['nama' => 'Umum', 'parent_id' => null]);
+        // =========================
+        // DATA KATEGORI
+        // =========================
+        $data = [
 
-        $ketatausahaan = Kategori::create([
-            'nama' => 'Ketatausahaan dan Kerumahtanggaan',
-            'parent_id' => $umum->id
-        ]);
+            'Umum' => [
+                'Ketatausahaan dan Kerumahtanggaan' => [
+                    'Telekomunikasi',
 
-        Kategori::create(['nama' => 'Telekomunikasi', 'parent_id' => $umum->id]);
+                    'Perjalanan Dinas Dalam Negeri' => [
+                        'Perjalanan Dinas Kepala Daerah',
+                        'Perjalanan Dinas DPRD',
+                        'Perjalanan Dinas Pegawai',
+                    ],
 
-        // Perjalanan Dinas Dalam Negeri
-        $pdn = Kategori::create([
-            'nama' => 'Perjalanan Dinas Dalam Negeri',
-            'parent_id' => $umum->id
-        ]);
+                    'Perjalanan Dinas Luar Negeri' => [
+                        'Perjalanan Dinas Kepala Daerah',
+                        'Perjalanan Dinas DPRD',
+                        'Perjalanan Dinas Pegawai',
+                    ],
 
-        Kategori::create(['nama' => 'Perjalanan Dinas Kepala Daerah', 'parent_id' => $pdn->id]);
-        Kategori::create(['nama' => 'Perjalanan Dinas DPRD', 'parent_id' => $pdn->id]);
-        Kategori::create(['nama' => 'Perjalanan Dinas Pegawai', 'parent_id' => $pdn->id]);
+                    'Penggunaan Fasilitas Kantor',
+                    'Rapat Pimpinan',
+                    'Penyediaan Konsumsi',
 
-        // Perjalanan Dinas Luar Negeri
-        $pln = Kategori::create([
-            'nama' => 'Perjalanan Dinas Luar Negeri',
-            'parent_id' => $umum->id
-        ]);
+                    'Pengurusan Kendaraan Dinas' => [
+                        'Pengurusan surat-surat kendaraan dinas',
+                        'Pemeliharaan dan perbaikan',
+                        'Pengurusan kehilangan dan masalah kendaraan',
+                    ],
 
-        Kategori::create(['nama' => 'Perjalanan Dinas Kepala Daerah', 'parent_id' => $pln->id]);
-        Kategori::create(['nama' => 'Perjalanan Dinas DPRD', 'parent_id' => $pln->id]);
-        Kategori::create(['nama' => 'Perjalanan Dinas Pegawai', 'parent_id' => $pln->id]);
+                    'Pemeliharaan Gedung, Taman, dan Peralatan Kantor' => [
+                        'Pertamanan / Landscape',
+                        'Penghijauan',
+                        'Perbaikan Gedung',
+                        'Perbaikan Peralatan Kantor',
+                        'Perbaikan Rumah Dinas/ Wisma',
+                        'Kebersihan Gedung dan Taman',
+                    ],
 
-        Kategori::create(['nama' => 'Penggunaan Fasilitas Kantor', 'parent_id' => $umum->id]);
-        Kategori::create(['nama' => 'Rapat Pimpinan', 'parent_id' => $umum->id]);
-        Kategori::create(['nama' => 'Penyediaan Konsumsi', 'parent_id' => $umum->id]);
+                    'Pengelolaan Jaringan Listrik, Air, Telepon dan Komputer' => [
+                        'Perbaikan / Pemeliharaan',
+                        'Pemasangan',
+                    ],
 
-        // Kendaraan
-        $kendaraan = Kategori::create([
-            'nama' => 'Pengurusan Kendaraan Dinas',
-            'parent_id' => $umum->id
-        ]);
+                    'Ketertiban dan Keamanan' => [
+                        'Pengamanan, Penjagaan, dan Pengawalan terhadap Pejabat, Kantor dan Rumah Dinas',
+                        'Laporan Ketertiban dan Keamanan',
+                    ],
 
-        Kategori::create(['nama' => 'Pengurusan surat-surat kendaraan dinas', 'parent_id' => $kendaraan->id]);
-        Kategori::create(['nama' => 'Pemeliharaan dan perbaikan', 'parent_id' => $kendaraan->id]);
-        Kategori::create(['nama' => 'Pengurusan kehilangan dan masalah kendaraan', 'parent_id' => $kendaraan->id]);
+                    'Administrasi Pengelolaan Parkir',
+                    'Administrasi Pakaian Dinas Pegawai, Satpam, Petugas Kebersihan, dan Pegawai Lainnya',
+                ],
+            ],
 
-        // Gedung
-        $gedung = Kategori::create([
-            'nama' => 'Pemeliharaan Gedung, Taman, dan Peralatan Kantor',
-            'parent_id' => $umum->id
-        ]);
+            'Pemerintahan' => [
+                'Otonomi Daerah' => [
+                    'Kebijakan di bidang Otonomi Daerah yang dilakukan oleh Pemerintah Daerah',
+                    'Penyelenggaraan Pemerintah Daerah (Fasilitasi, Bimbingan, Pengawasan, Monitoring dan Evaluasi)',
+                    'Penataan Daerah, Pembinaan Daerah Pemekaran, Otonomi Khusus dan Dewan Pertimbangan Otonomi Daerah',
 
-        Kategori::create(['nama' => 'Pertamanan / Landscape', 'parent_id' => $gedung->id]);
-        Kategori::create(['nama' => 'Penghijauan', 'parent_id' => $gedung->id]);
-        Kategori::create(['nama' => 'Perbaikan Gedung', 'parent_id' => $gedung->id]);
-        Kategori::create(['nama' => 'Perbaikan Peralatan Kantor', 'parent_id' => $gedung->id]);
+                    'Pemilihan Kepala Daerah, DPRD, dan Hubungan Antar Lembaga' => [
+                        'Penyelenggaraan Pemilihan Umum Kepala Daerah',
+                        'Administrasi Kepala Daerah dan DPRD',
+                        'Penyiapan Perumusan Kebijakan Pemberdayaan Kapasitas Kepala Daerah dan DPRD di Bidang Pemerintahan',
+                        'Hubungan Antar Lembaga Daerah (Pemerintah Daerah dan DPRD)',
+                        'Assosiasi Daerah',
+                    ],
 
-        // Jaringan
-        $jaringan = Kategori::create([
-            'nama' => 'Pengelolaan Jaringan Listrik, Air, Telepon dan Komputer',
-            'parent_id' => $umum->id
-        ]);
+                    'Peningkatan Kapasitas Dan Evaluasi Kinerja Daerah' => [
+                        'Kinerja Penyelenggaraan Pemerintahan Daerah',
+                        'Kemampuan Penyelenggaraan Otonomi Daerah',
+                        'Pengembangan Kapasitas Daerah',
+                    ],
 
-        Kategori::create(['nama' => 'Perbaikan / Pemeliharaan', 'parent_id' => $jaringan->id]);
-        Kategori::create(['nama' => 'Pemasangan', 'parent_id' => $jaringan->id]);
+                    'LKPJ/LKPJAMJ dan LPPD',
+                ],
+            ],
 
-        // Keamanan
-        $keamanan = Kategori::create([
-            'nama' => 'Ketertiban dan Keamanan',
-            'parent_id' => $umum->id
-        ]);
+            'Pemerintahan Umum' => [
+                'Kebijakan di bidang Pemerintahan Umum yang dilakukan oleh Pemerintah Daerah',
 
-        Kategori::create(['nama' => 'Pengamanan, Penjagaan, dan Pengawalan', 'parent_id' => $keamanan->id]);
-        Kategori::create(['nama' => 'Laporan Ketertiban dan Keamanan', 'parent_id' => $keamanan->id]);
+                'Dekonsentrasi dan Kerjasama' => [
+                    'Fasilitasi Dekonsentrasi',
+                    'Fasilitasi Tugas Gubernur',
+                    'Fasilitasi Kerjasama Daerah',
+                    'Fasilitasi Kecamatan',
+                    'Fasilitasi Pelayanan Umum',
+                ],
 
-        // ========================
-        // PEMERINTAHAN
-        // ========================
-        $pemerintahan = Kategori::create(['nama' => 'Pemerintahan', 'parent_id' => null]);
+                'Wilayah Administrasi dan Perbatasan' => [
+                    'Toponimi dan Data Wilayah',
+                    'Pengembangan Batas Antar Negara',
+                    'Batas Antar Daerah',
+                    'Penataan Batas Wilayah',
+                    'Pemeliharaan Batas Wilayah',
+                ],
+            ],
 
-        Kategori::create(['nama' => 'Otonomi Daerah', 'parent_id' => $pemerintahan->id]);
-        Kategori::create(['nama' => 'Pemilihan Kepala Daerah', 'parent_id' => $pemerintahan->id]);
-        Kategori::create(['nama' => 'Administrasi Kepala Daerah dan DPRD', 'parent_id' => $pemerintahan->id]);
+            'Hukum' => [
 
-        // ========================
-        // HUKUM
-        // ========================
-        $hukum = Kategori::create(['nama' => 'Hukum', 'parent_id' => null]);
+                'Program Legislasi' => [
+                    'Bahan/Materi Program Legislasi Daerah',
+                    'Program Legislasi',
+                ],
 
-        Kategori::create(['nama' => 'Program Legislasi', 'parent_id' => $hukum->id]);
-        Kategori::create(['nama' => 'Rancangan Peraturan Daerah', 'parent_id' => $hukum->id]);
-        Kategori::create(['nama' => 'Keputusan Kepala Daerah', 'parent_id' => $hukum->id]);
-        Kategori::create(['nama' => 'Instruksi / Surat Edaran', 'parent_id' => $hukum->id]);
-        Kategori::create(['nama' => 'Surat Perintah', 'parent_id' => $hukum->id]);
-        Kategori::create(['nama' => 'MoU / Perjanjian Kerja Sama', 'parent_id' => $hukum->id]);
-        Kategori::create(['nama' => 'Kasus Pidana', 'parent_id' => $hukum->id]);
-        Kategori::create(['nama' => 'Kasus Perdata', 'parent_id' => $hukum->id]);
+                'Rancangan Peraturan Perundang-Undangan' => [
+                    'Rancangan Peraturan Daerah',
+                ],
 
-        // ========================
-        // KEUANGAN
-        // ========================
-        $keuangan = Kategori::create(['nama' => 'Keuangan', 'parent_id' => null]);
+                'Keputusan/Ketetapan Pimpinan Pemerintah' => [
+                    'Keputusan Gubernur',
+                    'Keputusan Bupati',
+                    'Keputusan Walikota',
+                    'Keputusan Sekretaris Daerah Provinsi',
+                    'Keputusan Sekretaris Daerah Kabupaten',
+                    'Keputusan Sekretaris Daerah Kota',
+                ],
 
-        Kategori::create(['nama' => 'Pelaksanaan Anggaran', 'parent_id' => $keuangan->id]);
-        Kategori::create(['nama' => 'Pendapatan', 'parent_id' => $keuangan->id]);
-        Kategori::create(['nama' => 'Belanja', 'parent_id' => $keuangan->id]);
-        Kategori::create(['nama' => 'Laporan Keuangan', 'parent_id' => $keuangan->id]);
+                'Instruksi/Surat Edaran' => [
+                    'Instruksi Provinsi',
+                    'Instruksi Kabupaten',
+                    'Instruksi Kota',
+                    'Instruksi Eselon II',
+                ],
 
-        // ========================
-        // VITAL
-        // ========================
-        $vital = Kategori::create(['nama' => 'VITAL', 'parent_id' => null]);
+                'Surat Perintah' => [
+                    'Surat Perintah Gubernur',
+                    'Surat Perintah Bupati',
+                    'Surat Perintah Walikota',
+                    'Surat Perintah Eselon II',
+                ],
 
-        Kategori::create(['nama' => 'Bantuan Sosial', 'parent_id' => $vital->id]);
-        Kategori::create(['nama' => 'Program Keluarga Harapan', 'parent_id' => $vital->id]);
+                'Standar/Pedoman/Prosedur Kerja/Petunjuk Pelaksanaan/Petunjuk Teknis',
+
+                'Nota Kesepakatan/Memorandum of Understanding (MoU)/Kontrak/Perjanjian Kerja Sama' => [
+                    'Dalam Negeri',
+                    'Luar Negeri',
+                ],
+
+                'Dokumentasi Hukum (antara lain: Undang-Undang, Peraturan Pemerintah, Keputusan Presiden dan Peraturan-Peraturan yang dijadikan referensi)',
+
+                'Kasus/Sengketa Hukum' => [
+                    'Pidana Kasus/ sengketa pidana, baik kejahatan maupun pelanggaran',
+                    'Perdata Kasus/sengketa perdata',
+                    'Tata Usaha Negara',
+                    'Perburuhan',
+                    'Arbitrase',
+                    'Sengketa Adat',
+                ],
+
+                'Perijinan',
+
+                'Hak atas Kekayaan Intelektual (HaKI)' => [
+                    'Hak Cipta',
+                    'Hak Paten',
+                    'Hak Desain Industri',
+                    'Hak Rahasia Dagang',
+                    'Hak Merk',
+                ],
+
+                'Permohonan HaKI yang Ditolak',
+            ],
+
+            'Kesejahteraan Rakyat' => [
+                'Sosial' => [
+                    'Kebijakan di bidang Sosial yang dilakukan oleh Pemerintah Daerah',
+                    'Kesejahteraan Sosial Anak' => [
+                        'Kesejahteraan Sosial Anak Balita',
+                        'Kesejahteraan Sosial Anak Terlantar',
+                        'Kesejahteraan Sosial Anak Berhadapan dengan Hukum',
+                        'Kesejahteraan Sosial Anak dengan Kecacatan',
+                        'Kesejahteraan Sosial Anak Perlindungan Khusus',
+                    ],
+
+                    'Rehabilitasi Sosial' => [
+                        'Rehabilitasi Sosial Orang dengan Kecacatan Tubuh dan Bekas Penderita Penyakit Kronis, Netra dan Rungu Wicara, Mental',
+                        'Kelembagaan dan Advokasi Sosial',
+                        'Asistensi dan Pemeliharaan Kesejahteraan Sosial',
+                    ],
+
+                    'Rehabilitasi Sosial Tuna Sosial' => [
+                        'Gelandangan, Pengemis, dan Pemulung',
+                        'Tuna Susila dan Korban Trafficking Perempuan',
+                        'Warga Binaan Lembaga Pemasyarakatan meliputi Penyiapan, Reintegrasi',
+                        'Pelayanan Sosial Orang dengan HIV/AIDS dan Kelompok Minoritas',
+                    ],
+
+                    'Rehabilitasi Sosial Korban Penyalahgunaan Napza' => [
+                        'Pelayanan Sosial Lanjut Usia',
+                        'Pelayanan Sosial Dalam dan Luar Panti',
+                        'Pengembangan Kelembagaan meliputi Pembinaan Lembaga, Kerjasama Lembaga', 
+                        'Advokasi dan Pelayanan Sosial Kedaruratan',
+                    ],
+                    
+                    'Pengumpulan dan Pengelolaan Sumber Dana Bantuan Sosial',
+                    'Perlindungan Sosial Korban Tindak Kekerasan dan Pekerja Migran',
+
+                    'Perlindungan Sosial Bencana Sosial'=> [
+                        'Ketahanan Sosial Masyarakat meliputi Keserasian Sosial, Penguatan Sumber Daya',
+                        'Tanggap Darurat meliputi Bantuan Darurat, Advokasi Sosial',
+                        'Pemulihan Sosial meliputi Penguatan Sosial, Reintegrasi Sosial',
+                        'Kerjasama Meliputi Kerjasama Pemerintah, Kerjasama Non Pemerintah',
+                    ],
+                    
+                    'Perlindungan Sosial Bencana Alam' => [
+                        'Kesiapsiagaan dan mitigasi',
+                        'Tanggap Darurat meliputi Bantuan Darurat, Advokasi Sosial',
+                        'Pemulihan Sosial dan Penguatan Sosial', 
+                        'Kerjasama',
+                    ],
+
+                    'Jaminan Sosial'=> [
+                        'Seleksi dan verifikasi',
+                        'Asuransi kesejahteraan sosial meliputi kelembagaan, pengelolaan premi',
+                        'Bantuan langsung dan tunjangan berkelanjutan meliputi pendampingan dan penyaluran',
+                        'Kerjasama',
+                    ],
+
+                    'Pemberdayaan Keluarga dan Kelembagaan Sosial' => [
+                        'Ketahanan Keluarga',
+                        'Asistensi Keluarga dan Pemberdayaan Perempuan',
+                        'Tenaga Kesejahteraan Sosial Masyarakat dan Organisasi Sosial',
+                        'Kemitraan dunia usaha',
+                        'Karang Taruna meliputi Kelembagaan, Pengembangan Kapasitas',
+                    ],
+
+                    'Pemberdayaan Komunitas Adat Terpencil'=> [
+                        'Persiapan Pemberdayaan',
+                        'Pemberdayaan Sumber Daya Manusia',
+                        'Penggalian dan Pengembangan Potensi',
+                        'Keserasian dan Penguatan Komunitas Adat Terpencil',
+                        'Kerjasama Kelembagaan',
+                    ],
+
+                    'Penanggulangan Kemiskinan Perkotaan dan Perdesaan'=> [
+                        'Identifikasi dan Analisis',
+                        'Pengembangan Kapasitas',
+                        'Penataan Sosial Lingkungan Kumuh',
+                        'Advokasi Sosial dan Pengembangan Aksesibilitas',
+                        'Bantuan Langsung',
+                        'Kerjasama Kelembagaan',
+                    ],
+
+                    'Kepahlawanan, Keperintisan  dan Kesetiakawanan Sosial' => [
+                        'Penghargaan  dan Kesejahteraan Keluarga Pahlawan',
+                        'Pelestarian Nilai-Nilai Kepahlawanan dan Keperintisan',
+                        'Pengembangan Kesetiakawanan Sosial',
+                        'Pengelolaan Taman Makam Pahlawan',
+                    ],
+                ],
+            ],
+
+            'Keuangan' => [
+                'Keuangan Daerah' => [
+                    
+                    'Pelaksanaan Anggaran' => [
+                        'Surat Penyedia Dana (SPP, SPM dan SP2D): UP, GU, TU, LS',
+                        'Pendapatan',
+                        'Belanja',
+                        'Pembiayaan Daerah',
+                        'Dokumen Penatausahaan Keuangan',
+                        'Pertanggungjawaban Penggunaan Dana',
+                        'Daftar Gaji',
+                        'Kartu Gaji',
+                        'Data Rekening Bendahara Umum Daerah (BUD)',
+                        'Laporan Keuangan',
+                    ],
+                ],
+            ],
+
+            'VITAL' => [
+                'Kebijakan dan program pemerintah tentang masalah sosial',
+                'Bantuan Sosial',
+                'Penghargaan kepada pahlawan',
+                'Perintis kemerdekaan',
+                'Taman Makam Pahlawan',
+                'Organisasi dan kelembagaan masyarakat sosial',
+                'Korban kekacauan, pengungsian dan rehabilitasi',
+                'Program Keluarga Harapan',
+                'Suku terasing',
+                'Pembinaan Komunitas Adat Terpencil (PKAT)',
+            ],
+        ];
+
+
+        // Insert data
+        $this->insertKategori($data);
+    }
+
+    // =========================
+    // FUNCTION RECURSIVE
+    // =========================
+    private function insertKategori($data, $parentId = null)
+    {
+        foreach ($data as $key => $value) {
+
+            if (is_array($value)) {
+
+                $kategori = Kategori::create([
+                    'nama' => is_string($key) ? $key : $value,
+                    'parent_id' => $parentId
+                ]);
+
+                $this->insertKategori($value, $kategori->id);
+
+            } else {
+
+                Kategori::create([
+                    'nama' => $value,
+                    'parent_id' => $parentId
+                ]);
+            }
+        }
     }
 }

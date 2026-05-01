@@ -182,7 +182,9 @@ $arsip = $query->latest()->get()->map(function ($item) {
 });
     return Inertia::render('ListArsip', [
         'arsip' => $arsip,
-        'kategori' => Kategori::all(),
+        'kategori' => Kategori::with('childrenRecursive')
+            ->whereNull('parent_id')
+            ->get(),
         'filters' => $request->only([
             'search',
             'kategori',
@@ -199,7 +201,9 @@ $arsip = $query->latest()->get()->map(function ($item) {
 
         return Inertia::render('EditDokumen', [
             'arsip' => $arsip,
-            'kategori' => Kategori::all()
+            'kategori' => Kategori::with('childrenRecursive')
+                ->whereNull('parent_id')
+                ->get(),
         ]);
     }
 
@@ -278,7 +282,7 @@ $arsip = $query->latest()->get()->map(function ($item) {
 
     return Inertia::render('Dashboard', [
         'arsip' => $arsip,
-        'kategori' => Kategori::all(),
+        'kategori' => Kategori::with('childrenRecursive')->get(),
         'totalDownload' => $totalDownload
     ]);
 }
