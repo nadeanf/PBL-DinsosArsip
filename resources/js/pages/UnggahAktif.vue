@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { Head, useForm } from '@inertiajs/vue3'
 import UserLayout from '@/layouts/UserLayout.vue'
 import { UploadCloud } from 'lucide-vue-next'
+import TreeDropdown from '@/components/TreeDropdown.vue'
 
 defineOptions({ layout: UserLayout })
 
@@ -32,6 +33,21 @@ const form = useForm({
 ========================= */
 const isPrivate = computed(() => form.status_akses === 'private')
 const isDragging = ref(false)
+
+const showDropdown = ref(false)
+
+const selectedKategoriName = computed(() => {
+  const findName = (data: any[]): any => {
+    for (let item of data) {
+      if (item.id == form.id_kategori) return item.nama
+      if (item.children_recursive) {
+        const found = findName(item.children_recursive)
+        if (found) return found
+      }
+    }
+  }
+  return findName(kategoriTree.value) || ''
+})
 
 /* =========================
    BIDANG
@@ -98,6 +114,17 @@ const getChildren = (parentId: number) => {
     (item: any) => item.parent_id === parentId
   )
 }
+
+    const buildTree = (data: any[], parentId: number | null = null) => {
+      return data
+        .filter(item => item.parent_id === parentId)
+        .map(item => ({
+          ...item,
+          children_recursive: buildTree(data, item.id)
+        }))
+    }
+
+const kategoriTree = computed(() => buildTree(props.kategoriData))
 
 /* =========================
    ACTION
@@ -237,23 +264,33 @@ const submit = () => {
               Kategori
             </label>
 
-            <select v-model="form.id_kategori"
-              class="w-full p-4 bg-white text-black rounded-2xl border border-gray-300">
+            <div class="relative">
 
-              <option value="">-- Pilih Kategori --</option>
+              <!-- BUTTON -->
+              <div
+                @click.stop="showDropdown = !showDropdown"
+                class="w-full p-4 bg-white text-black rounded-2xl border border-gray-300 cursor-pointer flex justify-between items-center"
+              >
+                <span>
+              {{ selectedKategoriName || 'Pilih Kategori' }}
+            </span>
+                <span>▼</span>
+              </div>
 
-              <optgroup v-for="parent in parents"
-                :key="parent.id"
-                :label="parent.nama">
+              <!-- DROPDOWN -->
+              <div
+                v-show="showDropdown"
+                class="absolute left-0 top-full mt-2 w-full bg-white border rounded-xl shadow-lg max-h-[300px] overflow-y-auto z-[9999]"
+              >
 
-                <option v-for="child in getChildren(parent.id)"
-                  :key="child.id"
-                  :value="child.id">
-                  {{ child.nama }}
-                </option>
+                <TreeDropdown
+              :data="kategoriTree"
+              v-model="form.id_kategori"
+            />
 
-              </optgroup>
-            </select>
+              </div>
+
+            </div>
           </div>
 
           <!-- status -->

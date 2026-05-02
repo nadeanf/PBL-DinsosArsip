@@ -2,8 +2,40 @@
 import { ref, computed } from 'vue'
 import { Head, useForm, router } from '@inertiajs/vue3'
 import UserLayout from '@/layouts/UserLayout.vue'
+import { UploadCloud } from 'lucide-vue-next'
+import TreeDropdown from '@/components/TreeDropdown.vue'
 
 defineOptions({ layout: UserLayout })
+
+
+const isDragging = ref(false)
+
+const setFiles = (files: File[]) => {
+  form.files = files
+
+  filePreviews.value = files.map((file: any) => ({
+    name: file.name,
+    type: file.type,
+    url: URL.createObjectURL(file)
+  }))
+}
+
+const handleDragOver = (e: DragEvent) => {
+  e.preventDefault()
+  isDragging.value = true
+}
+
+const handleDragLeave = () => {
+  isDragging.value = false
+}
+
+const handleDrop = (e: DragEvent) => {
+  e.preventDefault()
+  isDragging.value = false
+
+  const files = Array.from(e.dataTransfer?.files || [])
+  setFiles(files)
+}
 
 /* =====================
    PROPS DARI BACKEND
@@ -52,14 +84,23 @@ const triggerUpload = () => fileInput.value?.click()
 
 const handleFileChange = (e: any) => {
   const files = Array.from(e.target.files || [])
-  form.files = files
-
-  filePreviews.value = files.map((file: any) => ({
-    name: file.name,
-    type: file.type,
-    url: URL.createObjectURL(file)
-  }))
+  setFiles(files)
 }
+
+const showDropdown = ref(false)
+
+const selectedKategoriName = computed(() => {
+  const findName = (data: any[]): any => {
+    for (let item of data) {
+      if (item.id == form.id_kategori) return item.nama
+      if (item.children_recursive) {
+        const found = findName(item.children_recursive)
+        if (found) return found
+      }
+    }
+  }
+  return findName(props.kategori) || ''
+})
 
 /* =====================
    BACK
@@ -98,9 +139,17 @@ const submit = () => {
           </span>
 
           <div
-            @click="triggerUpload"
-            class="bg-white rounded-[35px] p-12 border-2 border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-all shadow-inner relative"
-          >
+  @click="triggerUpload"
+  @dragover.prevent="handleDragOver"
+  @dragleave="handleDragLeave"
+  @drop="handleDrop"
+  :class="[
+    'rounded-[35px] p-12 border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-all shadow-inner relative',
+    isDragging 
+      ? 'border-blue-500 bg-blue-50 scale-[1.02]' 
+      : 'bg-white border-gray-300 hover:bg-gray-50'
+  ]"
+>
 
             <div v-if="form.files && form.files.length > 0" class="mb-4 text-center absolute top-4">
               <span class="bg-blue-600 text-white px-4 py-1 rounded-full font-bold uppercase text-[10px]">
@@ -120,10 +169,26 @@ const submit = () => {
 
             <input type="file" ref="fileInput" class="hidden" @change="handleFileChange" multiple />
 
-            <div v-if="!filePreviews.length" class="text-center">
-              <p class="font-bold text-gray-900 text-xl">Klik untuk unggah atau drag and drop</p>
-              <p class="text-gray-600 text-sm mt-2">PDF, DOC, XLS, JPG, PNG, MP3, MP4</p>
-            </div>
+            <div v-if="!filePreviews.length" class="text-center flex flex-col items-center">
+
+  <!-- ICON -->
+  <div class="bg-[#7fa1b1]/20 p-6 rounded-full mb-4 shadow-inner">
+    <UploadCloud class="w-12 h-12 text-[#2f55a4]" />
+  </div>
+
+  <p class="font-black text-gray-900 text-xl">
+    Klik untuk unggah
+  </p>
+
+  <p class="text-gray-600 text-sm mt-1">
+    atau drag & drop file di sini
+  </p>
+
+  <p class="text-gray-400 text-xs mt-2">
+    PDF, DOC, XLS, JPG, PNG, MP3, MP4
+  </p>
+
+</div>
 
           </div>
         </div>
@@ -149,17 +214,32 @@ const submit = () => {
           <!-- KATEGORI -->
           <div>
             <label class="block font-black mb-1 text-sm uppercase">Kategori</label>
-            <select v-model="form.id_kategori" class="w-full p-4 bg-white rounded-2xl border">
-              <option value="">-- Pilih Kategori --</option>
+            <div class="relative">
 
-              <option
-                v-for="kat in props.kategori"
-                :key="kat.id"
-                :value="kat.id"
+              <!-- BUTTON -->
+              <div
+                @click.stop="showDropdown = !showDropdown"
+                class="w-full p-4 bg-white text-black rounded-2xl border border-gray-300 cursor-pointer flex justify-between items-center"
               >
-                {{ kat.nama }}
-              </option>
-            </select>
+                <span>
+                  {{ selectedKategoriName || 'Pilih Kategori' }}
+                </span>
+                <span>▼</span>
+              </div>
+
+              <!-- DROPDOWN -->
+              <div
+                v-show="showDropdown"
+                class="absolute left-0 top-full mt-2 w-full bg-white border rounded-xl shadow-lg max-h-[300px] overflow-y-auto z-[9999]"
+              >
+                <TreeDropdown
+                  :data="props.kategori"
+                  v-model="form.id_kategori"
+                  @update:modelValue="showDropdown = false"
+                />
+              </div>
+
+            </div>
           </div>
 
           <!-- STATUS -->

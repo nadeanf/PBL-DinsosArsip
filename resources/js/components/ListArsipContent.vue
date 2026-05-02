@@ -2,6 +2,7 @@
 import { usePage, router } from '@inertiajs/vue3'
 import { ref, computed } from 'vue'
 import { FileText, FileImage, File } from 'lucide-vue-next'
+import TreeDropdown from '@/components/TreeDropdown.vue'
 
 const page = usePage()
 
@@ -19,6 +20,21 @@ const search = ref(filters.search || '')
 const kategori = ref(filters.kategori || '')
 const tanggal_awal = ref(filters.tanggal_awal || '')
 const tanggal_akhir = ref(filters.tanggal_akhir || '')
+
+const showDropdown = ref(false)
+
+const selectedKategoriName = computed(() => {
+  const findName = (data) => {
+    for (let item of data) {
+      if (item.id == kategori.value) return item.nama
+      if (item.children_recursive) {
+        const found = findName(item.children_recursive)
+        if (found) return found
+      }
+    }
+  }
+  return findName(kategoriData) || ''
+})
 
 /* =========================
    BUTTON CARI (REDIRECT KE LIST ARSIP)
@@ -117,30 +133,35 @@ const openPreview = (item)=>{
     </div>
 
     <!-- 🔥 DROPDOWN FIX -->
-<select v-model="kategori" class="bg-white px-4 py-3 rounded-lg text-sm w-[300px]">
+<div class="relative w-[300px]">
 
-  <option value="">Semua</option>
+  <!-- BUTTON -->
+  <div 
+    @click="showDropdown = !showDropdown"
+    class="bg-white px-4 py-3 rounded-lg text-sm cursor-pointer flex justify-between items-center"
+  >
+    <span>
+      {{ selectedKategoriName || 'Pilih Kategori' }}
+    </span>
+    <span>▼</span>
+  </div>
 
-  <!-- AKTIF / INAKTIF (dari backend) -->
-  <optgroup label="Aktif / Inaktif">
-    <option
-      v-for="kat in kategoriData"
-      :key="kat.id"
-      :value="kat.id"
-    >
-      {{ kat.nama }}
-    </option>
-  </optgroup>
+  <!-- DROPDOWN -->
+  <div 
+    v-show="showDropdown"
+    class="absolute left-0 top-full mt-2 w-full z-[9999] 
+           bg-white border rounded-xl shadow-lg 
+           max-h-[300px] overflow-y-auto"
+  >
 
-  <!-- VITAL (HARDCODE TAPI VALUE JELAS) -->
-  <optgroup label="Kategori Vital">
-    <option value="vital_kepegawaian">Kepegawaian</option>
-    <option value="vital_keuangan">Keuangan</option>
-    <option value="vital_aset">Aset Daerah</option>
-    <option value="vital_hukum">Dokumen Hukum</option>
-  </optgroup>
+    <TreeDropdown
+      :data="kategoriData"
+      v-model="kategori"
+    />
 
-</select>
+  </div>
+
+</div>
 
     <input
       type="date"

@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { Head, useForm } from '@inertiajs/vue3'
 import UserLayout from '@/layouts/UserLayout.vue'
 import { UploadCloud } from 'lucide-vue-next'
+import TreeDropdown from '@/components/TreeDropdown.vue'
 
 defineOptions({ layout: UserLayout })
 
