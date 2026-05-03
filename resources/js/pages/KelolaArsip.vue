@@ -100,13 +100,16 @@ const openConfirmDelete = (id: number) => {
 const handleExecute = () => {
   if (!modalConfig.value.id) return
 
-  router.delete(`/arsip/${modalConfig.value.id}`, {
+  const deletedId = modalConfig.value.id
+
+  router.delete(`/arsip/${deletedId}`, {
     onSuccess: () => {
       showModal.value = false
-    },
-    onError: (err) => {
-      console.log(err)
-      alert('Gagal hapus data')
+
+      // HAPUS LANGSUNG DARI UI
+      allDocuments.value = allDocuments.value.filter(
+        item => item.id !== deletedId
+      )
     }
   })
 }
