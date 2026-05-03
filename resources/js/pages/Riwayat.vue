@@ -1,7 +1,7 @@
 <script setup>
 import UserLayout from '@/layouts/UserLayout.vue'
 import { Head } from '@inertiajs/vue3'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 
 defineOptions({ layout: UserLayout })
 
@@ -52,6 +52,11 @@ const formatTanggal = (dateString) => {
         minute: '2-digit'
     })
 }
+
+watch(searchQuery, () => {
+    currentPage.value = 1
+})
+
 </script>
 
 <template>
@@ -87,19 +92,44 @@ const formatTanggal = (dateString) => {
 
         </div>
 
-        <!-- PAGINATION -->
-        <div v-if="totalPages > 1" class="flex gap-2 justify-center mt-6">
+        <!-- PAGINATION (VERSI BAGUS) -->
+        <div
+            v-if="totalPages > 1"
+            class="flex justify-center items-center gap-2 mt-6"
+        >
 
-            <button @click="setPage(currentPage - 1)">Prev</button>
+            <!-- PREV -->
+            <button
+                @click="setPage(currentPage - 1)"
+                :disabled="currentPage === 1"
+                class="px-3 py-1 rounded-lg bg-gray-200 disabled:opacity-50"
+            >
+                Prev
+            </button>
 
+            <!-- ANGKA -->
             <button
                 v-for="p in totalPages"
                 :key="p"
-                @click="setPage(p)">
+                @click="setPage(p)"
+                :class="[
+                    'px-3 py-1 rounded-lg',
+                    currentPage === p
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-200'
+                ]"
+            >
                 {{ p }}
             </button>
 
-            <button @click="setPage(currentPage + 1)">Next</button>
+            <!-- NEXT -->
+            <button
+                @click="setPage(currentPage + 1)"
+                :disabled="currentPage === totalPages"
+                class="px-3 py-1 rounded-lg bg-gray-200 disabled:opacity-50"
+            >
+                Next
+            </button>
 
         </div>
 

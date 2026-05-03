@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch  } from 'vue'
 import { Head, router, usePage } from '@inertiajs/vue3'
 import UserLayout from '@/layouts/UserLayout.vue'
 import { FileText, FileImage, File, FileSpreadsheet } from 'lucide-vue-next'
@@ -8,14 +8,10 @@ defineOptions({ layout: UserLayout })
 
 const page = usePage()
 
-/* =========================
-   FILTER (JENIS SAJA)
-========================= */
+/* FILTER (JENIS ARSIP) */
 const filterJenis = ref('')
 
-/* =========================
-   HELPER FILE TYPE
-========================= */
+/* HELPER FILE TYPE */
 const getFileType = (path: string) => {
   if (!path) return 'FILE'
   const ext = path.split('.').pop()?.toLowerCase()
@@ -27,9 +23,7 @@ const getFileType = (path: string) => {
   return 'FILE'
 }
 
-/* =========================
-   DATA MAPPING
-========================= */
+/* DATA MAPPING */
 const allDocuments = ref(
   (page.props.arsip || []).map((item: any) => ({
     id: item.id,
@@ -54,9 +48,7 @@ const allDocuments = ref(
   }))
 )
 
-/* =========================
-   FILTER
-========================= */
+/* FILTER */
 const filteredDocuments = computed(() => {
   return allDocuments.value.filter(item => {
     return filterJenis.value
@@ -65,20 +57,25 @@ const filteredDocuments = computed(() => {
   })
 })
 
-/* =========================
-   PAGINATION
-========================= */
+/* PAGINATION */
 const itemsPerPage = 5
 const currentPage = ref(1)
+
+const totalPages = computed(() => {
+  return Math.ceil(filteredDocuments.value.length / itemsPerPage)
+})
+
+const goToPage = (page: number) => {
+  currentPage.value = page
+}
 
 const paginatedData = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage
   return filteredDocuments.value.slice(start, start + itemsPerPage)
 })
 
-/* =========================
-   PREVIEW
-========================= */
+
+/* PREVIEW */
 const previewModal = ref(false)
 const selectedDoc = ref<any>(null)
 
@@ -87,9 +84,7 @@ const openPreview = (item: any) => {
   previewModal.value = true
 }
 
-/* =========================
-   ACTION
-========================= */
+/* ACTION */
 const handleEdit = (id: number) => {
   router.get(`/edit-dokumen/${id}`)
 }
@@ -115,6 +110,10 @@ const handleExecute = () => {
     }
   })
 }
+
+watch(filterJenis, () => {
+  currentPage.value = 1
+})
 
 </script>
 <template>
@@ -151,32 +150,34 @@ const handleExecute = () => {
 
          <div class="w-20 h-20 bg-white rounded-2xl flex items-center justify-center shadow-sm">
 
-  <FileText
-    v-if="item.format === 'PDF'"
-    class="w-10 h-10 text-red-500"
-  />
+          <FileText
+            v-if="item.format === 'PDF'"
+            class="w-10 h-10 text-red-500"
+          />
 
-  <FileImage
-    v-else-if="item.format === 'IMAGE'"
-    class="w-10 h-10 text-blue-500"
-  />
+          <FileImage
+            v-else-if="item.format === 'IMAGE'"
+            class="w-10 h-10 text-blue-500"
+          />
 
-  <FileText
-    v-else-if="item.format === 'DOC'"
-    class="w-10 h-10 text-indigo-500"
-  />
+          <FileText
+            v-else-if="item.format === 'DOC'"
+            class="w-10 h-10 text-indigo-500"
+          />
 
-  <FileSpreadsheet
-    v-else-if="item.format === 'EXCEL'"
-    class="w-10 h-10 text-green-500"
-  />
+          <FileSpreadsheet
+            v-else-if="item.format === 'EXCEL'"
+            class="w-10 h-10 text-green-500"
+          />
 
-  <File
-    v-else
-    class="w-10 h-10 text-gray-400"
-  />
+          <File
+            v-else
+            class="w-10 h-10 text-gray-400"
+          />
 
-</div>
+        </div>
+
+        
 
           <div class="text-white">
 
@@ -208,6 +209,7 @@ const handleExecute = () => {
 
           </div>
         </div>
+
 
         <!-- BUTTON -->
         <div class="flex gap-2">
@@ -257,6 +259,49 @@ const handleExecute = () => {
       Tidak ada arsip
     </div>
 
+    <!-- PAGINATION -->
+    <div
+      v-if="totalPages > 1"
+      class="flex justify-center items-center gap-2 mb-10"
+    >
+      <!-- PREV -->
+      <button
+        @click="currentPage--"
+        :disabled="currentPage === 1"
+        class="px-3 py-1 rounded-lg bg-gray-200 disabled:opacity-50"
+      >
+        Prev
+      </button>
+
+      <!-- ANGKA -->
+      <button
+        v-for="page in totalPages"
+        :key="page"
+        @click="goToPage(page)"
+        :class="[
+          'px-3 py-1 rounded-lg',
+          currentPage === page
+            ? 'bg-blue-600 text-white'
+            : 'bg-gray-200'
+        ]"
+      >
+        {{ page }}
+      </button>
+
+      <!-- NEXT -->
+      <button
+        @click="currentPage++"
+        :disabled="currentPage === totalPages"
+        class="px-3 py-1 rounded-lg bg-gray-200 disabled:opacity-50"
+      >
+        Next
+      </button>
+    </div>
+
+    <!-- EMPTY -->
+    <div v-if="filteredDocuments.length === 0" class="text-center py-10">
+      Tidak ada arsip
+    </div>
   </div>
 
   <!-- PREVIEW MODAL (TIDAK DIUBAH) -->
@@ -350,9 +395,11 @@ const handleExecute = () => {
       </div>
 
     </div>
-   
+
   </div>
 </div>
+
+
  <!-- MODAL KONFIRMASI HAPUS -->
 <div v-if="showModal"
   class="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm">

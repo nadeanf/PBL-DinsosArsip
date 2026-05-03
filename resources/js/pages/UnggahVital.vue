@@ -12,9 +12,7 @@ const props = defineProps<{
   kategoriData: any[]
 }>()
 
-/* =========================
-   FORM
-========================= */
+/* FORM */
 const form = useForm({
   judul: '',
   nomor: '',
@@ -28,14 +26,10 @@ const form = useForm({
   folder: props.folder
 })
 
-/* =========================
-   PRIVATE
-========================= */
+/* PRIVATE */
 const isPrivate = computed(() => form.status_akses === 'private')
 
-/* =========================
-   BIDANG
-========================= */
+/* BIDANG */
 const bidangList = [
   'Sekretariat',
   'Rehabilitasi Sosial',
@@ -43,9 +37,7 @@ const bidangList = [
   'Pemberdayaan Sosial'
 ]
 
-/* =========================
-   FILE UPLOAD
-========================= */
+/* FILE UPLOAD */
 const fileInput = ref<HTMLInputElement | null>(null)
 const filePreviews = ref<any[]>([])
 const isDragging = ref(false)
@@ -66,9 +58,7 @@ const handleFileChange = (e: any) => {
   handleFiles(Array.from(e.target.files || []))
 }
 
-/* =========================
-   DRAG & DROP
-========================= */
+/* DRAG & DROP */
 const handleDrop = (e: DragEvent) => {
   e.preventDefault()
   isDragging.value = false
@@ -86,9 +76,7 @@ const handleDragLeave = () => {
   isDragging.value = false
 }
 
-/* =========================
-   ACTION
-========================= */
+/* ACTION */
 const goBack = () => window.history.back()
 
 const submit = () => {

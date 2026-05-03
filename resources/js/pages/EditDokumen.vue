@@ -37,9 +37,7 @@ const handleDrop = (e: DragEvent) => {
   setFiles(files)
 }
 
-/* =====================
-   PROPS DARI BACKEND
-===================== */
+/* PROPS DARI BACKEND */
 const props = defineProps<{
   arsip: any,
   kategori: any[]
@@ -47,9 +45,7 @@ const props = defineProps<{
 
 const arsip = props.arsip
 
-/* =====================
-   FORM (AUTO ISI DARI DB)
-===================== */
+/* FORM (AUTO ISI DARI DB) */
 const form = useForm({
   judul: arsip?.judul || '',
   nomor: arsip?.nomor || '',
@@ -69,14 +65,10 @@ const bidangList = [
   'Pemberdayaan Sosial'
 ]
 
-/* =====================
-   PRIVATE CHECK
-===================== */
+/* PRIVATE CHECK */
 const isPrivate = computed(() => form.status_akses === 'private')
 
-/* =====================
-   FILE PREVIEW
-===================== */
+/* FILE PREVIEW  */
 const fileInput = ref<HTMLInputElement | null>(null)
 const filePreviews = ref<any[]>([])
 
@@ -102,14 +94,10 @@ const selectedKategoriName = computed(() => {
   return findName(props.kategori) || ''
 })
 
-/* =====================
-   BACK
-===================== */
+/* BACK */
 const goBack = () => window.history.back()
 
-/* =====================
-   SUBMIT (UPDATE DB)
-===================== */
+/* SUBMIT (UPDATE DB) */
 const submit = () => {
   form.put(`/arsip/${arsip.id}`, {
     forceFormData: true,
@@ -139,17 +127,17 @@ const submit = () => {
           </span>
 
           <div
-  @click="triggerUpload"
-  @dragover.prevent="handleDragOver"
-  @dragleave="handleDragLeave"
-  @drop="handleDrop"
-  :class="[
-    'rounded-[35px] p-12 border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-all shadow-inner relative',
-    isDragging 
-      ? 'border-blue-500 bg-blue-50 scale-[1.02]' 
-      : 'bg-white border-gray-300 hover:bg-gray-50'
-  ]"
->
+            @click="triggerUpload"
+            @dragover.prevent="handleDragOver"
+            @dragleave="handleDragLeave"
+            @drop="handleDrop"
+            :class="[
+              'rounded-[35px] p-12 border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-all shadow-inner relative',
+              isDragging 
+                ? 'border-blue-500 bg-blue-50 scale-[1.02]' 
+                : 'bg-white border-gray-300 hover:bg-gray-50'
+            ]"
+          >
 
             <div v-if="form.files && form.files.length > 0" class="mb-4 text-center absolute top-4">
               <span class="bg-blue-600 text-white px-4 py-1 rounded-full font-bold uppercase text-[10px]">
@@ -171,24 +159,24 @@ const submit = () => {
 
             <div v-if="!filePreviews.length" class="text-center flex flex-col items-center">
 
-  <!-- ICON -->
-  <div class="bg-[#7fa1b1]/20 p-6 rounded-full mb-4 shadow-inner">
-    <UploadCloud class="w-12 h-12 text-[#2f55a4]" />
-  </div>
+              <!-- ICON -->
+              <div class="bg-[#7fa1b1]/20 p-6 rounded-full mb-4 shadow-inner">
+                <UploadCloud class="w-12 h-12 text-[#2f55a4]" />
+              </div>
 
-  <p class="font-black text-gray-900 text-xl">
-    Klik untuk unggah
-  </p>
+              <p class="font-black text-gray-900 text-xl">
+                Klik untuk unggah
+              </p>
 
-  <p class="text-gray-600 text-sm mt-1">
-    atau drag & drop file di sini
-  </p>
+              <p class="text-gray-600 text-sm mt-1">
+                atau drag & drop file di sini
+              </p>
 
-  <p class="text-gray-400 text-xs mt-2">
-    PDF, DOC, XLS, JPG, PNG, MP3, MP4
-  </p>
+              <p class="text-gray-400 text-xs mt-2">
+                PDF, DOC, XLS, JPG, PNG, MP3, MP4
+              </p>
 
-</div>
+            </div>
 
           </div>
         </div>

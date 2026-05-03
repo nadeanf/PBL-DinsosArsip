@@ -6,16 +6,12 @@ import TreeDropdown from '@/components/TreeDropdown.vue'
 
 const page = usePage()
 
-/* =========================
-   DATA BACKEND
-========================= */
+/* DATA BACKEND */
 const dataArsip = page.props.arsip || []
 const kategoriData = page.props.kategori || []
 const filters = page.props.filters || {}
 
-/* =========================
-   STATE FILTER
-========================= */
+/* STATE FILTER */
 const search = ref(filters.search || '')
 const kategori = ref(filters.kategori || '')
 const tanggal_awal = ref(filters.tanggal_awal || '')
@@ -36,9 +32,7 @@ const selectedKategoriName = computed(() => {
   return findName(kategoriData) || ''
 })
 
-/* =========================
-   BUTTON CARI (REDIRECT KE LIST ARSIP)
-========================= */
+/* BUTTON CARI REDIRECT KE LIST ARSIP */
 const handleSearch = () => {
   router.get('/daftar-arsip', {
     search: search.value,
@@ -51,9 +45,7 @@ const handleSearch = () => {
   })
 }
 
-/* =========================
-   HELPER FILE TYPE
-========================= */
+/* HELPER FILE TYPE */
 const getFileType = (path) => {
   if (!path) return 'FILE'
 
@@ -70,9 +62,7 @@ const getFileType = (path) => {
   return 'FILE'
 }
 
-/* =========================
-   DATA MAPPING
-========================= */
+/* DATA MAPPING */
 const documents = computed(() => {
  return dataArsip.map(item => ({
     id:item.id,
@@ -100,9 +90,7 @@ const documents = computed(() => {
  }))
 })
 
-/* =========================
-   PREVIEW MODAL
-========================= */
+/* PREVIEW MODAL */
 const previewModal = ref(false)
 const selectedDoc = ref(null)
 

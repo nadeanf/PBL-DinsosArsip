@@ -145,7 +145,7 @@ class ArsipController extends Controller
         ]);
     }
 
-    // 🔥 LIST ARSIP (UNTUK HALAMAN DAFTAR ARSIP)
+    // LIST ARSIP (UNTUK HALAMAN DAFTAR ARSIP)
     public function list(Request $request)
 {
     $query = Arsip::with(['kategori', 'user', 'files']);
@@ -381,7 +381,7 @@ public function exportPDF(Request $request)
         $query->whereBetween('created_at', [$tanggal_awal, $tanggal_akhir]);
     }
 
-    // 🔥 mapping biar rapi + ada link download
+    // mapping biar rapi + ada link download
     $data = $query->get()->map(function ($item) {
 
         $file = $item->files->first();
@@ -393,7 +393,7 @@ public function exportPDF(Request $request)
             'kategori' => $item->kategori->nama ?? '-',
             'status' => $item->status_akses,
 
-            // 🔥 ini link download
+            // ini link download
             'download_url' => $file 
                 ? url('/download/' . $item->id)
                 : '-'
@@ -409,7 +409,7 @@ public function exportPDF(Request $request)
 
 private function canAccessFull($arsip)
 {
-    $user = Auth::user(); // ✅ pindahin ke atas
+    $user = Auth::user(); 
 
     $approved = RequestAkses::where('user_id', $user->id)
         ->where('arsip_id', $arsip->id)

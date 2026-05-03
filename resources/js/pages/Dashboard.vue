@@ -33,21 +33,19 @@ const canAccessFull = (doc) => {
 }
 
 const requestAkses = (arsipId) => {
-  console.log('🔥 KLIK MASUK', arsipId)
+  console.log('KLIK MASUK', arsipId)
 
   router.post(`/request-akses/${arsipId}`, {}, {
   onSuccess: () => {
-    console.log('✅ BERHASIL')
+    console.log('BERHASIL')
 
-    // 🔥 langsung update UI
+    // update UI
     selectedDoc.value.request_status = 'pending'
   },
   })
 }
 
-/* =========================
-   DATA BACKEND (FIX)
-========================= */
+/* DATA BACKEND (FIX) */
 const dataArsip = computed(() => page.props?.arsip ?? [])
 console.log(dataArsip.value) // 
 const flattenKategori = (data, level = 0) => {
@@ -72,9 +70,7 @@ const flattenKategori = (data, level = 0) => {
 
 const totalDownload = computed(() => page.props?.totalDownload ?? 0)
 
-/* =========================
-   STATE FILTER
-========================= */
+/* STATE FILTER */
 const search = ref('')
 const kategori = ref('')
 const showDropdown = ref(false)
@@ -98,9 +94,7 @@ const exportPDF = () => {
   window.location.href = `/export/pdf?search=${search.value}&kategori=${kategori.value}&tanggal_awal=${tanggal_awal.value}&tanggal_akhir=${tanggal_akhir.value}`
 }
 
-/* =========================
-   HELPER FILE TYPE
-========================= */
+/* HELPER FILE TYPE */
 const getFileType = (path) => {
   if (!path) return 'FILE'
   const ext = path.split('.').pop()?.toLowerCase()
@@ -110,9 +104,7 @@ const getFileType = (path) => {
   return 'FILE'
 }
 
-/* =========================
-   MAPPING DATA
-========================= */
+/* MAPPING DATA */
 const aktivitasTerbaru = computed(() => {
   return dataArsip.value.map(item => ({
     id: item.id,
@@ -145,25 +137,19 @@ const aktivitasTerbaru = computed(() => {
   }))
 })
 
-/* =========================
-   LOAD DATA
-========================= */
+/* LOAD DATA */
 const filteredData = ref([])
 
 onMounted(() => {
   filteredData.value = aktivitasTerbaru.value
 })
 
-/* =========================
-   LIMIT DASHBOARD
-========================= */
+/* LIMIT DASHBOARD */
 const limitedData = computed(() => {
   return filteredData.value.slice(0, 5)
 })
 
-/* =========================
-   SEARCH REDIRECT
-========================= */
+/* SEARCH REDIRECT */
 const handleSearch = () => {
   router.get('/daftar-arsip', {
     search: search.value,
@@ -173,9 +159,7 @@ const handleSearch = () => {
   })
 }
 
-/* =========================
-   PREVIEW MODAL
-========================= */
+/* PREVIEW MODAL */
 const previewModal = ref(false)
 const selectedDoc = ref(null)
 
