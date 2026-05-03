@@ -130,6 +130,7 @@ Route::middleware('auth')->group(function () {
 });
 });
 /* AUTH + FITUR */
+    Route::post('/riwayat/view', [ArsipController::class, 'storeView']);
 Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/sampah', [ArsipController::class, 'trash'])->name('arsip.trash');
