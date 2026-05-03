@@ -146,7 +146,7 @@ onMounted(() => {
 
 /* LIMIT DASHBOARD */
 const limitedData = computed(() => {
-  return filteredData.value.slice(0, 5)
+  return filteredData.value.slice(0, 3)
 })
 
 /* SEARCH REDIRECT */
@@ -175,7 +175,7 @@ const openPreview = (doc) => {
 
 const handleDownload = (id) => {
 
-  // 🔥 bikin form manual (bypass Inertia)
+  // bikin form manual (bypass Inertia)
   const form = document.createElement('form')
   form.method = 'GET'
   form.action = `/download/${id}`

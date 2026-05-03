@@ -33,19 +33,19 @@ class Arsip extends Model
         'waktu_aktivitas'
     ];
 
-    // 🔥 Relasi ke kategori
+    // Relasi ke kategori
     public function kategori()
     {
         return $this->belongsTo(Kategori::class, 'id_kategori');
     }
 
-    // 🔥 Relasi ke user
+    // Relasi ke user
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    // 🔥 Relasi ke file
+    // Relasi ke file
     public function files()
     {
         return $this->hasMany(File::class);

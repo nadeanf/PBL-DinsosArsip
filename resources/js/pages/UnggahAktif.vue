@@ -93,26 +93,7 @@ const handleDrop = (e: DragEvent) => {
 }
 
 /* KATEGORI (DB) */
-const parents = computed(() =>
-  props.kategoriData.filter((item: any) => !item.parent_id)
-)
-
-const getChildren = (parentId: number) => {
-  return props.kategoriData.filter(
-    (item: any) => item.parent_id === parentId
-  )
-}
-
-    const buildTree = (data: any[], parentId: number | null = null) => {
-      return data
-        .filter(item => item.parent_id === parentId)
-        .map(item => ({
-          ...item,
-          children_recursive: buildTree(data, item.id)
-        }))
-    }
-
-const kategoriTree = computed(() => buildTree(props.kategoriData))
+const kategoriTree = computed(() => props.kategoriData)
 
 /* ACTION */
 const goBack = () => window.history.back()
