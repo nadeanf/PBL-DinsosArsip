@@ -9,10 +9,13 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
-        Schema::table('arsip', function (Blueprint $table) {
-            $table->integer('download_count')->default(0);
+        Schema::create('download_logs', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id');
+            $table->foreignId('arsip_id');
+            $table->timestamps();
         });
     }
 
@@ -20,9 +23,7 @@ return new class extends Migration
      * Reverse the migrations.
      */
     public function down(): void
-{
-    Schema::table('arsip', function (Blueprint $table) {
-        $table->dropColumn('download_count');
-    });
+    {
+        Schema::dropIfExists('download_logs');
     }
 };

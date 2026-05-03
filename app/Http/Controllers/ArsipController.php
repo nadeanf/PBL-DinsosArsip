@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\File;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\RequestAkses;
+use App\Models\DownloadLog;
+
 
 class ArsipController extends Controller
 {
@@ -278,7 +280,7 @@ $arsip = $query->latest()->get()->map(function ($item) {
     return $item;
 });
 
-    $totalDownload = Arsip::sum('download_count');
+    $totalDownload = DownloadLog::where('user_id', Auth::id())->count();
 
     return Inertia::render('Dashboard', [
         'arsip' => $arsip,
@@ -296,7 +298,7 @@ $arsip = $query->latest()->get()->map(function ($item) {
     ]);
 }
 
-       public function download($id)
+   public function download($id)
 {
     $arsip = Arsip::with('files')->findOrFail($id);
 
@@ -304,18 +306,23 @@ $arsip = $query->latest()->get()->map(function ($item) {
         abort(403, 'Tidak punya akses');
     }
 
-    $arsip->increment('download_count');
-
     $file = $arsip->files->first();
 
-    if (!$file) {
+    if (!$file || !Storage::disk('public')->exists($file->path_file)) {
         abort(404, 'File tidak ditemukan');
     }
 
-    return response()->download(
-        storage_path('app/public/' . $file->path_file),
-        $file->nama_file
-    );
+    // log download
+    DownloadLog::create([
+        'user_id' => Auth::id(),
+        'arsip_id' => $arsip->id
+    ]);
+
+    $filePath = storage_path('app/public/' . $file->path_file);
+
+return response()->file($filePath, [
+    'Content-Disposition' => 'attachment; filename="'.$file->nama_file.'"'
+]);
 }
 
     // RIWAYAT

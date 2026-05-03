@@ -68,7 +68,7 @@ const flattenKategori = (data, level = 0) => {
   return result
 }
 
-const totalDownload = computed(() => page.props?.totalDownload ?? 0)
+const totalDownload = ref(page.props?.totalDownload ?? 0)
 
 /* STATE FILTER */
 const search = ref('')
@@ -172,6 +172,22 @@ const openPreview = (doc) => {
   console.log('STATUS DOC:', doc.status)
   previewModal.value = true
 }
+
+const handleDownload = (id) => {
+
+  // 🔥 bikin form manual (bypass Inertia)
+  const form = document.createElement('form')
+  form.method = 'GET'
+  form.action = `/download/${id}`
+
+  document.body.appendChild(form)
+  form.submit()
+  document.body.removeChild(form)
+
+  // update count manual
+  totalDownload.value++
+}
+
 </script>
 
 <template>
@@ -425,13 +441,12 @@ class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-
       </div>
 
       <div class="flex justify-end gap-3 mt-6">
-       <a
-  v-if="selectedDoc?.files?.length && canAccessFull(selectedDoc)"
-  :href="`/download/${selectedDoc?.id}`"
+       <button
+  @click="handleDownload(selectedDoc.id)"
   class="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold"
 >
   Download
-</a>
+</button>
 
         <button
           @click="previewModal = false"
