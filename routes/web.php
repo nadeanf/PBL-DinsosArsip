@@ -95,7 +95,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/pimpinan/riwayat', function () {
     if (auth()->user()->role !== 'pimpinan') abort(403);
     return Inertia::render('Pimpinan/RiwayatPimpinan');
-});
+    });
+
+    //Route::get('/pimpinan/daftar-arsip', [ArsipController::class, 'listPimpinan']);
 
     // SUPER ADMIN
     Route::get('/super-admin/dashboard', function () {

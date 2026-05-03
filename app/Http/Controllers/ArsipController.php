@@ -180,7 +180,26 @@ $arsip = $query->latest()->get()->map(function ($item) {
 
     return $item;
 });
-    return Inertia::render('ListArsip', [
+
+    //hmch coba
+    $user = Auth::user();
+
+    if ($user->role === 'pimpinan') {
+        return Inertia::render('Pimpinan/ListArsipPimpinan', [
+            'arsip' => $arsip,
+            'kategori' => Kategori::with('childrenRecursive')
+                ->whereNull('parent_id')
+                ->get(),
+            'filters' => $request->only([
+                'search',
+                'kategori',
+                'tanggal_awal',
+                'tanggal_akhir'
+            ])
+        ]);
+    }
+
+return Inertia::render('ListArsip', [
         'arsip' => $arsip,
         'kategori' => Kategori::with('childrenRecursive')
             ->whereNull('parent_id')
@@ -441,4 +460,4 @@ public function requestAkses($id)
 
     return back()->with('success', 'Request akses dikirim');
 }
-}
+}       
