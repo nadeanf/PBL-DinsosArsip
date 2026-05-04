@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
 use Inertia\Inertia;
 use App\Http\Controllers\ArsipController;
+use App\Models\Kategori;
 
 /* PUBLIC ROUTES */
 
@@ -180,10 +181,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
     /* ADMIN*/
-    Route::get('/admin/dashboard', function () {
-        if (auth()->user()->role !== 'admin') abort(403);
-        return Inertia::render('admin/DashboardAdmin');
-    });
+    Route::get('/admin/dashboard', [ArsipController::class, 'dashboardAdmin']);
+
+    Route::get('/admin/daftar-arsip', [ArsipController::class, 'listAdmin']);
 
     Route::get('/admin/statistik', function () {
         if (auth()->user()->role !== 'admin') abort(403);
@@ -215,10 +215,34 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('admin/Pengumuman');
     });
 
-    Route::get('/admin/kelola-kategori', function () {
-        if (auth()->user()->role !== 'admin') abort(403);
-        return Inertia::render('admin/KelolaKategori');
-    });
+    Route::get('/admin/kelola-kategori', [ArsipController::class, 'kelolaKategori'])
+    ->middleware('auth');
+
+    Route::post('/kategori', function (Illuminate\Http\Request $request) {
+
+    if (auth()->user()->role !== 'admin') abort(403);
+
+    $request->validate([
+        'nama' => 'required|string',
+        'parent_id' => 'nullable|exists:kategori,id'
+    ]);
+
+    \App\Models\Kategori::create([
+        'nama' => $request->nama,
+        'parent_id' => $request->parent_id
+    ]);
+
+    return back();
+});
+
+Route::delete('/kategori/{id}', function ($id) {
+
+    if (auth()->user()->role !== 'admin') abort(403);
+
+    \App\Models\Kategori::findOrFail($id)->delete();
+
+    return back();
+});
 
     Route::get('/admin/unggah/aktif-inaktif', function () {
         if (auth()->user()->role !== 'admin') abort(403);

@@ -17,7 +17,7 @@ const user = page.props.auth?.user
         </div>
         <div>
           <p class="text-sm font-semibold text-gray-800">Pimpinan Dinas</p>
-          <p class="text-xs text-gray-600">Pimpinan</p>
+          <p class="text-xs text-gray-600">{{ user?.email }}</p>
         </div>
       </Link>
 
