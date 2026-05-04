@@ -22,7 +22,6 @@ const statistik = ref({
   audio: 2,
   download: 45,
   dilihat: 120,
-  favorit: 12
 })
 
 // DATA AKSES CEPAT

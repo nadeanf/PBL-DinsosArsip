@@ -406,6 +406,7 @@ public function dashboardAdmin(Request $request)
 
     $totalDownload = DownloadLog::where('user_id', Auth::id())->count();
 
+    $totalArsip = Arsip::count();
     $tipeDokumen = File::selectRaw("
     CASE
         WHEN LOWER(nama_file) LIKE '%.jpg' 
@@ -477,7 +478,8 @@ public function dashboardAdmin(Request $request)
     'totalDownload' => $totalDownload,
     'tipeDokumen' => $tipeDokumen,
     'approvalList' => $approvalList,
-    'totalApproval' => $totalApproval
+    'totalApproval' => $totalApproval,
+    'totalArsip' => $totalArsip
     ]);
 }
 
