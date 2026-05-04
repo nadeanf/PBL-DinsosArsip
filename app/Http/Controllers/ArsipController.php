@@ -25,6 +25,14 @@ class ArsipController extends Controller
     ]);
     }
 
+    public function createAdmin($folder)
+    {
+    return Inertia::render('admin/UnggahAktifAdmin', [
+        'folder' => $folder,
+        'kategoriData' => $this->kategoriTree()
+    ]);
+    }
+
     private function kategoriTree()
 {
     return Kategori::with('childrenRecursive')
@@ -115,6 +123,11 @@ class ArsipController extends Controller
             'deskripsi' => $request->deskripsi,
             'jenis_arsip' => $jenisArsip
         ]);
+        if (auth()->check() && auth()->user()->role === 'admin') {
+    return redirect('/admin/kelola-arsip-role-admin');
+}
+
+return redirect('/kelola-arsip');
 
         // HANDLE FILE BARU
         if ($request->hasFile('files')) {
@@ -156,6 +169,21 @@ class ArsipController extends Controller
             'requestAkses' => $requestAkses
         ]);
     }
+
+    public function kelolaArsipAdmin()
+{
+    if (auth()->user()->role !== 'admin') abort(403);
+
+    $arsip = Arsip::with(['kategori', 'user', 'files'])
+        ->where('user_id', Auth::id()) // ✅ INI KUNCINYA
+        ->latest()
+        ->get();
+        
+
+    return Inertia::render('admin/KelolaArsipRoleAdmin', [
+        'arsip' => $arsip
+    ]);
+}
 
     // LIST ARSIP (UNTUK HALAMAN DAFTAR ARSIP)
     public function list(Request $request)
@@ -255,6 +283,18 @@ public function listAdmin(Request $request)
         ]);
     }
 
+    public function editAdmin($id)
+    {
+    if (auth()->user()->role !== 'admin') abort(403);
+
+    $arsip = Arsip::with(['kategori', 'user'])->findOrFail($id);
+
+    return Inertia::render('admin/EditDokumenAdmin', [
+        'arsip' => $arsip,
+        'kategori' => $this->kategoriTree(),
+    ]);
+    }
+
     public function destroy($id)
     {
         $arsip = Arsip::findOrFail($id);
@@ -290,6 +330,19 @@ public function listAdmin(Request $request)
             'items' => $arsip
         ]);
     }
+
+    public function trashAdmin()
+{
+    $arsip = Arsip::onlyTrashed()
+        ->with('files')
+        ->latest()
+        ->get();
+
+    return Inertia::render('admin/SampahAdmin', [
+        'items' => $arsip
+    ]);
+}
+
 //now
     public function dashboard(Request $request)
 {

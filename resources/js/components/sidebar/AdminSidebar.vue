@@ -63,25 +63,51 @@ const page = usePage()
 
         <!-- UNGGAH -->
       <Link href="/admin/UnggahAdmin"
-          :class="page.url.startsWith('/admin/UnggahAdmin')
-            ? 'bg-[#2f4fa2] text-white shadow-md'
-            : 'bg-gray-200 text-gray-800'"
-          class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all">
-          <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-white">
-            <Upload :class="page.url.startsWith('/admin/UnggahAdmin') ? 'text-[#2f4fa2]' : 'text-gray-700'" class="w-5 h-5" />
-          </span>
-          <span class="text-sm font-medium">Unggah</span>
-        </Link>
+  :class="
+    page.url.startsWith('/admin/UnggahAdmin') ||
+    page.url.startsWith('/admin/unggah')
+      ? 'bg-[#2f4fa2] text-white shadow-md'
+      : 'bg-gray-200 text-gray-800'
+  "
+  class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all"
+>
+  <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-white">
+    <Upload
+      :class="
+        page.url.startsWith('/admin/UnggahAdmin') ||
+        page.url.startsWith('/admin/unggah')
+          ? 'text-[#2f4fa2]'
+          : 'text-gray-700'
+      "
+      class="w-5 h-5"
+    />
+  </span>
+
+  <span class="text-sm font-medium">Unggah</span>
+</Link>
 
         <!-- KELOLA ARSIP SAYA -->
         <Link href="/admin/kelola-arsip-role-admin"
-          :class="page.url.startsWith('/admin/kelola-arsip-role-admin')
-            ? 'bg-[#2f4fa2] text-white shadow-md'
-            : 'bg-gray-200 text-gray-800'"
-          class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all">
+          :class="
+            page.url.startsWith('/admin/kelola-arsip-role-admin') ||
+            page.url.startsWith('/admin/edit-dokumen')
+              ? 'bg-[#2f4fa2] text-white shadow-md'
+              : 'bg-gray-200 text-gray-800'
+          "
+          class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all"
+        >
           <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-white">
-            <FileText :class="page.url.startsWith('/admin/kelola-arsip-role-admin') ? 'text-[#2f4fa2]' : 'text-gray-700'" class="w-5 h-5" />
+            <FileText 
+              :class="
+                page.url.startsWith('/admin/kelola-arsip-role-admin') ||
+                page.url.startsWith('/admin/edit-dokumen')
+                  ? 'text-[#2f4fa2]'
+                  : 'text-gray-700'
+              "
+              class="w-5 h-5"
+            />
           </span>
+
           <span class="text-sm font-medium">Kelola Arsip Saya</span>
         </Link>
 
