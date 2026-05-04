@@ -7,9 +7,9 @@ import TreeDropdown from '@/components/TreeDropdown.vue'
 const page = usePage()
 
 /* DATA BACKEND */
-const dataArsip = page.props.arsip || []
-const kategoriData = page.props.kategori || []
-const filters = page.props.filters || {}
+const dataArsip = computed(() => page.props.arsip ?? [])
+const kategoriData = page.props.kategori ?? []
+const filters = page.props.filters ?? {}
 
 /* STATE FILTER */
 const search = ref(filters.search || '')
@@ -19,6 +19,16 @@ const tanggal_akhir = ref(filters.tanggal_akhir || '')
 
 const showDropdown = ref(false)
 
+/* PAGINATION */
+const currentPage = ref(1)
+const perPage = 8
+
+/* RESET PAGE kalau filter berubah */
+const resetPage = () => {
+  currentPage.value = 1
+}
+
+/* CATEGORY NAME */
 const selectedKategoriName = computed(() => {
   const findName = (data) => {
     for (let item of data) {
@@ -32,8 +42,10 @@ const selectedKategoriName = computed(() => {
   return findName(kategoriData) || ''
 })
 
-/* BUTTON CARI REDIRECT KE LIST ARSIP */
+/* SEARCH */
 const handleSearch = () => {
+  currentPage.value = 1
+
   router.get('/daftar-arsip', {
     search: search.value,
     kategori: kategori.value,
@@ -45,56 +57,67 @@ const handleSearch = () => {
   })
 }
 
-/* HELPER FILE TYPE */
+/* FILE TYPE */
 const getFileType = (path) => {
   if (!path) return 'FILE'
 
   const ext = path.split('.').pop()?.toLowerCase()
 
-  if(['jpg','jpeg','png','gif','webp'].includes(ext)){
-    return 'IMAGE'
-  }
-
-  if(ext === 'pdf'){
-    return 'PDF'
-  }
+  if (['jpg','jpeg','png','gif','webp'].includes(ext)) return 'IMAGE'
+  if (ext === 'pdf') return 'PDF'
 
   return 'FILE'
 }
 
-/* DATA MAPPING */
-const documents = computed(() => {
- return dataArsip.map(item => ({
-    id:item.id,
-    title:item.judul,
-    nomor:item.nomor || '',
-    deskripsi:item.deskripsi,
-
-    kategori:item.kategori?.nama || '-',
-    jenis:item.jenis_arsip || '-',
-    bidang:item.user?.bagian || '-',
-
-    tahun:item.tahun,
-    lokasi:item.lokasi,
-    status:item.status_akses,
-
-    files:item.files || [],
-
-    format:item.files?.length
+/* MAPPING FULL DATA */
+const mappedDocuments = computed(() => {
+  return dataArsip.value.map(item => ({
+    id: item.id,
+    title: item.judul,
+    nomor: item.nomor || '',
+    deskripsi: item.deskripsi,
+    kategori: item.kategori?.nama || '-',
+    jenis: item.jenis_arsip || '-',
+    bidang: item.user?.bagian || '-',
+    tahun: item.tahun,
+    lokasi: item.lokasi,
+    status: item.status_akses,
+    files: item.files || [],
+    format: item.files?.length
       ? getFileType(item.files[0].path_file)
       : 'FILE',
-
-    tanggal:item.created_at
+    tanggal: item.created_at
       ? new Date(item.created_at).toLocaleDateString('id-ID')
       : '-'
- }))
+  }))
 })
 
-/* PREVIEW MODAL */
+/* TOTAL DATA (PENTING) */
+const totalData = computed(() => mappedDocuments.value.length)
+
+/* TOTAL PAGE */
+const totalPages = computed(() =>
+  Math.ceil(totalData.value / perPage)
+)
+
+/* DATA PER PAGE */
+const documents = computed(() => {
+  const start = (currentPage.value - 1) * perPage
+  const end = start + perPage
+  return mappedDocuments.value.slice(start, end)
+})
+
+/* SET PAGE */
+const setPage = (p) => {
+  if (p < 1 || p > totalPages.value) return
+  currentPage.value = p
+}
+
+/* PREVIEW */
 const previewModal = ref(false)
 const selectedDoc = ref(null)
 
-const openPreview = (item)=>{
+const openPreview = (item) => {
   selectedDoc.value = item
   previewModal.value = true
 }
@@ -120,7 +143,7 @@ const openPreview = (item)=>{
       />
     </div>
 
-    <!-- 🔥 DROPDOWN FIX -->
+    <!-- DROPDOWN FIX -->
 <div class="relative w-[300px]">
 
   <!-- BUTTON -->
@@ -175,7 +198,7 @@ const openPreview = (item)=>{
 
   <!-- TOTAL -->
   <div class="text-sm">
-    Ditemukan <b>{{ documents.length }}</b> arsip
+    Ditemukan {{ mappedDocuments.length }} arsip
   </div>
 
 
@@ -188,7 +211,6 @@ const openPreview = (item)=>{
       @click="openPreview(item)"
       class="cursor-pointer bg-[#7fa6b3] rounded-xl p-4 shadow-md flex items-center gap-4 hover:border-blue-500 transition"
     >
-
       <!-- ICON -->
       <div class="w-12 h-12 flex items-center justify-center rounded-xl bg-gray-100">
 
@@ -241,6 +263,44 @@ const openPreview = (item)=>{
     </div>
 
   </div>
+
+  <!-- 🔥 PAGINATION TARUH DI SINI -->
+<div
+  v-if="totalPages > 1"
+  class="flex justify-center items-center gap-2 mt-6"
+>
+
+  <button
+    @click="setPage(currentPage - 1)"
+    :disabled="currentPage === 1"
+    class="px-3 py-1 rounded-lg bg-gray-200 disabled:opacity-50"
+  >
+    Prev
+  </button>
+
+  <button
+    v-for="p in totalPages"
+    :key="p"
+    @click="setPage(p)"
+    :class="[
+      'px-3 py-1 rounded-lg',
+      currentPage === p
+        ? 'bg-blue-600 text-white'
+        : 'bg-gray-200'
+    ]"
+  >
+    {{ p }}
+  </button>
+
+  <button
+    @click="setPage(currentPage + 1)"
+    :disabled="currentPage === totalPages"
+    class="px-3 py-1 rounded-lg bg-gray-200 disabled:opacity-50"
+  >
+    Next
+  </button>
+
+</div>
 
 </div>
 
