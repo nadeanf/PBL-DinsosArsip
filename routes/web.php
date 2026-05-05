@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
 use Inertia\Inertia;
 use App\Http\Controllers\ArsipController;
+use App\Models\Kategori;
 
 /* PUBLIC ROUTES */
 
@@ -82,10 +83,7 @@ Route::post('/logout', function () {
 Route::middleware('auth')->group(function () {
 
     // PIMPINAN
-    Route::get('/pimpinan/dashboard', function () {
-        if (auth()->user()->role !== 'pimpinan') abort(403);
-        return Inertia::render('Pimpinan/DashboardPimpinan', ['title' => 'Dashboard']);
-    });
+    Route::get('/pimpinan/dashboard', [ArsipController::class, 'dashboardPimpinan']);
 
     Route::get('/pimpinan/statistik', function () {
         if (auth()->user()->role !== 'pimpinan') abort(403);
@@ -95,7 +93,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/pimpinan/riwayat', function () {
     if (auth()->user()->role !== 'pimpinan') abort(403);
     return Inertia::render('Pimpinan/RiwayatPimpinan');
-});
+    });
+
+    Route::get('/pimpinan/daftar-arsip', [ArsipController::class, 'list']);
 
     // SUPER ADMIN
     Route::get('/super-admin/dashboard', function () {
@@ -178,52 +178,65 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
     /* ADMIN*/
-    Route::get('/admin/dashboard', function () {
-        if (auth()->user()->role !== 'admin') abort(403);
-        return Inertia::render('admin/DashboardAdmin');
-    });
+    Route::get('/admin/dashboard', [ArsipController::class, 'dashboardAdmin']);
+
+    Route::get('/admin/daftar-arsip', [ArsipController::class, 'listAdmin']);
+    Route::get('/admin/persetujuan', [ArsipController::class, 'persetujuan'])
+    ->name('admin.persetujuan');
+
+    Route::post('/admin/persetujuan/{id}', [ArsipController::class, 'updatePersetujuan'])
+    ->name('admin.persetujuan.update');
 
     Route::get('/admin/statistik', function () {
         if (auth()->user()->role !== 'admin') abort(403);
         return Inertia::render('admin/StatistikLaporan');
     });
 
-    Route::get('/admin/kelola-arsip-user', function () {
-    if (auth()->user()->role !== 'admin') abort(403);
-    return Inertia::render('admin/KelolaArsipUser');
-    });
+    Route::get('/admin/kelola-arsip-user', [ArsipController::class, 'kelolaArsipUser']);
 
-    Route::get('/admin/kelola-arsip-role-admin', function () {
-        if (auth()->user()->role !== 'admin') abort(403);
-        return Inertia::render('admin/KelolaArsipRoleAdmin');
-    });
+    // ADMIN
+    Route::get('/admin/kelola-arsip-role-admin', [ArsipController::class, 'kelolaArsipAdmin']);
 
-    Route::get('/admin/persetujuan', function () {
-        if (auth()->user()->role !== 'admin') abort(403);
-        return Inertia::render('admin/PersetujuanAkses');
-    });
+    Route::get('/admin/edit-dokumen/{id}', [ArsipController::class, 'editAdmin'])
+    ->name('arsip.edit.admin');   
 
-    Route::get('/admin/sampah-admin', function () {
-    if (auth()->user()->role !== 'admin') abort(403);
-    return Inertia::render('admin/SampahAdmin');
-    });
+    Route::get('/admin/sampah-admin', [ArsipController::class, 'trashAdmin']);
 
     Route::get('/admin/pengumuman', function () {
         if (auth()->user()->role !== 'admin') abort(403);
         return Inertia::render('admin/Pengumuman');
     });
 
-    Route::get('/admin/kelola-kategori', function () {
-        if (auth()->user()->role !== 'admin') abort(403);
-        return Inertia::render('admin/KelolaKategori');
-    });
+    Route::get('/admin/kelola-kategori', [ArsipController::class, 'kelolaKategori'])
+    ->middleware('auth');
 
-    Route::get('/admin/unggah/aktif-inaktif', function () {
-        if (auth()->user()->role !== 'admin') abort(403);
-        return Inertia::render('admin/UnggahAktifAdmin', [
-            'folder' => 'aktif-inaktif',
-        ]);
-    });
+    Route::post('/kategori', function (Illuminate\Http\Request $request) {
+
+    if (auth()->user()->role !== 'admin') abort(403);
+
+    $request->validate([
+        'nama' => 'required|string',
+        'parent_id' => 'nullable|exists:kategori,id'
+    ]);
+
+    \App\Models\Kategori::create([
+        'nama' => $request->nama,
+        'parent_id' => $request->parent_id
+    ]);
+
+    return back();
+});
+
+Route::delete('/kategori/{id}', function ($id) {
+
+    if (auth()->user()->role !== 'admin') abort(403);
+
+    \App\Models\Kategori::findOrFail($id)->delete();
+
+    return back();
+});
+
+    Route::get('/admin/unggah/{folder}', [ArsipController::class, 'createAdmin']);
 
     Route::get('/admin/unggah/vital', function () {
         if (auth()->user()->role !== 'admin') abort(403);

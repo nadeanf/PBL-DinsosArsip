@@ -9,7 +9,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage; // ✅ tambahan
+use Illuminate\Support\Facades\Storage; 
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -36,7 +36,7 @@ class ProfileController extends Controller
         // tetap pakai validated bawaan kamu
         $data = $request->validated();
 
-        // ✅ TAMBAHAN: handle upload foto
+        // TAMBAHAN: handle upload foto
         if ($request->hasFile('photo')) {
 
             // hapus foto lama kalau ada

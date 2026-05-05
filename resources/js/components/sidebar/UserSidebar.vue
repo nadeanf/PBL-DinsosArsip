@@ -60,15 +60,31 @@ function getPhoto() {
           <span class="text-sm font-medium">Unggah</span>
         </Link>
 
-        <!-- ARSIP -->
-        <Link href="/kelola-arsip" 
-          :class="page.url.startsWith('/kelola-arsip') ? 'bg-[#2f4fa2] text-white shadow-md' : 'bg-gray-200 hover:bg-gray-300 text-gray-800'"
-          class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all">
-          <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-white shadow-inner">
-            <FileText :class="page.url.startsWith('/kelola-arsip') ? 'text-[#2f4fa2]' : 'text-gray-800'" class="w-5 h-5" />
+        <!-- KELOLA ARSIP -->
+        <Link href="/kelola-arsip"
+          :class="
+            page.url.startsWith('/kelola-arsip') ||
+            page.url.startsWith('/edit-dokumen')
+              ? 'bg-[#2f4fa2] text-white shadow-md'
+              : 'bg-gray-200 text-gray-800'
+          "
+          class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all"
+        >
+          <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-white">
+            <FileText 
+              :class="
+                page.url.startsWith('/kelola-arsip') ||
+                page.url.startsWith('/edit-dokumen')
+                  ? 'text-[#2f4fa2]'
+                  : 'text-gray-700'
+              "
+              class="w-5 h-5"
+            />
           </span>
-          <span class="text-sm font-medium">Arsip Saya</span>
+
+          <span class="text-sm font-medium">Kelola Arsip Saya</span>
         </Link>
+
 
         <!-- RIWAYAT -->
         <Link href="/riwayat" 
@@ -89,6 +105,15 @@ function getPhoto() {
           </span>
           <span class="text-sm font-medium">Sampah</span>
         </Link>
+
+        <!-- STORAGE -->
+      <div class="mt-8 bg-white/70 p-4 rounded-xl text-xs shadow-inner">
+        <p class="mb-3 font-semibold text-gray-800">Penyimpanan</p>
+        <div class="w-full bg-gray-300 h-2.5 rounded-full overflow-hidden">
+          <div class="bg-[#2f4fa2] h-full w-1/3 rounded-full"></div>
+        </div>
+        <p class="mt-2.5 text-[10px] text-gray-700">xx GB / xx GB (xx%)</p>
+      </div>
 
       </div>
     </div>

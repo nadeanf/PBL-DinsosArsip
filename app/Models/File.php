@@ -19,7 +19,7 @@ class File extends Model
         'size'
     ];
 
-    // 🔥 Relasi ke Arsip
+    // Relasi ke Arsip
     public function arsip()
     {
         return $this->belongsTo(Arsip::class);

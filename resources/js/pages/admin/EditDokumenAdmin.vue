@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { Head, useForm, router } from '@inertiajs/vue3'
-import UserLayout from '@/layouts/UserLayout.vue'
+import AdminLayout from '@/layouts/AdminLayout.vue'
 import { UploadCloud } from 'lucide-vue-next'
 import TreeDropdown from '@/components/TreeDropdown.vue'
 
-defineOptions({ layout: UserLayout })
+defineOptions({ layout: AdminLayout })
 
 
 const isDragging = ref(false)
@@ -100,10 +100,7 @@ const goBack = () => window.history.back()
 /* SUBMIT (UPDATE DB) */
 const submit = () => {
   form.put(`/arsip/${arsip.id}`, {
-    forceFormData: true,
-    onSuccess: () => {
-      router.visit('/kelola-arsip')
-    }
+    forceFormData: true
   })
 }
 </script>

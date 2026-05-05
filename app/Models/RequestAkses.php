@@ -13,15 +13,15 @@ class RequestAkses extends Model
         'status'
     ];
 
-    // 🔗 relasi ke user
+    // relasi ke user
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    // 🔗 relasi ke arsip
+    // relasi ke arsip
     public function arsip()
     {
-        return $this->belongsTo(Arsip::class);
+        return $this->belongsTo(Arsip::class)->withTrashed();
     }
 }

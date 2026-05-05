@@ -1,35 +1,35 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3'
-import {
-  Home,
-  BarChart3,
-  Upload,
-  FileText,
-  Users,
-  Folder,
-  CheckCircle,
-  History,
-  Trash2,
-  Megaphone,
-  LogOut
-} from 'lucide-vue-next'
+import { Home, BarChart3, Upload, FileText, Users, Folder, CheckCircle, History, Trash2, Megaphone, LogOut} from 'lucide-vue-next'
+import { computed } from 'vue'
+
+
+const props = defineProps({
+    user: Object
+})
 
 const page = usePage()
+
+
+const user = computed(() => props.user || page.props.auth?.user)
 </script>
 
 <template>
   <aside class="w-64 min-h-screen bg-gradient-to-b from-[#dbe3e7] to-[#2f6f7e] p-4 flex flex-col justify-between">
 
-    <!-- TOP -->
     <div>
-      <!-- PROFILE -->
       <Link href="/edit-profile" class="flex items-center gap-3 mb-6">
-        <div class="w-12 h-12 flex items-center justify-center rounded-full bg-[#b7d3d8]">
-          <span class="text-xl">👤</span>
+        <div class="w-12 h-12 flex items-center justify-center rounded-full bg-[#b7d3d8] overflow-hidden border-2 border-white shadow-sm">
+          <img 
+            v-if="user?.photo" 
+            :src="`/storage/${user.photo}`" 
+            class="w-full h-full object-cover"
+          />
+          <span v-else class="text-xl">👤</span>
         </div>
         <div>
-          <p class="text-sm font-semibold text-gray-800">Admin Arsip</p>
-          <p class="text-xs text-gray-600">Administrator</p>
+          <p class="text-sm font-semibold text-gray-800">{{ user?.name || 'Super Admin' }}</p>
+          <p class="text-xs text-gray-600">{{ user?.email }}</p>
         </div>
       </Link>
 
@@ -63,25 +63,51 @@ const page = usePage()
 
         <!-- UNGGAH -->
       <Link href="/admin/UnggahAdmin"
-          :class="page.url.startsWith('/admin/UnggahAdmin')
-            ? 'bg-[#2f4fa2] text-white shadow-md'
-            : 'bg-gray-200 text-gray-800'"
-          class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all">
-          <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-white">
-            <Upload :class="page.url.startsWith('/admin/UnggahAdmin') ? 'text-[#2f4fa2]' : 'text-gray-700'" class="w-5 h-5" />
-          </span>
-          <span class="text-sm font-medium">Unggah</span>
-        </Link>
+  :class="
+    page.url.startsWith('/admin/UnggahAdmin') ||
+    page.url.startsWith('/admin/unggah')
+      ? 'bg-[#2f4fa2] text-white shadow-md'
+      : 'bg-gray-200 text-gray-800'
+  "
+  class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all"
+>
+  <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-white">
+    <Upload
+      :class="
+        page.url.startsWith('/admin/UnggahAdmin') ||
+        page.url.startsWith('/admin/unggah')
+          ? 'text-[#2f4fa2]'
+          : 'text-gray-700'
+      "
+      class="w-5 h-5"
+    />
+  </span>
+
+  <span class="text-sm font-medium">Unggah</span>
+</Link>
 
         <!-- KELOLA ARSIP SAYA -->
         <Link href="/admin/kelola-arsip-role-admin"
-          :class="page.url.startsWith('/admin/kelola-arsip-role-admin')
-            ? 'bg-[#2f4fa2] text-white shadow-md'
-            : 'bg-gray-200 text-gray-800'"
-          class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all">
+          :class="
+            page.url.startsWith('/admin/kelola-arsip-role-admin') ||
+            page.url.startsWith('/admin/edit-dokumen')
+              ? 'bg-[#2f4fa2] text-white shadow-md'
+              : 'bg-gray-200 text-gray-800'
+          "
+          class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all"
+        >
           <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-white">
-            <FileText :class="page.url.startsWith('/admin/kelola-arsip-role-admin') ? 'text-[#2f4fa2]' : 'text-gray-700'" class="w-5 h-5" />
+            <FileText 
+              :class="
+                page.url.startsWith('/admin/kelola-arsip-role-admin') ||
+                page.url.startsWith('/admin/edit-dokumen')
+                  ? 'text-[#2f4fa2]'
+                  : 'text-gray-700'
+              "
+              class="w-5 h-5"
+            />
           </span>
+
           <span class="text-sm font-medium">Kelola Arsip Saya</span>
         </Link>
 

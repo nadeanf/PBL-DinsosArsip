@@ -1,14 +1,16 @@
 <script setup>
 import { usePage, router } from '@inertiajs/vue3'
-import { ref } from 'vue'
+import { ref, computed } from 'vue' 
 import UserLayout from '@/layouts/UserLayout.vue'
 
-defineOptions({
-  layout: UserLayout
-})
+import AuthLayoutPimpinan from '@/layouts/AuthLayoutPimpinan.vue' 
+import AdminLayout from '@/layouts/AdminLayout.vue' 
+import SuperAdminLayout from '@/layouts/SuperAdminLayout.vue'
 
 const page = usePage()
-const user = page.props.auth?.user
+
+const user = computed(() => page.props.auth?.user)
+
 
 const photo = ref(null)
 const preview = ref(null)
@@ -45,6 +47,8 @@ function handleFile(e) {
     onSuccess: () => {
       message.value = 'Foto berhasil diupdate ✅'
 
+      router.reload({ only: ['auth'] })
+
       setTimeout(() => {
         message.value = null
       }, 3000)
@@ -63,6 +67,34 @@ function handleFile(e) {
     }
   })
 }
+</script>
+
+<script>
+export default {
+  layout: (h, page) => {
+    const role = page.props.auth?.user?.role;
+
+    if (role === 'pimpinan') {
+      return h(AuthLayoutPimpinan, [page]);
+    } 
+    
+    if (role === 'admin') {
+      return h(AdminLayout, [page]);
+    }
+
+    /* if (role === 'admin') {
+      return h(AdminLayout, [page]);
+    } */
+
+    if (role === 'super_admin') {
+      return h(SuperAdminLayout, [page]);
+    }
+
+    // Default jika bukan pimpinan atau admin
+    return h(UserLayout, [page]);
+  },
+}
+
 </script>
 
 <template>

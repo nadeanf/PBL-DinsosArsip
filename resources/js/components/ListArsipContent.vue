@@ -6,16 +6,12 @@ import TreeDropdown from '@/components/TreeDropdown.vue'
 
 const page = usePage()
 
-/* =========================
-   DATA BACKEND
-========================= */
-const dataArsip = page.props.arsip || []
-const kategoriData = page.props.kategori || []
-const filters = page.props.filters || {}
+/* DATA BACKEND */
+const dataArsip = computed(() => page.props.arsip ?? [])
+const kategoriData = page.props.kategori ?? []
+const filters = page.props.filters ?? {}
 
-/* =========================
-   STATE FILTER
-========================= */
+/* STATE FILTER */
 const search = ref(filters.search || '')
 const kategori = ref(filters.kategori || '')
 const tanggal_awal = ref(filters.tanggal_awal || '')
@@ -23,6 +19,16 @@ const tanggal_akhir = ref(filters.tanggal_akhir || '')
 
 const showDropdown = ref(false)
 
+/* PAGINATION */
+const currentPage = ref(1)
+const perPage = 8
+
+/* RESET PAGE kalau filter berubah */
+const resetPage = () => {
+  currentPage.value = 1
+}
+
+/* CATEGORY NAME */
 const selectedKategoriName = computed(() => {
   const findName = (data) => {
     for (let item of data) {
@@ -36,10 +42,10 @@ const selectedKategoriName = computed(() => {
   return findName(kategoriData) || ''
 })
 
-/* =========================
-   BUTTON CARI (REDIRECT KE LIST ARSIP)
-========================= */
+/* SEARCH */
 const handleSearch = () => {
+  currentPage.value = 1
+
   router.get('/daftar-arsip', {
     search: search.value,
     kategori: kategori.value,
@@ -51,9 +57,7 @@ const handleSearch = () => {
   })
 }
 
-/* =========================
-   HELPER FILE TYPE
-========================= */
+/* FILE TYPE */
 const getFileType = (path) => {
   if (!path) return 'FILE'
 
@@ -70,43 +74,55 @@ const getFileType = (path) => {
   return 'FILE'
 }
 
-/* =========================
-   DATA MAPPING
-========================= */
-const documents = computed(() => {
- return dataArsip.map(item => ({
-    id:item.id,
-    title:item.judul,
-    nomor:item.nomor || '',
-    deskripsi:item.deskripsi,
-
-    kategori:item.kategori?.nama || '-',
-    jenis:item.jenis_arsip || '-',
-    bidang:item.user?.bagian || '-',
-
-    tahun:item.tahun,
-    lokasi:item.lokasi,
-    status:item.status_akses,
-
-    files:item.files || [],
-
-    format:item.files?.length
+/* MAPPING FULL DATA */
+const mappedDocuments = computed(() => {
+  return dataArsip.value.map(item => ({
+    id: item.id,
+    title: item.judul,
+    nomor: item.nomor || '',
+    deskripsi: item.deskripsi,
+    kategori: item.kategori?.nama || '-',
+    jenis: item.jenis_arsip || '-',
+    bidang: item.user?.bagian || '-',
+    tahun: item.tahun,
+    lokasi: item.lokasi,
+    status: item.status_akses,
+    files: item.files || [],
+    format: item.files?.length
       ? getFileType(item.files[0].path_file)
       : 'FILE',
-
-    tanggal:item.created_at
+    tanggal: item.created_at
       ? new Date(item.created_at).toLocaleDateString('id-ID')
       : '-'
- }))
+  }))
 })
 
-/* =========================
-   PREVIEW MODAL
-========================= */
+/* TOTAL DATA (PENTING) */
+const totalData = computed(() => mappedDocuments.value.length)
+
+/* TOTAL PAGE */
+const totalPages = computed(() =>
+  Math.ceil(totalData.value / perPage)
+)
+
+/* DATA PER PAGE */
+const documents = computed(() => {
+  const start = (currentPage.value - 1) * perPage
+  const end = start + perPage
+  return mappedDocuments.value.slice(start, end)
+})
+
+/* SET PAGE */
+const setPage = (p) => {
+  if (p < 1 || p > totalPages.value) return
+  currentPage.value = p
+}
+
+/* PREVIEW */
 const previewModal = ref(false)
 const selectedDoc = ref(null)
 
-const openPreview = (item)=>{
+const openPreview = (item) => {
   selectedDoc.value = item
   previewModal.value = true
 }

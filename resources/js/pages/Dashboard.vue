@@ -20,34 +20,35 @@ const canAccessFull = (doc) => {
 
   if (!user) return false
 
-  // publik → bebas
+  // ✅ request approved → BOLEH
+  if (doc.request_status === 'approved') return true
+
+  // ✅ publik → BOLEH
   if (doc.status === 'publik') return true
 
-  // pemilik arsip
+  // ✅ pemilik
   if (doc.user_id === user.id) return true
 
-  // private tapi bagian sama
+  // ✅ private tapi bagian sama
   if (doc.status === 'private' && doc.bidang === user.bagian) return true
 
   return false
 }
 
 const requestAkses = (arsipId) => {
-  console.log('🔥 KLIK MASUK', arsipId)
+  console.log('KLIK MASUK', arsipId)
 
   router.post(`/request-akses/${arsipId}`, {}, {
   onSuccess: () => {
-    console.log('✅ BERHASIL')
+    console.log('BERHASIL')
 
-    // 🔥 langsung update UI
+    // update UI
     selectedDoc.value.request_status = 'pending'
   },
   })
 }
 
-/* =========================
-   DATA BACKEND (FIX)
-========================= */
+/* DATA BACKEND (FIX) */
 const dataArsip = computed(() => page.props?.arsip ?? [])
 console.log(dataArsip.value) // 
 const flattenKategori = (data, level = 0) => {
@@ -70,11 +71,9 @@ const flattenKategori = (data, level = 0) => {
   return result
 }
 
-const totalDownload = computed(() => page.props?.totalDownload ?? 0)
+const totalDownload = ref(page.props?.totalDownload ?? 0)
 
-/* =========================
-   STATE FILTER
-========================= */
+/* STATE FILTER */
 const search = ref('')
 const kategori = ref('')
 const showDropdown = ref(false)
@@ -98,9 +97,7 @@ const exportPDF = () => {
   window.location.href = `/export/pdf?search=${search.value}&kategori=${kategori.value}&tanggal_awal=${tanggal_awal.value}&tanggal_akhir=${tanggal_akhir.value}`
 }
 
-/* =========================
-   HELPER FILE TYPE
-========================= */
+/* HELPER FILE TYPE */
 const getFileType = (path) => {
   if (!path) return 'FILE'
   const ext = path.split('.').pop()?.toLowerCase()
@@ -110,9 +107,7 @@ const getFileType = (path) => {
   return 'FILE'
 }
 
-/* =========================
-   MAPPING DATA
-========================= */
+/* MAPPING DATA */
 const aktivitasTerbaru = computed(() => {
   return dataArsip.value.map(item => ({
     id: item.id,
@@ -145,25 +140,19 @@ const aktivitasTerbaru = computed(() => {
   }))
 })
 
-/* =========================
-   LOAD DATA
-========================= */
+/* LOAD DATA */
 const filteredData = ref([])
 
 onMounted(() => {
   filteredData.value = aktivitasTerbaru.value
 })
 
-/* =========================
-   LIMIT DASHBOARD
-========================= */
+/* LIMIT DASHBOARD */
 const limitedData = computed(() => {
-  return filteredData.value.slice(0, 5)
+  return filteredData.value.slice(0, 3)
 })
 
-/* =========================
-   SEARCH REDIRECT
-========================= */
+/* SEARCH REDIRECT */
 const handleSearch = () => {
   router.get('/daftar-arsip', {
     search: search.value,
@@ -173,9 +162,7 @@ const handleSearch = () => {
   })
 }
 
-/* =========================
-   PREVIEW MODAL
-========================= */
+/* PREVIEW MODAL */
 const previewModal = ref(false)
 const selectedDoc = ref(null)
 const openPreview = (doc) => {
@@ -184,6 +171,23 @@ const openPreview = (doc) => {
   // 🔥 buka modal dulu
   selectedDoc.value = doc
   previewModal.value = true
+}
+
+const handleDownload = (id) => {
+
+  // bikin form manual (bypass Inertia)
+  const form = document.createElement('form')
+  form.method = 'GET'
+  form.action = `/download/${id}`
+
+  document.body.appendChild(form)
+  form.submit()
+  document.body.removeChild(form)
+
+  // update count manual
+  totalDownload.value++
+}
+
 
   // 🔥 kirim ke backend TANPA ganggu Inertia
   fetch('/riwayat/view', {
@@ -374,32 +378,36 @@ class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-
 </iframe>
 
 <!-- TIDAK ADA AKSES -->
-<div v-else class="text-gray-500 text-center space-y-3">
+ <!-- KALAU PUBLIC, JANGAN TAMPILKAN REQUEST STATUS -->
+<div v-if="selectedDoc?.status === 'publik'">
+  <!-- kosong / atau langsung tampil preview -->
+</div><div v-if="!canAccessFull(selectedDoc)" class="text-gray-500 text-center space-y-3">
+  
   <div>
     🔒 Dokumen ini bersifat privat <br/>
     Anda tidak memiliki akses
   </div>
 
- <!-- SUDAH REQUEST -->
-<div v-if="selectedDoc?.request_status === 'pending'"
-     class="text-yellow-500 font-semibold text-sm">
-  ⏳ Menunggu persetujuan
-</div>
+  <!-- STATUS REQUEST -->
+  <div v-if="selectedDoc?.request_status === 'pending'"
+       class="text-yellow-500 font-semibold text-sm">
+    ⏳ Menunggu persetujuan
+  </div>
 
-<!-- DITOLAK -->
-<div v-else-if="selectedDoc?.request_status === 'ditolak'"
-     class="text-red-500 font-semibold text-sm">
-  ❌ Akses ditolak
-</div>
+  <div v-else-if="selectedDoc?.request_status === 'rejected'"
+       class="text-red-500 font-semibold text-sm">
+    ❌ Akses ditolak
+  </div>
 
-<!-- BELUM REQUEST -->
-<button
-  v-else
-  @click.stop.prevent="requestAkses(selectedDoc.id)"
-  class="bg-yellow-500 text-white px-4 py-2 rounded-lg text-sm font-semibold"
->
-  Minta Akses
-</button>
+  <!-- BUTTON -->
+  <button
+    v-else
+    @click.stop.prevent="requestAkses(selectedDoc.id)"
+    class="bg-yellow-500 text-white px-4 py-2 rounded-lg text-sm font-semibold"
+  >
+    Minta Akses
+  </button>
+
 </div>
 </div>
     <div class="w-full md:w-1/2 p-8 flex flex-col justify-between">
@@ -451,13 +459,12 @@ class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-
       </div>
 
       <div class="flex justify-end gap-3 mt-6">
-       <a
-  v-if="selectedDoc?.files?.length && canAccessFull(selectedDoc)"
-  :href="`/download/${selectedDoc?.id}`"
+       <button
+  @click="handleDownload(selectedDoc.id)"
   class="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold"
 >
   Download
-</a>
+</button>
 
         <button
           @click="previewModal = false"

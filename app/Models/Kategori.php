@@ -20,16 +20,12 @@ class Kategori extends Model
     }
 
     public function children()
-    {
-        return $this->hasMany(Kategori::class, 'parent_id');
-    }
+{
+    return $this->hasMany(Kategori::class, 'parent_id');
+}
 
-    public function childrenRecursive()
-    {
-        return $this->children()->with([
-            'childrenRecursive' => function ($query) {
-                $query->select('id', 'nama', 'parent_id');
-            }
-        ]);
-    }
+public function childrenRecursive()
+{
+    return $this->children()->with('childrenRecursive');
+}
 }

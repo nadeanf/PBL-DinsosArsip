@@ -12,9 +12,8 @@ const props = defineProps<{
   kategoriData: any[]
 }>()
 
-/* =========================
-   FORM
-========================= */
+
+/* FORM */
 const form = useForm({
   judul: '',
   nomor: '',
@@ -28,9 +27,7 @@ const form = useForm({
   folder: props.folder
 })
 
-/* =========================
-   STATE
-========================= */
+/* STATE */
 const isPrivate = computed(() => form.status_akses === 'private')
 const isDragging = ref(false)
 
@@ -49,9 +46,7 @@ const selectedKategoriName = computed(() => {
   return findName(kategoriTree.value) || ''
 })
 
-/* =========================
-   BIDANG
-========================= */
+/* BIDANG */
 const bidangList = [
   'Sekretariat',
   'Rehabilitasi Sosial',
@@ -59,9 +54,7 @@ const bidangList = [
   'Pemberdayaan Sosial'
 ]
 
-/* =========================
-   FILE UPLOAD
-========================= */
+/* FILE UPLOAD */
 const fileInput = ref<HTMLInputElement | null>(null)
 const filePreviews = ref<any[]>([])
 
@@ -82,9 +75,7 @@ const handleFileChange = (e: any) => {
   setFiles(files)
 }
 
-/* =========================
-   DRAG & DROP
-========================= */
+/* DRAG & DROP */
 const handleDragOver = (e: DragEvent) => {
   e.preventDefault()
   isDragging.value = true
@@ -102,33 +93,10 @@ const handleDrop = (e: DragEvent) => {
   setFiles(files)
 }
 
-/* =========================
-   KATEGORI (DB)
-========================= */
-const parents = computed(() =>
-  props.kategoriData.filter((item: any) => !item.parent_id)
-)
+/* KATEGORI (DB) */
+const kategoriTree = computed(() => props.kategoriData)
 
-const getChildren = (parentId: number) => {
-  return props.kategoriData.filter(
-    (item: any) => item.parent_id === parentId
-  )
-}
-
-    const buildTree = (data: any[], parentId: number | null = null) => {
-      return data
-        .filter(item => item.parent_id === parentId)
-        .map(item => ({
-          ...item,
-          children_recursive: buildTree(data, item.id)
-        }))
-    }
-
-const kategoriTree = computed(() => buildTree(props.kategoriData))
-
-/* =========================
-   ACTION
-========================= */
+/* ACTION */
 const goBack = () => window.history.back()
 
 const submit = () => {
