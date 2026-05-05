@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\File;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\RequestAkses;
-use App\Models\RiwayatAkses; // 🔥 TAMBAHAN
+use App\Models\RiwayatAkses; //  TAMBAHAN
 
 class ArsipController extends Controller
 {
@@ -154,39 +154,44 @@ class ArsipController extends Controller
     $arsip = Arsip::with(['kategori', 'user', 'files'])->findOrFail($id);
 
     //  SIMPAN RIWAYAT (INI PUNYAMU, JANGAN DIGANTI)
-    RiwayatAkses::create([
+    RiwayatAkses::updateOrCreate(
+    [
         'user_id' => Auth::id(),
         'arsip_id' => $arsip->id,
-        'aksi' => 'lihat'
-    ]);
-
+    ],
+    [
+        'aksi' => 'lihat',
+        'updated_at' => now()
+    ]
+);
     //  BALIK LAGI KE HALAMAN SEBELUMNYA
     return back();
 }
     public function storeView(Request $request)
-{
-    $userId = auth()->id();
-    $arsipId = $request->dokumen_id;
+    {
+        $userId = auth()->id();
+        $arsipId = $request->dokumen_id;
 
-    $existing = RiwayatAkses::where('user_id', $userId)
-        ->where('arsip_id', $arsipId)
-        ->where('aksi', 'lihat')
-        ->first();
+        // Cek apakah sudah ada aksi 'lihat'
+        $existingView = RiwayatAkses::where('user_id', $userId)
+            ->where('arsip_id', $arsipId)
+            ->where('aksi', 'lihat')
+            ->first();
 
-    if ($existing) {
-        // kalau sudah ada → update waktu biar naik ke atas
-        $existing->touch(); // otomatis update updated_at
-    } else {
-        // kalau belum ada → buat baru
-        RiwayatAkses::create([
-            'user_id' => $userId,
-            'arsip_id' => $arsipId,
-            'aksi' => 'lihat'
-        ]);
+        if ($existingView) {
+            // Update waktu jika sudah ada
+            $existingView->touch();
+        } else {
+            // Tambahkan entri baru untuk aksi 'lihat'
+            RiwayatAkses::create([
+                'user_id' => $userId,
+                'arsip_id' => $arsipId,
+                'aksi' => 'lihat'
+            ]);
+        }
+
+        return response()->noContent();
     }
-
-    return response()->noContent();
-}
 
     //  DOWNLOAD + CATAT RIWAYAT
     public function download($id)
@@ -197,12 +202,27 @@ class ArsipController extends Controller
             abort(403);
         }
 
-        // 🔥 SIMPAN RIWAYAT
-        RiwayatAkses::create([
-            'user_id' => Auth::id(),
-            'arsip_id' => $arsip->id,
-            'aksi' => 'download'
-        ]);
+        $userId = auth()->id();
+
+        // Cek apakah sudah ada aksi 'lihat' untuk arsip ini
+        $existingView = RiwayatAkses::where('user_id', $userId)
+            ->where('arsip_id', $arsip->id)
+            ->first();
+
+        if ($existingView) {
+            // Jika ada aksi 'lihat', ubah menjadi 'download'
+            $existingView->update([
+                'aksi' => 'download',
+                'updated_at' => now()
+            ]);
+        } else if($existingView?->aksi !== 'download') {
+            // Jika tidak ada, tambahkan entri baru untuk 'download'
+            RiwayatAkses::create([
+                'user_id' => $userId,
+                'arsip_id' => $arsip->id,
+                'aksi' => 'download'
+            ]);
+        }
 
         $file = $arsip->files->first();
 
@@ -212,19 +232,36 @@ class ArsipController extends Controller
         );
     }
 
-    // 🔥 RIWAYAT AKSES (FIX SESUAI LOGIKA KAMU)
+    // RIWAYAT AKSES (FIX SESUAI LOGIKA KAMU)
     public function riwayat()
     {
-        $data = RiwayatAkses::with('arsip')
+        $data = RiwayatAkses::with('arsip.files', 'arsip.kategori', 'arsip.user')
             ->where('user_id', Auth::id())
             ->orderBy('updated_at', 'desc')
             ->get()
             ->map(function ($item) {
                 return [
-                    'judul' => $item->arsip->judul ?? '-',
-                    'aksi' => $item->aksi,
-                    'waktu' => $item->created_at
-                ];
+    'id' => $item->arsip->id,
+    'user_id' => $item->arsip->user_id,
+
+    'title' => $item->arsip->judul,
+    'nomor' => $item->arsip->nomor,
+    'aksi' => $item->aksi,
+    'deskripsi' => $item->arsip->deskripsi,
+
+    'kategori' => $item->arsip->kategori->nama ?? '-',
+    'jenis' => $item->arsip->jenis_arsip,
+    'bidang' => $item->arsip->user->bagian ?? '-',
+
+    'tahun' => $item->arsip->tahun,
+           'lokasi' => $item->arsip->lokasi,
+
+           'status' => $item->arsip->status_akses,
+
+             'files' => $item->arsip->files ?? [],
+
+             'waktu' => $item->updated_at
+];
             });
 
         return Inertia::render('Riwayat', [

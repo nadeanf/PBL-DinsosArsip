@@ -1,7 +1,12 @@
 <script setup>
 import UserLayout from '@/layouts/UserLayout.vue'
 import { Head } from '@inertiajs/vue3'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
+import { usePage } from '@inertiajs/vue3'
+
+const page = usePage()
+const previewModal = ref(false)
+const selectedDoc = ref(null)
 
 defineOptions({ layout: UserLayout })
 
@@ -15,12 +20,15 @@ const searchQuery = ref('')
 const currentPage = ref(1)
 const itemsPerPage = 5
 
-// filter
 const filteredHistory = computed(() => {
-    return (props.riwayat || []).filter(item =>
-        item.judul.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        item.aktivitas.toLowerCase().includes(searchQuery.value.toLowerCase())
+    return mappedHistory.value.filter(item =>
+        item.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+        item.aksi.toLowerCase().includes(searchQuery.value.toLowerCase())
     )
+})
+
+watch(searchQuery, () => {
+    currentPage.value = 1
 })
 
 // pagination
@@ -52,6 +60,86 @@ const formatTanggal = (dateString) => {
         minute: '2-digit'
     })
 }
+
+const openPreview = (item) => {
+    selectedDoc.value = item
+    previewModal.value = true
+
+    // Kirim ke backend untuk mencatat aksi 'lihat'
+    fetch('/riwayat/view', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document
+                .querySelector('meta[name="csrf-token"]')
+                .getAttribute('content')
+        },
+        body: JSON.stringify({
+            dokumen_id: item.id
+        })
+    })
+}
+
+const downloadFile = (item) => {
+    // Kirim ke backend untuk mencatat aksi 'download'
+    fetch(`/download/${item.id}`, {
+        method: 'GET',
+        headers: {
+            'X-CSRF-TOKEN': document
+                .querySelector('meta[name="csrf-token"]')
+                .getAttribute('content')
+        }
+    }).then(response => {
+        if (response.ok) {
+            // Lakukan download file
+            window.location.href = `/download/${item.id}`;
+        }
+    });
+}
+
+const canAccessFull = (doc) => {
+  const user = page.props.auth?.user
+
+  if (!user) return false
+  if (doc.status === 'publik') return true
+  if (doc.user_id === user.id) return true
+  if (doc.status === 'private' && doc.bidang === user.bagian) return true
+
+  return false
+}
+
+const requestAkses = (arsipId) => {
+  fetch(`/request-akses/${arsipId}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-TOKEN': document
+        .querySelector('meta[name="csrf-token"]')
+        .getAttribute('content')
+    }
+  }).then(() => {
+    selectedDoc.value.request_status = 'pending'
+  })
+}
+
+const getFileType = (path) => {
+  if (!path) return 'FILE'
+  const ext = path.split('.').pop()?.toLowerCase()
+
+  if (['jpg','jpeg','png','gif','webp'].includes(ext)) return 'IMAGE'
+  if (ext === 'pdf') return 'PDF'
+  return 'FILE'
+}
+
+const mappedHistory = computed(() => {
+  return (props.riwayat || []).map(item => ({
+    ...item,
+    format: item.files?.length
+      ? getFileType(item.files[0].path_file)
+      : 'FILE'
+  }))
+})
+
 </script>
 
 <template>
@@ -71,17 +159,21 @@ const formatTanggal = (dateString) => {
         />
 
         <!-- LIST -->
-        <div v-for="item in paginatedData" :key="item.id"
-            class="bg-[#7fa1b1] p-5 rounded-xl mb-4 text-white shadow-md">
+        <div 
+      v-for="item in paginatedData"
+     :key="item.id"
+     @click="openPreview(item)"
+     class="cursor-pointer bg-[#7fa1b1] p-5 rounded-xl mb-4 text-white shadow-md"
+>
 
             <div class="flex justify-between">
                 <div>
-                    <p class="font-bold text-lg">{{ item.judul }}</p>
-                    <p class="text-sm">{{ item.aktivitas }}</p>
+                    <p class="font-bold text-lg">{{ item.title }}</p>
+                    <p class="text-sm">{{ item.aksi }}</p>
                 </div>
 
                 <p class="text-xs bg-white/20 px-2 py-1 rounded">
-                    {{ formatTanggal(item.waktu_aktivitas) }}
+                    {{ formatTanggal(item.waktu) }}
                 </p>
             </div>
 
@@ -110,4 +202,128 @@ const formatTanggal = (dateString) => {
         </div>
 
     </div>
+
+    
+<!-- PREVIEW MODAL FIX -->
+<div v-if="previewModal && selectedDoc"
+class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-6"
+@click.self="previewModal = false"
+>
+  <div class="bg-white w-full max-w-5xl rounded-[30px] shadow-2xl overflow-hidden flex flex-col md:flex-row">
+    
+    <div class="w-full md:w-1/2 bg-gray-100 flex items-center justify-center p-6">
+
+     <!-- IMAGE -->
+<img 
+  v-if="selectedDoc?.format === 'IMAGE' && canAccessFull(selectedDoc)"
+  :src="`/storage/${selectedDoc?.files?.[0]?.path_file}`"
+  class="max-h-[400px] object-contain rounded-xl shadow" 
+/>
+
+<!-- PDF -->
+<iframe 
+  v-else-if="selectedDoc?.format === 'PDF' && canAccessFull(selectedDoc)"
+  :src="`/storage/${selectedDoc?.files?.[0]?.path_file}`"
+  class="w-full h-[400px] rounded-xl">
+</iframe>
+
+<!-- TIDAK ADA AKSES -->
+<div v-else class="text-gray-500 text-center space-y-3">
+  <div>
+    🔒 Dokumen ini bersifat privat <br/>
+    Anda tidak memiliki akses
+  </div>
+
+ <!-- SUDAH REQUEST -->
+<div v-if="selectedDoc?.request_status === 'pending'"
+     class="text-yellow-500 font-semibold text-sm">
+  ⏳ Menunggu persetujuan
+</div>
+
+<!-- DITOLAK -->
+<div v-else-if="selectedDoc?.request_status === 'ditolak'"
+     class="text-red-500 font-semibold text-sm">
+  ❌ Akses ditolak
+</div>
+
+<!-- BELUM REQUEST -->
+<button
+  v-else
+  @click.stop.prevent="requestAkses(selectedDoc.id)"
+  class="bg-yellow-500 text-white px-4 py-2 rounded-lg text-sm font-semibold"
+>
+  Minta Akses
+</button>
+</div>
+</div>
+    <div class="w-full md:w-1/2 p-8 flex flex-col justify-between">
+
+      <div>
+        <div class="flex justify-between items-start mb-4">
+          <h2 class="text-2xl font-black text-gray-800">
+            {{ selectedDoc?.title }}
+          </h2>
+
+          <button @click="previewModal = false">✕</button>
+        </div>
+
+        <div class="flex flex-wrap gap-2 mb-4">
+          <span class="bg-gray-200 px-3 py-1 rounded-full text-xs font-bold">
+            No: {{ selectedDoc?.nomor }}
+          </span>
+
+          <span class="bg-blue-100 px-3 py-1 rounded-full text-xs font-bold">
+            {{ selectedDoc?.kategori }}
+          </span>
+
+          <span class="bg-green-100 px-3 py-1 rounded-full text-xs font-bold uppercase">
+            {{ selectedDoc?.jenis }}
+          </span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <p class="font-bold">Tahun</p>
+            <p>{{ selectedDoc?.tahun }}</p>
+          </div>
+
+          <div>
+            <p class="font-bold">Status</p>
+            <p>{{ selectedDoc?.status }}</p>
+          </div>
+
+          <div class="col-span-2">
+            <p class="font-bold">Lokasi</p>
+            <p>{{ selectedDoc?.lokasi }}</p>
+          </div>
+        </div>
+
+        <div class="mt-6">
+          <p class="font-bold">Deskripsi</p>
+          <p>{{ selectedDoc?.deskripsi || '-' }}</p>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3 mt-6">
+       <a
+  v-if="selectedDoc?.files?.length && canAccessFull(selectedDoc)"
+  :href="`/download/${selectedDoc?.id}`"
+  class="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold"
+>
+  Download
+</a>
+
+        <button
+          @click="previewModal = false"
+          class="bg-gray-300 px-4 py-2 rounded-xl font-bold"
+        >
+          Tutup
+        </button>
+      </div>
+
+    </div>
+   
+  </div>
+</div>
+
 </template>

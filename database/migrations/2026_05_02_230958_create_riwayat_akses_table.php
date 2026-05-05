@@ -16,7 +16,6 @@ return new class extends Migration
 
         $table->foreignId('user_id')->constrained()->cascadeOnDelete();
 
-        // 🔥 FIX DI SINI
         $table->foreignId('arsip_id')->constrained('arsip')->cascadeOnDelete();
 
         $table->string('aksi');
