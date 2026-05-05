@@ -82,9 +82,9 @@ export default {
       return h(AdminLayout, [page]);
     }
 
-    if (role === 'admin') {
+    /* if (role === 'admin') {
       return h(AdminLayout, [page]);
-    }
+    } */
 
     if (role === 'super_admin') {
       return h(SuperAdminLayout, [page]);
