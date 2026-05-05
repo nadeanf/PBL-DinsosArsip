@@ -53,7 +53,7 @@ class ArsipController extends Controller
             $jenisArsip = 'vital';
         } else {
             $currentYear = now()->year;
-            $jenisArsip = ($currentYear - (int)$request->tahun >= 5)
+            $jenisArsip = ($currentYear - (int)$request->tahun >= 3)
                 ? 'inaktif'
                 : 'aktif';
         }
@@ -296,6 +296,7 @@ class ArsipController extends Controller
     public function trash()
 {
     $arsip = Arsip::onlyTrashed()
+        ->where('user_id', Auth::id()) // ✅ cuma milik sendiri
         ->with('files')
         ->latest()
         ->get();
@@ -307,8 +308,8 @@ class ArsipController extends Controller
 
     public function trashAdmin()
 {
-    $arsip = Arsip::onlyTrashed()
-        ->with('files')
+     $arsip = Arsip::onlyTrashed()
+        ->with(['files', 'user']) // 🔥 tambahin user biar tau pemilik
         ->latest()
         ->get();
 
@@ -437,7 +438,7 @@ public function dashboardAdmin(Request $request)
     ->get()
     ->map(function ($item) {
         return [
-            'title' => $item->arsip->judul,
+            'title' => $item->arsip?->judul ?? 'Arsip (dihapus)',
             'user' => $item->user->name,
             'tanggal' => $item->created_at->format('d M Y'),
             'jumlah' => 1
