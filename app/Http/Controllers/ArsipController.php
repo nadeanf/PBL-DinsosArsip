@@ -89,73 +89,81 @@ class ArsipController extends Controller
         return redirect()->route('kelola.arsip');
     }
 
-    public function update(Request $request, $id)
-    {
-        $request->validate([
-            'judul' => 'required|string',
-            'nomor' => 'nullable|string',
-            'tahun' => 'required|integer',
-            'id_kategori' => 'required|exists:kategori,id',
-            'status_akses' => 'required'
-        ]);
+  public function update(Request $request, $id)
+{
+    $arsip = Arsip::with('files')->findOrFail($id);
 
-        $arsip = Arsip::with('files')->findOrFail($id);
-
-        $jenisArsip = (now()->year - (int)$request->tahun >= 5)
-            ? 'inaktif'
-            : 'aktif';
-
+    // ✅ KHUSUS UPDATE STATUS (ADMIN ONLY - QUICK UPDATE)
+    if ($request->has('status_akses') && !$request->has('judul')) {
         $arsip->update([
-            'judul' => $request->judul,
-            'nomor' => $request->nomor,
-            'tahun' => $request->tahun,
-            'id_kategori' => $request->id_kategori,
-            'status_akses' => $request->status_akses,
-            'lokasi' => $request->lokasi,
-            'deskripsi' => $request->deskripsi,
-            'jenis_arsip' => $jenisArsip
+            'status_akses' => $request->status_akses
         ]);
-        if (auth()->check() && auth()->user()->role === 'admin') {
-    return redirect('/admin/kelola-arsip-role-admin');
-}
 
-return redirect('/kelola-arsip');
+        return back();
+    }
 
-        if ($request->hasFile('files')) {
-            foreach ($arsip->files as $old) {
-                Storage::disk('public')->delete($old->path_file);
-                $old->delete();
-            }
+    // ✅ VALIDASI
+    $request->validate([
+        'judul' => 'required|string',
+        'nomor' => 'nullable|string',
+        'tahun' => 'required|integer',
+        'id_kategori' => 'required|exists:kategori,id',
+        'status_akses' => 'required',
+        'files.*' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png,mp4|max:20480'
+    ]);
 
-            foreach ($request->file('files') as $file) {
-                $path = $file->store('arsip', 'public');
+    // ✅ HITUNG JENIS ARSIP
+    $jenisArsip = (now()->year - (int)$request->tahun >= 5)
+        ? 'inaktif'
+        : 'aktif';
 
-                File::create([
-                    'arsip_id' => $arsip->id,
-                    'path_file' => $path,
-                    'nama_file' => $file->getClientOriginalName()
-                ]);
-            }
+    // ✅ UPDATE DATA UTAMA
+    $arsip->update([
+        'judul' => $request->judul,
+        'nomor' => $request->nomor,
+        'tahun' => $request->tahun,
+        'id_kategori' => $request->id_kategori,
+        'status_akses' => $request->status_akses,
+        'lokasi' => $request->lokasi,
+        'deskripsi' => $request->deskripsi,
+        'jenis_arsip' => $jenisArsip,
+        'bagian' => $request->status_akses === 'private'
+            ? auth()->user()->bagian
+            : null
+    ]);
+
+    // ✅ HANDLE FILE UPLOAD (REPLACE FILE LAMA)
+    if ($request->hasFile('files')) {
+
+        // hapus file lama
+        foreach ($arsip->files as $old) {
+            Storage::disk('public')->delete($old->path_file);
+            $old->delete();
         }
 
-        return redirect()->route('kelola.arsip');
+        // upload file baru
+        foreach ($request->file('files') as $file) {
+            $path = $file->store('arsip', 'public');
+
+            File::create([
+                'arsip_id' => $arsip->id,
+                'path_file' => $path,
+                'nama_file' => $file->getClientOriginalName(),
+                'tipe_file' => strtolower($file->getClientOriginalExtension()),
+                'size' => $file->getSize()
+            ]);
+        }
     }
 
-    public function index()
-    {
-        $arsip = Arsip::with(['kategori', 'user', 'files'])
-            ->where('user_id', Auth::id())
-            ->latest()
-            ->get();
-
-        $requestAkses = RequestAkses::where('user_id', auth()->id())->get();
-
-        return Inertia::render('KelolaArsip', [
-            'title' => 'Kelola Arsip',
-            'arsip' => $arsip,
-            'requestAkses' => $requestAkses
-        ]);
+    // ✅ REDIRECT SESUAI ROLE
+    if (auth()->check() && auth()->user()->role === 'admin') {
+        return redirect('/admin/kelola-arsip-role-admin')
+            ->with('success', 'Arsip berhasil diperbarui');
     }
+
+    return redirect('/kelola-arsip')
+        ->with('success', 'Arsip berhasil diperbarui');
+}
 
     public function kelolaArsipAdmin()
 {
@@ -286,11 +294,16 @@ return redirect('/kelola-arsip');
     }
 
     public function trash()
-    {
-        return Inertia::render('Sampah', [
-            'items' => $arsip
-        ]);
-    }
+{
+    $arsip = Arsip::onlyTrashed()
+        ->with('files')
+        ->latest()
+        ->get();
+
+    return Inertia::render('Sampah', [
+        'items' => $arsip
+    ]);
+}
 
     public function trashAdmin()
 {
@@ -615,4 +628,64 @@ public function requestAkses($id)
                 ->first()?->children ?? []
         ]);
     }
+public function persetujuan()
+{
+    if (auth()->user()->role !== 'admin') abort(403);
+
+    $data = RequestAkses::with([
+    'user:id,name,bagian',
+    'arsip:id,judul,nomor,bagian'
+])
+    ->latest()
+    ->get()
+    ->map(function ($item) {
+        return [
+            'id' => $item->id,
+            'status' => $item->status,
+            'created_at' => $item->created_at->format('d M Y'),
+            'user' => $item->user,
+            'arsip' => $item->arsip
+        ];
+    });
+
+    return Inertia::render('admin/PersetujuanAkses', [
+        'requests' => $data // ✅ WAJIB ini
+    ]);
+}
+
+public function updatePersetujuan(Request $request, $id)
+{
+    $request->validate([
+        'status' => 'required|in:approved,rejected'
+    ]);
+
+    $item = RequestAkses::findOrFail($id);
+    $item->status = $request->status;
+    $item->save();
+
+    return back();
+}
+public function kelolaArsipUser()
+{
+    if (auth()->user()->role !== 'admin') abort(403);
+
+    $arsip = Arsip::with(['kategori', 'user', 'files'])
+        ->latest()
+        ->get(); // ✅ semua arsip user
+
+    return Inertia::render('admin/KelolaArsipUser', [
+        'arsip' => $arsip
+    ]);
+}
+public function index()
+{
+    $arsip = Arsip::with(['kategori', 'files'])
+        ->where('user_id', Auth::id()) // ✅ hanya arsip milik user
+        ->latest()
+        ->get();
+
+    return Inertia::render('KelolaArsip', [
+        'arsip' => $arsip
+    ]);
+}
 }
