@@ -83,10 +83,7 @@ Route::post('/logout', function () {
 Route::middleware('auth')->group(function () {
 
     // PIMPINAN
-    Route::get('/pimpinan/dashboard', function () {
-        if (auth()->user()->role !== 'pimpinan') abort(403);
-        return Inertia::render('Pimpinan/DashboardPimpinan', ['title' => 'Dashboard']);
-    });
+    Route::get('/pimpinan/dashboard', [ArsipController::class, 'dashboardPimpinan']);
 
     Route::get('/pimpinan/statistik', function () {
         if (auth()->user()->role !== 'pimpinan') abort(403);
@@ -98,7 +95,7 @@ Route::middleware('auth')->group(function () {
     return Inertia::render('Pimpinan/RiwayatPimpinan');
     });
 
-    //Route::get('/pimpinan/daftar-arsip', [ArsipController::class, 'listPimpinan']);
+    Route::get('/pimpinan/daftar-arsip', [ArsipController::class, 'list']);
 
     // SUPER ADMIN
     Route::get('/super-admin/dashboard', function () {

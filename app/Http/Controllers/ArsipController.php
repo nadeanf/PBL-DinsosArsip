@@ -457,6 +457,97 @@ public function dashboardAdmin(Request $request)
     ]);
 }
 
+public function dashboardPimpinan(Request $request)
+{
+    $query = Arsip::with(['kategori', 'user', 'files']);
+
+    $arsip = $query->latest()->get()->map(function ($item) {
+        $user = Auth::user();
+
+        $req = RequestAkses::where('user_id', $user->id)
+            ->where('arsip_id', $item->id)
+            ->first();
+
+        $item->request_status = $req?->status;
+
+        return $item;
+    });
+
+    $totalDownload = DownloadLog::where('user_id', Auth::id())->count();
+
+    $totalArsip = Arsip::count();
+    $tipeDokumen = File::selectRaw("
+    CASE
+        WHEN LOWER(nama_file) LIKE '%.jpg' 
+            OR LOWER(nama_file) LIKE '%.jpeg'
+            OR LOWER(nama_file) LIKE '%.png'
+            OR LOWER(nama_file) LIKE '%.gif'
+            OR LOWER(nama_file) LIKE '%.bmp'
+        THEN 'Foto / Gambar'
+
+        WHEN LOWER(nama_file) LIKE '%.pdf'
+            OR LOWER(nama_file) LIKE '%.txt'
+            OR LOWER(nama_file) LIKE '%.doc'
+            OR LOWER(nama_file) LIKE '%.docx'
+            OR LOWER(nama_file) LIKE '%.xls'
+            OR LOWER(nama_file) LIKE '%.xlsx'
+            OR LOWER(nama_file) LIKE '%.ppt'  
+            OR LOWER(nama_file) LIKE '%.pptx'
+        THEN 'Dokumen'
+
+        WHEN LOWER(nama_file) LIKE '%.mp4'
+            OR LOWER(nama_file) LIKE '%.avi'
+            OR LOWER(nama_file) LIKE '%.mkv'
+            OR LOWER(nama_file) LIKE '%.mov'
+            OR LOWER(nama_file) LIKE '%.wmv'
+            OR LOWER(nama_file) LIKE '%.flv'
+            OR LOWER(nama_file) LIKE '%.mpeg'
+        THEN 'Video'
+
+        WHEN LOWER(nama_file) LIKE '%.mp3'
+            OR LOWER(nama_file) LIKE '%.wav'
+            OR LOWER(nama_file) LIKE '%.ogg'
+            OR LOWER(nama_file) LIKE '%.flac'
+            OR LOWER(nama_file) LIKE '%.aac'
+            OR LOWER(nama_file) LIKE '%.wma'
+            OR LOWER(nama_file) LIKE '%.m4a'
+            OR LOWER(nama_file) LIKE '%.opus'
+            OR LOWER(nama_file) LIKE '%.alac'
+            OR LOWER(nama_file) LIKE '%.aiff'
+            OR LOWER(nama_file) LIKE '%.dsd'
+            OR LOWER(nama_file) LIKE '%.pcm'
+        THEN 'Audio'
+
+        ELSE 'Lainnya'
+    END as nama,
+    COUNT(*) as total
+    ")
+    ->groupBy('nama')
+    ->get();
+
+    $approvalList = RequestAkses::with(['user', 'arsip'])
+    ->where('status', 'pending')
+    ->latest()
+    ->take(3) // ambil 3 data terbaru
+    ->get()
+    ->map(function ($item) {
+        return [
+            'title' => $item->arsip->judul,
+            'user' => $item->user->name,
+            'tanggal' => $item->created_at->format('d M Y'),
+            'jumlah' => 1
+        ];
+    });
+
+    return Inertia::render('Pimpinan/DashboardPimpinan', [
+    'arsip' => $arsip,
+    'kategori' => $this->kategoriTree(),
+    'totalDownload' => $totalDownload,
+    'tipeDokumen' => $tipeDokumen,
+    'totalArsip' => $totalArsip
+    ]);
+}
+
     public function show($id)
 {
     $arsip = Arsip::with(['kategori', 'user', 'files'])->findOrFail($id);

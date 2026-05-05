@@ -4,6 +4,8 @@ import { ref, computed } from 'vue'
 import UserLayout from '@/layouts/UserLayout.vue'
 
 import AuthLayoutPimpinan from '@/layouts/AuthLayoutPimpinan.vue' 
+import AdminLayout from '@/layouts/AdminLayout.vue' 
+import SuperAdminLayout from '@/layouts/SuperAdminLayout.vue'
 
 const page = usePage()
 
@@ -70,14 +72,29 @@ function handleFile(e) {
 <script>
 export default {
   layout: (h, page) => {
-    // Jika role pimpinan, bungkus dengan AuthLayoutPimpinan
-    // Jika bukan, tetap pakai UserLayout asli kamu
-    const layout = page.props.auth?.user?.role === 'pimpinan' 
-      ? AuthLayoutPimpinan 
-      : UserLayout
-    return h(layout, [page])
+    const role = page.props.auth?.user?.role;
+
+    if (role === 'pimpinan') {
+      return h(AuthLayoutPimpinan, [page]);
+    } 
+    
+    if (role === 'admin') {
+      return h(AdminLayout, [page]);
+    }
+
+    if (role === 'admin') {
+      return h(AdminLayout, [page]);
+    }
+
+    if (role === 'super_admin') {
+      return h(SuperAdminLayout, [page]);
+    }
+
+    // Default jika bukan pimpinan atau admin
+    return h(UserLayout, [page]);
   },
 }
+
 </script>
 
 <template>
