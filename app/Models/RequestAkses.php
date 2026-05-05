@@ -22,6 +22,6 @@ class RequestAkses extends Model
     // relasi ke arsip
     public function arsip()
     {
-        return $this->belongsTo(Arsip::class);
+        return $this->belongsTo(Arsip::class)->withTrashed();
     }
 }
