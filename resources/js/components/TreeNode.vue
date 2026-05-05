@@ -32,10 +32,8 @@ const hasChildren = computed(() =>
       class="flex items-center gap-2 cursor-pointer py-1 hover:bg-gray-100 rounded"
       :style="{ paddingLeft: (level * 16) + 'px' }"
     >
-
-      <!-- ICON -->
       <span
-        class="w-4 text-gray-500"
+        class="w-4 text-black font-black" 
         @click.stop="emit('toggle', item)"
       >
         <span v-if="hasChildren">
@@ -44,9 +42,8 @@ const hasChildren = computed(() =>
         <span v-else>•</span>
       </span>
 
-      <!-- NAMA -->
       <span
-        class="text-sm"
+        class="text-sm text-black font-bold"
         @click.stop="emit('select', item)"
       >
         {{ item.nama }}
@@ -54,7 +51,6 @@ const hasChildren = computed(() =>
 
     </div>
 
-    <!-- CHILD -->
     <div v-if="hasChildren && isOpen">
       <TreeNode
         v-for="child in item.children_recursive"
@@ -66,6 +62,5 @@ const hasChildren = computed(() =>
         @select="emit('select', $event)"
       />
     </div>
-
   </div>
 </template>
