@@ -83,10 +83,7 @@ Route::post('/logout', function () {
 Route::middleware('auth')->group(function () {
 
     // PIMPINAN
-    Route::get('/pimpinan/dashboard', function () {
-        if (auth()->user()->role !== 'pimpinan') abort(403);
-        return Inertia::render('Pimpinan/DashboardPimpinan', ['title' => 'Dashboard']);
-    });
+    Route::get('/pimpinan/dashboard', [ArsipController::class, 'dashboardPimpinan']);
 
     Route::get('/pimpinan/statistik', function () {
         if (auth()->user()->role !== 'pimpinan') abort(403);
@@ -96,7 +93,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/pimpinan/riwayat', function () {
     if (auth()->user()->role !== 'pimpinan') abort(403);
     return Inertia::render('Pimpinan/RiwayatPimpinan');
-});
+    });
+
+    Route::get('/pimpinan/daftar-arsip', [ArsipController::class, 'list']);
 
     // SUPER ADMIN
     Route::get('/super-admin/dashboard', function () {
@@ -182,30 +181,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/admin/dashboard', [ArsipController::class, 'dashboardAdmin']);
 
     Route::get('/admin/daftar-arsip', [ArsipController::class, 'listAdmin']);
+    Route::get('/admin/persetujuan', [ArsipController::class, 'persetujuan'])
+    ->name('admin.persetujuan');
+
+    Route::post('/admin/persetujuan/{id}', [ArsipController::class, 'updatePersetujuan'])
+    ->name('admin.persetujuan.update');
 
     Route::get('/admin/statistik', function () {
         if (auth()->user()->role !== 'admin') abort(403);
         return Inertia::render('admin/StatistikLaporan');
     });
 
-    Route::get('/admin/kelola-arsip-user', function () {
-    if (auth()->user()->role !== 'admin') abort(403);
-    return Inertia::render('admin/KelolaArsipUser');
-    });
+    Route::get('/admin/kelola-arsip-user', [ArsipController::class, 'kelolaArsipUser']);
 
     // ADMIN
     Route::get('/admin/kelola-arsip-role-admin', [ArsipController::class, 'kelolaArsipAdmin']);
-    
-    Route::get('/admin/edit-dokumen/{id}', [ArsipController::class, 'editAdmin'])
-    ->name('admin.arsip.edit');
 
     Route::get('/admin/edit-dokumen/{id}', [ArsipController::class, 'editAdmin'])
-    ->name('arsip.edit.admin');
-
-    Route::get('/admin/persetujuan', function () {
-        if (auth()->user()->role !== 'admin') abort(403);
-        return Inertia::render('admin/PersetujuanAkses');
-    });
+    ->name('arsip.edit.admin');   
 
     Route::get('/admin/sampah-admin', [ArsipController::class, 'trashAdmin']);
 
