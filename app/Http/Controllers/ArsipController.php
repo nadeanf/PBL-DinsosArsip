@@ -53,7 +53,7 @@ class ArsipController extends Controller
             $jenisArsip = 'vital';
         } else {
             $currentYear = now()->year;
-            $jenisArsip = ($currentYear - (int)$request->tahun >= 5)
+            $jenisArsip = ($currentYear - (int)$request->tahun >= 3)
                 ? 'inaktif'
                 : 'aktif';
         }
