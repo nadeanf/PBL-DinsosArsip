@@ -97,9 +97,8 @@ const submit = () => {
       </h1>
 
       <form @submit.prevent="submit"
-        class="bg-[#7fa1b1] p-10 rounded-[40px] shadow-lg">
+        class="bg-[#7fa1b1] p-10 rounded-[40px] shadow-lg overflow-hidden">
 
-        <!-- FILE UPLOAD -->
         <div class="space-y-2">
           <span class="inline-block bg-[#b8ccd5] text-gray-700 px-4 py-1 rounded-full text-sm font-bold ml-2">
             File Dokumen
@@ -113,8 +112,6 @@ const submit = () => {
             class="bg-white rounded-[35px] p-12 border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-all shadow-inner relative"
             :class="isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:bg-gray-50'"
           >
-
-            <!-- jumlah file -->
             <div v-if="form.files && form.files.length > 0"
               class="mb-4 text-center absolute top-4">
               <span class="bg-blue-600 text-white px-4 py-1 rounded-full font-bold uppercase text-[10px]">
@@ -122,117 +119,85 @@ const submit = () => {
               </span>
             </div>
 
-            <!-- preview -->
             <div v-if="filePreviews.length"
               class="mt-6 grid grid-cols-2 md:grid-cols-3 gap-4 w-full">
-
               <div v-for="(file, index) in filePreviews"
                 :key="index"
                 class="bg-white rounded-xl p-3 shadow text-center">
-
                 <img v-if="file.type.startsWith('image')"
                   :src="file.url"
                   class="w-full h-32 object-cover rounded-lg mb-2" />
-
-                <div v-else class="text-gray-500 text-sm mb-2">
-                  📄 File
-                </div>
-
-                <p class="text-xs font-bold truncate">
-                  {{ file.name }}
-                </p>
+                <div v-else class="text-gray-500 text-sm mb-2">📄 File</div>
+                <p class="text-xs font-bold text-black truncate">{{ file.name }}</p>
               </div>
             </div>
 
-            <!-- input -->
-            <input type="file"
-              ref="fileInput"
-              class="hidden"
-              @change="handleFileChange"
-              multiple />
+            <input type="file" ref="fileInput" class="hidden" @change="handleFileChange" multiple />
 
-            <!-- empty -->
-            <div v-if="!filePreviews.length"
-              class="text-center flex flex-col items-center">
-
+            <div v-if="!filePreviews.length" class="text-center flex flex-col items-center">
               <div class="bg-[#7fa1b1]/20 p-6 rounded-full mb-4 shadow-inner">
                 <UploadCloud class="w-12 h-12 text-[#2f55a4]" />
               </div>
-
-              <p class="font-black text-gray-900 text-xl">
-                Klik atau Drag File
-              </p>
-
-              <p class="text-gray-600 text-sm mt-1">
-                Drop file di sini
-              </p>
-
-              <p class="text-gray-400 text-xs mt-2">
-                PDF, DOC, XLS, JPG, PNG, MP3, MP4
-              </p>
+              <p class="font-black text-gray-900 text-xl">Klik atau Drag File</p>
+              <p class="text-gray-600 text-sm mt-1">Drop file di sini</p>
+              <p class="text-gray-400 text-xs mt-2">PDF, DOC, XLS, JPG, PNG, MP3, MP4</p>
             </div>
-
           </div>
         </div>
 
-        <!-- FORM -->
         <div class="space-y-4 mt-6">
-
           <input v-model="form.judul" placeholder="Judul"
-            class="w-full p-4 bg-white rounded-2xl border" />
+            class="w-full p-4 bg-white rounded-2xl border text-black font-bold outline-none focus:ring-2 focus:ring-blue-400" />
 
           <input v-model="form.nomor" placeholder="Nomor"
-            class="w-full p-4 bg-white rounded-2xl border" />
+            class="w-full p-4 bg-white rounded-2xl border text-black font-bold outline-none" />
 
           <input v-model="form.tahun" placeholder="Tahun"
-            class="w-full p-4 bg-white rounded-2xl border" />
+            class="w-full p-4 bg-white rounded-2xl border text-black font-bold outline-none" />
 
-          <!-- kategori -->
           <select v-model="form.id_kategori"
-            class="w-full p-4 bg-white rounded-2xl border">
-            <option value="">-- Pilih Kategori --</option>
+            class="w-full p-4 bg-white rounded-2xl border text-black font-bold outline-none appearance-none">
+            <option value="" class="text-gray-500">-- Pilih Kategori --</option>
             <option v-for="item in props.kategoriData"
               :key="item.id"
-              :value="item.id">
+              :value="item.id"
+              class="text-black">
               {{ item.nama }}
             </option>
           </select>
 
-          <!-- status -->
           <select v-model="form.status_akses"
-            class="w-full p-4 bg-white rounded-2xl border">
-            <option value="publik">Publik</option>
-            <option value="private">Private</option>
+            class="w-full p-4 bg-white rounded-2xl border text-black font-bold outline-none">
+            <option value="publik" class="text-black">Publik</option>
+            <option value="private" class="text-black">Private</option>
           </select>
 
-          <!-- bidang -->
           <select v-if="isPrivate"
             v-model="form.bagian"
-            class="w-full p-4 bg-white rounded-2xl border">
-            <option value="">-- Pilih Bidang --</option>
-            <option v-for="b in bidangList" :key="b">
+            class="w-full p-4 bg-white rounded-2xl border text-black font-bold outline-none">
+            <option value="" class="text-gray-500">-- Pilih Bidang --</option>
+            <option v-for="b in bidangList" :key="b" class="text-black">
               {{ b }}
             </option>
           </select>
 
           <input v-model="form.lokasi" placeholder="Lokasi"
-            class="w-full p-4 bg-white rounded-2xl border" />
+            class="w-full p-4 bg-white rounded-2xl border text-black font-bold outline-none" />
 
           <textarea v-model="form.deskripsi"
-            class="w-full p-4 bg-white rounded-2xl border"></textarea>
-
+            placeholder="Deskripsi..."
+            rows="4"
+            class="w-full p-4 bg-white rounded-2xl border text-black font-bold outline-none resize-none"></textarea>
         </div>
 
-        <!-- BUTTON -->
         <div class="flex justify-end gap-4 mt-10">
           <button type="submit"
-            class="bg-blue-700 text-white px-8 py-3 rounded-xl font-bold">
+            class="bg-blue-700 hover:bg-blue-800 text-white px-8 py-3 rounded-xl font-bold transition-colors">
             Simpan
           </button>
-
           <button type="button"
             @click="goBack"
-            class="bg-red-600 text-white px-8 py-3 rounded-xl font-bold">
+            class="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-xl font-bold transition-colors">
             Batal
           </button>
         </div>

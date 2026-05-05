@@ -20,13 +20,16 @@ const canAccessFull = (doc) => {
 
   if (!user) return false
 
-  // publik → bebas
+  // ✅ request approved → BOLEH
+  if (doc.request_status === 'approved') return true
+
+  // ✅ publik → BOLEH
   if (doc.status === 'publik') return true
 
-  // pemilik arsip
+  // ✅ pemilik
   if (doc.user_id === user.id) return true
 
-  // private tapi bagian sama
+  // ✅ private tapi bagian sama
   if (doc.status === 'private' && doc.bidang === user.bagian) return true
 
   return false
@@ -364,32 +367,36 @@ class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-
 </iframe>
 
 <!-- TIDAK ADA AKSES -->
-<div v-else class="text-gray-500 text-center space-y-3">
+ <!-- KALAU PUBLIC, JANGAN TAMPILKAN REQUEST STATUS -->
+<div v-if="selectedDoc?.status === 'publik'">
+  <!-- kosong / atau langsung tampil preview -->
+</div><div v-if="!canAccessFull(selectedDoc)" class="text-gray-500 text-center space-y-3">
+  
   <div>
     🔒 Dokumen ini bersifat privat <br/>
     Anda tidak memiliki akses
   </div>
 
- <!-- SUDAH REQUEST -->
-<div v-if="selectedDoc?.request_status === 'pending'"
-     class="text-yellow-500 font-semibold text-sm">
-  ⏳ Menunggu persetujuan
-</div>
+  <!-- STATUS REQUEST -->
+  <div v-if="selectedDoc?.request_status === 'pending'"
+       class="text-yellow-500 font-semibold text-sm">
+    ⏳ Menunggu persetujuan
+  </div>
 
-<!-- DITOLAK -->
-<div v-else-if="selectedDoc?.request_status === 'ditolak'"
-     class="text-red-500 font-semibold text-sm">
-  ❌ Akses ditolak
-</div>
+  <div v-else-if="selectedDoc?.request_status === 'rejected'"
+       class="text-red-500 font-semibold text-sm">
+    ❌ Akses ditolak
+  </div>
 
-<!-- BELUM REQUEST -->
-<button
-  v-else
-  @click.stop.prevent="requestAkses(selectedDoc.id)"
-  class="bg-yellow-500 text-white px-4 py-2 rounded-lg text-sm font-semibold"
->
-  Minta Akses
-</button>
+  <!-- BUTTON -->
+  <button
+    v-else
+    @click.stop.prevent="requestAkses(selectedDoc.id)"
+    class="bg-yellow-500 text-white px-4 py-2 rounded-lg text-sm font-semibold"
+  >
+    Minta Akses
+  </button>
+
 </div>
 </div>
     <div class="w-full md:w-1/2 p-8 flex flex-col justify-between">

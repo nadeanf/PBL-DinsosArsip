@@ -1,23 +1,35 @@
 <script setup>
 import { Link, usePage } from '@inertiajs/vue3'
 import { Home, BarChart3, Clock, LogOut, Folder } from 'lucide-vue-next'
+import { computed } from 'vue' 
+
+
+const props = defineProps({
+    user: Object
+})
 
 const page = usePage()
-const user = page.props.auth?.user
+
+
+const user = computed(() => props.user || page.props.auth?.user)
 </script>
 
 <template>
   <aside class="w-64 min-h-screen bg-gradient-to-b from-[#dbe3e7] to-[#2f6f7e] p-4 flex flex-col justify-between">
 
     <div>
-      <!-- PROFILE -->
       <Link href="/edit-profile" class="flex items-center gap-3 mb-6">
-        <div class="w-12 h-12 flex items-center justify-center rounded-full bg-[#b7d3d8]">
-          <span class="text-xl">👤</span>
+        <div class="w-12 h-12 flex items-center justify-center rounded-full bg-[#b7d3d8] overflow-hidden border-2 border-white shadow-sm">
+          <img 
+            v-if="user?.photo" 
+            :src="`/storage/${user.photo}`" 
+            class="w-full h-full object-cover"
+          />
+          <span v-else class="text-xl">👤</span>
         </div>
         <div>
-          <p class="text-sm font-semibold text-gray-800">Pimpinan Dinas</p>
-          <p class="text-xs text-gray-600">Pimpinan</p>
+          <p class="text-sm font-semibold text-gray-800">{{ user?.name || 'Pimpinan' }}</p>
+          <p class="text-xs text-gray-600">{{ user?.email }}</p>
         </div>
       </Link>
 
@@ -26,7 +38,6 @@ const user = page.props.auth?.user
       
       <div class="space-y-3">
 
-        <!-- DASHBOARD -->
         <Link href="/pimpinan/dashboard"
           :class="page.url === '/pimpinan/dashboard'
             ? 'bg-[#2f4fa2] text-white'
@@ -40,7 +51,6 @@ const user = page.props.auth?.user
           <span class="text-sm font-medium">Dashboard</span>
         </Link>
 
-        <!-- STATISTIK -->
         <Link href="/pimpinan/statistik"
           :class="page.url.startsWith('/pimpinan/statistik')
             ? 'bg-[#2f4fa2] text-white'
@@ -54,8 +64,7 @@ const user = page.props.auth?.user
           <span class="text-sm font-medium">Statistik</span>
         </Link>
 
-       <!-- RIWAYAT -->
-<Link href="/pimpinan/riwayat"
+       <Link href="/pimpinan/riwayat"
   :class="page.url.startsWith('/pimpinan/riwayat')
     ? 'bg-[#2f4fa2] text-white'
     : 'bg-gray-200 text-gray-800'"
@@ -69,7 +78,6 @@ const user = page.props.auth?.user
 </Link>
 </div>
 
-      <!-- STORAGE -->
       <div class="mt-8 bg-white/70 p-4 rounded-xl text-xs shadow-inner">
         <p class="mb-3 font-semibold text-gray-800">Penyimpanan</p>
         <div class="w-full bg-gray-300 h-2.5 rounded-full overflow-hidden">
@@ -79,7 +87,6 @@ const user = page.props.auth?.user
       </div>
     </div>
 
-    <!-- LOGOUT -->
     <Link href="/logout" method="post" as="button"
       class="flex items-center gap-3 bg-gray-200 px-3 py-2 rounded-lg w-full text-left hover:bg-gray-300 transition-all group">
 

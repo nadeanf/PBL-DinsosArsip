@@ -29,8 +29,6 @@ const getType = (files) => {
   const ext = files[0].path_file.split('.').pop()?.toUpperCase()
   return ext || 'FILE'
 }
-
-/* DUMMY */
 const displayItems = ref(
   props.items.map(item => ({
     id: item.id,
@@ -39,7 +37,8 @@ const displayItems = ref(
       ? new Date(item.deleted_at).toLocaleDateString()
       : '-',
     doc_no: item.nomor || '-',
-    type: getType(item.files)
+    type: getType(item.files),
+    owner: item.user?.name || '-' // 🔥 TAMBAHAN
   }))
 )
 
@@ -131,6 +130,9 @@ const handleExecute = () => {
             <div class="flex flex-wrap justify-center md:justify-start gap-3">
               <span class="text-[10px] font-bold uppercase">Dihapus : {{ item.date }}</span>
               <span class="text-[10px] font-bold uppercase">No. Dokumen : {{ item.doc_no }}</span>
+              <span class="text-[10px] font-bold uppercase">
+              Oleh : {{ item.owner }}
+            </span>
             </div>
           </div>
 

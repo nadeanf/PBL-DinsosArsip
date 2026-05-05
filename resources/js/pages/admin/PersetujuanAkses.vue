@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3'
+import { Head, usePage, router } from '@inertiajs/vue3'
 import AdminLayout from '@/layouts/AdminLayout.vue'
 import { Search, Filter } from 'lucide-vue-next'
 
@@ -7,28 +7,31 @@ defineOptions({
   layout: AdminLayout
 })
 
-// Dummy 
-const data = [
-  { dokumen: '422/07', user: 'adib', tanggal: '24/08/26', divisi: 'Bendahara', status: 'pending' },
-  { dokumen: '422/07', user: 'adib', tanggal: '24/08/26', divisi: 'Bendahara', status: 'approved' },
-  { dokumen: '422/07', user: 'adib', tanggal: '24/08/26', divisi: 'Bendahara', status: 'rejected' },
-  { dokumen: '422/07', user: 'adib', tanggal: '24/08/26', divisi: 'Bendahara', status: 'pending' },
-  { dokumen: '422/07', user: 'adib', tanggal: '24/08/26', divisi: 'Bendahara', status: 'approved' },
-  { dokumen: '422/07', user: 'adib', tanggal: '24/08/26', divisi: 'Bendahara', status: 'approved' },
-  { dokumen: '422/07', user: 'adib', tanggal: '24/08/26', divisi: 'Bendahara', status: 'rejected' },
-]
+const page = usePage()
 
-// Helper warna status
+// ambil data dari controller
+const data = page.props.requests
+
+// helper warna
 const statusClass = (status: string) => {
   if (status === 'pending') return 'bg-yellow-300 text-black'
   if (status === 'approved') return 'bg-green-400 text-black'
   if (status === 'rejected') return 'bg-red-400 text-black'
 }
+
+// update status
+const updateStatus = (id: number, status: string) => {
+  router.post(`/admin/persetujuan/${id}`, {
+    status: status
+  }, {
+    preserveScroll: true
+  })
+}
 </script>
 
 <template>
   <Head title="Persetujuan Akses" />
-
+  
   <div class="p-6 bg-gray-100 min-h-screen">
 
     <!-- TITLE -->
@@ -73,20 +76,41 @@ const statusClass = (status: string) => {
         :key="index"
         class="grid grid-cols-5 px-6 py-4 border-b text-gray-700 text-sm items-center"
       >
-        <div>{{ item.dokumen }}</div>
-        <div>{{ item.user }}</div>
-        <div>{{ item.tanggal }}</div>
-        <div>{{ item.divisi }}</div>
+        <!-- ambil dari relasi -->
+        <div>{{ item.arsip?.judul }}</div>
+        <div>{{ item.user?.name }}</div>
+        <div>{{ item.created_at }}</div>
+        <div>{{ item.user?.bagian }}</div>
 
-        <div>
+        <!-- STATUS / ACTION -->
+        <div class="flex gap-2 items-center">
+
+          <!-- kalau pending -->
+          <template v-if="item.status === 'pending'">
+            <button
+              @click="updateStatus(item.id, 'approved')"
+              class="bg-green-500 text-white px-3 py-1 rounded text-xs"
+            >
+              Approve
+            </button>
+
+            <button
+              @click="updateStatus(item.id, 'rejected')"
+              class="bg-red-500 text-white px-3 py-1 rounded text-xs"
+            >
+              Tolak
+            </button>
+          </template>
+
+          <!-- kalau sudah diproses -->
           <span
+            v-else
             class="px-3 py-1 rounded-full text-xs font-bold"
             :class="statusClass(item.status)"
           >
-            {{ item.status === 'pending' ? 'Pending' :
-               item.status === 'approved' ? 'Disetujui' :
-               'Ditolak' }}
+            {{ item.status === 'approved' ? 'Disetujui' : 'Ditolak' }}
           </span>
+
         </div>
       </div>
 
