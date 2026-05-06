@@ -165,15 +165,24 @@ const handleSearch = () => {
 /* PREVIEW MODAL */
 const previewModal = ref(false)
 const selectedDoc = ref(null)
-
-
 const openPreview = (doc) => {
   if (!doc) return
-  selectedDoc.value = doc
 
-  console.log('FULL DOC:', doc)
-  console.log('STATUS DOC:', doc.status)
+  // 🔥 buka modal dulu
+  selectedDoc.value = doc
   previewModal.value = true
+
+  // 🔥 kirim ke backend TANPA ganggu Inertia
+  fetch('/riwayat/view', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+    },
+    body: JSON.stringify({
+      dokumen_id: doc.id
+    })
+  }).catch(err => console.error(err))
 }
 
 const handleDownload = (id) => {

@@ -131,7 +131,7 @@ Route::middleware('auth')->group(function () {
 });
 /* AUTH + FITUR */
 Route::middleware(['auth', 'verified'])->group(function () {
-
+    Route::post('/riwayat/view', [ArsipController::class, 'storeView']);
     Route::get('/sampah', [ArsipController::class, 'trash'])->name('arsip.trash');
     Route::get('/riwayat', [ArsipController::class, 'riwayat'])->name('riwayat');
     Route::get('/edit-dokumen/{id}', [ArsipController::class, 'edit'])->name('arsip.edit');
