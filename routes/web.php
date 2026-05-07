@@ -108,10 +108,8 @@ Route::middleware('auth')->group(function () {
         return Inertia::render('SuperAdmin/StatistikSuperAdmin');
     });
 
-    Route::get('/super-admin/kelolauser', function () {
-        if (auth()->user()->role !== 'superadmin') abort(403);
-        return Inertia::render('SuperAdmin/KelolaUser');
-    });
+    Route::get('/super-admin/kelolauser', [ArsipController::class, 'kelolaUserSuperAdmin'])
+    ->name('superadmin.kelolauser');
 
     Route::get('/super-admin/pengaturan', function () {
         if (auth()->user()->role !== 'superadmin') abort(403);
