@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
 use Inertia\Inertia;
 use App\Http\Controllers\ArsipController;
+use App\Http\Controllers\UserController;
 use App\Models\Kategori;
 
 /* PUBLIC ROUTES */
@@ -124,8 +125,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/super-admin/riwayat', function () {
     if (auth()->user()->role !== 'superadmin') abort(403);
     return Inertia::render('SuperAdmin/RiwayatSuperAdmin');
-
-});
+    });
+    Route::patch('/super-admin/user/{id}/toggle', [UserController::class, 'toggleStatus']);
+    Route::post('/super-admin/tambah-user', [UserController::class, 'store']);
 });
 /* AUTH + FITUR */
 Route::middleware(['auth', 'verified'])->group(function () {

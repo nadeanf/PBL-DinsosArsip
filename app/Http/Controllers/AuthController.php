@@ -39,6 +39,16 @@ class AuthController extends Controller
 
             $user = Auth::user();
 
+            // CEK USER AKTIF / NONAKTIF
+        if (!$user->is_active) {
+
+            Auth::logout();
+
+            return back()->withErrors([
+                'email' => 'Akun anda telah dinonaktifkan oleh Super Admin'
+            ]);
+        }
+
             // DETECT SUPER ADMIN
             if ($user->email === 'superadmin@gmail.com') {
                 $user->role = 'superadmin';

@@ -752,7 +752,7 @@ class ArsipController extends Controller
 
         // STATISTIK
         'totalUser' => User::count(),
-        'totalAktif' => User::count(),
+        'totalAktif' => User::where('is_active', true)->count(),
         'totalAdmin' => User::where('role', 'admin')->count(),
 
         // SEARCH VALUE
