@@ -1,7 +1,7 @@
 <script setup>
 import SuperAdminLayout from '@/layouts/SuperAdminLayout.vue'
-import { ref } from 'vue'
-import { router, Link, Head } from '@inertiajs/vue3'
+import { ref, computed } from 'vue'
+import { router, Link, Head, usePage } from '@inertiajs/vue3'
 import { Eye, Download, FileText } from 'lucide-vue-next'
 
 defineOptions({
@@ -14,39 +14,7 @@ const kategori = ref('')
 const tanggal_awal = ref('')
 const tanggal_akhir = ref('')
 
-// DUMMY 
-const aktivitasTerbaru = ref([
-  {
-    id: 0,
-    title: "Proposal Program Pemberdayaan Masyarakat",
-    nomor: "DOK/1012/11/2026",
-    kategori: "Proposal",
-    divisi: "Sekretariat",
-    tanggal: "25 Januari 2026",
-    ukuran: "3.5 MB",
-    status: "Public"
-  },
-  {
-    id: 1,
-    title: "Laporan Keuangan Tahunan Dinas",
-    nomor: "KEU/088/01/2026",
-    kategori: "Laporan",
-    divisi: "Keuangan",
-    tanggal: "20 Januari 2026",
-    ukuran: "5.2 MB",
-    status: "Internal"
-  },
-  {
-    id: 2,
-    title: "Surat Keputusan Kadis No. 5",
-    nomor: "SK/005/XII/2025",
-    kategori: "Surat",
-    divisi: "Hukum",
-    tanggal: "15 Desember 2025",
-    ukuran: "1.2 MB",
-    status: "Public"
-  }
-])
+
 
 const handleSearch = () => {
   router.get('/daftar-arsip', {
@@ -56,6 +24,32 @@ const handleSearch = () => {
     tanggal_akhir: tanggal_akhir.value
   })
 }
+
+const page = usePage()
+
+const dataArsip = computed(() => page.props.arsip ?? [])
+
+const totalView = computed(() => page.props.totalView ?? 0)
+
+const totalDownload = computed(() => page.props.totalDownload ?? 0)
+
+const tipeDokumen = computed(() => page.props.tipeDokumen ?? [])
+
+const aktivitasTerbaru = computed(() => {
+  return dataArsip.value.slice(0, 3).map(item => ({
+    id: item.id,
+    title: item.judul,
+    nomor: item.nomor,
+    kategori: item.kategori?.nama || '-',
+    divisi: item.user?.bagian || '-',
+    tanggal: new Date(item.created_at).toLocaleDateString(),
+    ukuran: item.files?.[0]?.size
+      ? (item.files[0].size / 1024 / 1024).toFixed(1) + ' MB'
+      : '-',
+    status: item.status_akses
+  }))
+})
+
 </script>
 
 <template>
@@ -95,7 +89,7 @@ const handleSearch = () => {
     <div class="grid md:grid-cols-2 gap-4">
       <div class="bg-[#6f98a8] p-4 rounded-xl flex justify-between items-center shadow-sm">
         <div>
-          <div class="bg-white text-[#6f98a8] text-xs px-2 py-1 rounded w-fit mb-1 font-bold">125</div>
+          <div class="bg-white text-[#6f98a8] text-xs px-2 py-1 rounded w-fit mb-1 font-bold">{{ totalView }}</div>
           <p class="text-white text-sm">Dokumen terlihat</p>
           <div class="h-2 bg-gray-300/30 rounded mt-2 w-40"></div>
         </div>
@@ -106,7 +100,7 @@ const handleSearch = () => {
 
       <div class="bg-[#6f98a8] p-4 rounded-xl flex justify-between items-center shadow-sm">
         <div>
-          <div class="bg-white text-[#6f98a8] text-xs px-2 py-1 rounded w-fit mb-1 font-bold">42</div>
+          <div class="bg-white text-[#6f98a8] text-xs px-2 py-1 rounded w-fit mb-1 font-bold">{{ totalDownload }}</div>
           <p class="text-white text-sm">Dokumen diunduh</p>
           <div class="h-2 bg-gray-300/30 rounded mt-2 w-40"></div>
         </div>
@@ -116,31 +110,11 @@ const handleSearch = () => {
       </div>
     </div>
 
-    <div>
-      <h2 class="bg-[#2f4fa2] text-white px-4 py-1 rounded-md w-fit text-sm mb-3">
-        Tipe Dokumen
-      </h2>
-      <div class="bg-[#6f98a8] p-4 rounded-xl w-[300px] space-y-2 shadow-sm">
-        <div class="flex justify-between bg-white px-3 py-1.5 rounded text-xs font-medium">
-          <span>Dokumen</span><span class="text-[#2f4fa2]">85 Item</span>
-        </div>
-        <div class="flex justify-between bg-white px-3 py-1.5 rounded text-xs font-medium">
-          <span>Foto / Gambar</span><span class="text-[#2f4fa2]">12 Item</span>
-        </div>
-        <div class="flex justify-between bg-white px-3 py-1.5 rounded text-xs font-medium">
-          <span>Video</span><span class="text-[#2f4fa2]">5 Item</span>
-        </div>
-        <div class="flex justify-between bg-white px-3 py-1.5 rounded text-xs font-medium">
-          <span>Audio</span><span class="text-[#2f4fa2]">2 Item</span>
-        </div>
-      </div>
-    </div>
-
     <div class="flex items-center justify-between">
       <h2 class="bg-[#2f4fa2] text-white px-4 py-1 rounded-md text-sm">
         Aktivitas Terbaru
       </h2>
-      <Link href="/daftar-arsip" class="bg-red-700 text-white px-4 py-1 rounded text-xs hover:bg-red-800 transition">
+      <Link href="/super-admin/daftar-arsip" class="bg-red-700 text-white px-4 py-1 rounded text-xs hover:bg-red-800 transition">
         Lihat Semua
       </Link>
     </div>

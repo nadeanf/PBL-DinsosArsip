@@ -99,15 +99,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/pimpinan/daftar-arsip', [ArsipController::class, 'list']);
 
     // SUPER ADMIN
-    Route::get('/super-admin/dashboard', function () {
-        if (auth()->user()->role !== 'superadmin') abort(403);
-        return Inertia::render('SuperAdmin/DashboardSuperAdmin');
-    });
+    Route::get('/super-admin/dashboard', [ArsipController::class, 'dashboardSuperAdmin']);
 
-    Route::get('/super-admin/statistik', function () {
-        if (auth()->user()->role !== 'superadmin') abort(403);
-        return Inertia::render('SuperAdmin/StatistikSuperAdmin');
-    });
+    Route::get('/super-admin/statistik', [ArsipController::class, 'statistikSuperAdmin']);
 
     Route::get('/super-admin/kelolauser', [ArsipController::class, 'kelolaUserSuperAdmin'])
     ->name('superadmin.kelolauser');
@@ -128,6 +122,7 @@ Route::middleware('auth')->group(function () {
     });
     Route::patch('/super-admin/user/{id}/toggle', [UserController::class, 'toggleStatus']);
     Route::post('/super-admin/tambah-user', [UserController::class, 'store']);
+    Route::get('/super-admin/daftar-arsip', [ArsipController::class, 'listAdmin']);
 });
 /* AUTH + FITUR */
 Route::middleware(['auth', 'verified'])->group(function () {

@@ -252,7 +252,7 @@ class ArsipController extends Controller
             $query->where('id_kategori', $request->kategori);
         }
 
-        return Inertia::render('admin/ListArsipAdmin', [
+        return Inertia::render('SuperAdmin/ListArsipSuperAdmin', [
             'arsip' => $query->latest()->get(),
             'kategori' => $this->kategoriTree(),
         ]);
@@ -532,6 +532,81 @@ class ArsipController extends Controller
         ]);
     }
 
+    public function dashboardSuperAdmin(Request $request)
+{
+    if (auth()->user()->role !== 'superadmin') {
+        abort(403);
+    }
+
+    $query = Arsip::with(['kategori', 'user', 'files']);
+
+    // SEARCH
+    if ($request->search) {
+        $query->where(function ($q) use ($request) {
+            $q->where('judul', 'like', '%' . $request->search . '%')
+              ->orWhere('nomor', 'like', '%' . $request->search . '%');
+        });
+    }
+
+    // FILTER KATEGORI
+    if ($request->kategori) {
+        $query->where('jenis_arsip', $request->kategori);
+    }
+
+    // FILTER TANGGAL
+    if ($request->tanggal_awal) {
+        $query->whereDate('created_at', '>=', $request->tanggal_awal);
+    }
+
+    if ($request->tanggal_akhir) {
+        $query->whereDate('created_at', '<=', $request->tanggal_akhir);
+    }
+
+    $arsip = $query->latest()->get();
+
+    // TOTAL VIEW
+    $totalView = RiwayatAkses::where('aksi', 'lihat')->count();
+
+    // TOTAL DOWNLOAD
+    $totalDownload = DownloadLog::count();
+
+    // TIPE DOKUMEN
+    $tipeDokumen = File::selectRaw("
+        CASE
+            WHEN LOWER(nama_file) LIKE '%.jpg'
+                OR LOWER(nama_file) LIKE '%.jpeg'
+                OR LOWER(nama_file) LIKE '%.png'
+            THEN 'Foto / Gambar'
+
+            WHEN LOWER(nama_file) LIKE '%.pdf'
+                OR LOWER(nama_file) LIKE '%.doc'
+                OR LOWER(nama_file) LIKE '%.docx'
+                OR LOWER(nama_file) LIKE '%.xls'
+                OR LOWER(nama_file) LIKE '%.xlsx'
+            THEN 'Dokumen'
+
+            WHEN LOWER(nama_file) LIKE '%.mp4'
+            THEN 'Video'
+
+            WHEN LOWER(nama_file) LIKE '%.mp3'
+            THEN 'Audio'
+
+            ELSE 'Lainnya'
+        END as nama,
+        COUNT(*) as total
+    ")
+    ->groupBy('nama')
+    ->get();
+
+    return Inertia::render('SuperAdmin/DashboardSuperAdmin', [
+        'arsip' => $arsip,
+        'kategoriData' => $this->kategoriTree(),
+        'totalView' => $totalView,
+        'totalDownload' => $totalDownload,
+        'tipeDokumen' => $tipeDokumen,
+    ]);
+}
+
     public function show($id)
     {
         $arsip = Arsip::with(['kategori', 'user', 'files'])->findOrFail($id);
@@ -757,6 +832,65 @@ class ArsipController extends Controller
 
         // SEARCH VALUE
         'filters' => $request->only('search')
+    ]);
+}
+public function statistikSuperAdmin(Request $request)
+{
+    if (auth()->user()->role !== 'superadmin') {
+        abort(403);
+    }
+
+    // TOTAL FILE BERDASARKAN TIPE
+    $dokumen = File::where(function ($q) {
+        $q->where('nama_file', 'like', '%.pdf')
+          ->orWhere('nama_file', 'like', '%.doc')
+          ->orWhere('nama_file', 'like', '%.docx')
+          ->orWhere('nama_file', 'like', '%.xls')
+          ->orWhere('nama_file', 'like', '%.xlsx');
+    })->count();
+
+    $foto = File::where(function ($q) {
+        $q->where('nama_file', 'like', '%.jpg')
+          ->orWhere('nama_file', 'like', '%.jpeg')
+          ->orWhere('nama_file', 'like', '%.png');
+    })->count();
+
+    $video = File::where('nama_file', 'like', '%.mp4')->count();
+
+    $audio = File::where('nama_file', 'like', '%.mp3')->count();
+
+    // TOTAL DOWNLOAD
+    $download = DownloadLog::count();
+
+    // TOTAL DILIHAT
+    $dilihat = RiwayatAkses::where('aksi', 'lihat')->count();
+
+    // USER TERAKTIF
+    $users = User::withCount('arsip')
+        ->latest()
+        ->take(10)
+        ->get()
+        ->map(function ($user) {
+            return [
+                'nama' => $user->name,
+                'role' => $user->role,
+                'status' => $user->is_active ? 'Aktif' : 'Nonaktif',
+                'tanggal' => $user->created_at->format('d M Y'),
+                'dokumen' => $user->arsip_count
+            ];
+        });
+
+    return Inertia::render('SuperAdmin/StatistikSuperAdmin', [
+        'statistik' => [
+            'dokumen' => $dokumen,
+            'foto' => $foto,
+            'video' => $video,
+            'audio' => $audio,
+            'download' => $download,
+            'dilihat' => $dilihat,
+        ],
+
+        'users' => $users
     ]);
 }
 }
