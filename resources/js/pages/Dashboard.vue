@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang+="ts">
 
 import { usePage, router } from '@inertiajs/vue3'
 import { ref, computed, onMounted } from 'vue'
@@ -171,6 +171,25 @@ const openPreview = (doc) => {
   // 🔥 buka modal dulu
   selectedDoc.value = doc
   previewModal.value = true
+
+  // 🔥 track riwayat akses (silent - tidak perlu error dialog)
+  const trackView = async () => {
+    try {
+      const response = await fetch('/riwayat/view', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+        },
+        body: JSON.stringify({ dokumen_id: doc.id })
+      })
+      if (!response.ok) throw new Error('Tracking failed')
+    } catch (err) {
+      // Silent - jangan tampilkan error
+      console.debug('View tracking completed', err)
+    }
+  }
+  trackView()
 }
 
 const handleDownload = (id) => {
@@ -186,21 +205,27 @@ const handleDownload = (id) => {
 
   // update count manual
   totalDownload.value++
+
+  // 🔥 track riwayat download (silent - tidak perlu error dialog)
+  const trackDownload = async () => {
+    try {
+      const response = await fetch('/riwayat/view', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+        },
+        body: JSON.stringify({ dokumen_id: id })
+      })
+      if (!response.ok) throw new Error('Tracking failed')
+    } catch (err) {
+      // Silent - jangan tampilkan error
+      console.debug('Download tracking completed', err)
+    }
+  }
+  trackDownload()
 }
 
-
-  // 🔥 kirim ke backend TANPA ganggu Inertia
-  fetch('/riwayat/view', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-    },
-    body: JSON.stringify({
-      dokumen_id: doc.id
-    })
-  }).catch(err => console.error(err))
-}
 
 </script>
 
@@ -380,8 +405,13 @@ class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-
 <!-- TIDAK ADA AKSES -->
  <!-- KALAU PUBLIC, JANGAN TAMPILKAN REQUEST STATUS -->
 <div v-if="selectedDoc?.status === 'publik'">
-  <!-- kosong / atau langsung tampil preview -->
-</div><div v-if="!canAccessFull(selectedDoc)" class="text-gray-500 text-center space-y-3">
+  <!-- kosong -->
+</div>
+
+<div
+  v-if="!canAccessFull(selectedDoc)"
+  class="text-gray-500 text-center space-y-3"
+>
   
   <div>
     🔒 Dokumen ini bersifat privat <br/>

@@ -125,6 +125,46 @@ const selectedDoc = ref(null)
 const openPreview = (item) => {
   selectedDoc.value = item
   previewModal.value = true
+
+  // 🔥 Track riwayat akses (silent - tidak perlu error dialog)
+  const trackView = async () => {
+    try {
+      const response = await fetch('/riwayat/view', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+        },
+        body: JSON.stringify({ dokumen_id: item.id })
+      })
+      if (!response.ok) throw new Error('Tracking failed')
+    } catch (err) {
+      // Silent - jangan tampilkan error
+      console.debug('View tracking completed', err)
+    }
+  }
+  trackView()
+}
+
+const handleDownload = (id) => {
+  // 🔥 Track riwayat download (silent - tidak perlu error dialog)
+  const trackDownload = async () => {
+    try {
+      const response = await fetch('/riwayat/view', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+        },
+        body: JSON.stringify({ dokumen_id: id })
+      })
+      if (!response.ok) throw new Error('Tracking failed')
+    } catch (err) {
+      // Silent - jangan tampilkan error
+      console.debug('Download tracking completed', err)
+    }
+  }
+  trackDownload()
 }
 </script>
 
@@ -368,14 +408,16 @@ No: {{ selectedDoc.nomor }}
 
 <div class="flex justify-end gap-3 mt-6">
 
-<a
+<button
 v-if="selectedDoc.files.length"
-:href="`/storage/${selectedDoc.files[0].path_file}`"
-download
+@click="() => {
+  handleDownload(selectedDoc.id)
+  window.location.href = `/storage/${selectedDoc.files[0].path_file}`
+}"
 class="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold"
 >
 Download
-</a>
+</button>
 
 <button
 @click="previewModal=false"
