@@ -894,4 +894,3 @@ public function statistikSuperAdmin(Request $request)
     ]);
 }
 }
-
