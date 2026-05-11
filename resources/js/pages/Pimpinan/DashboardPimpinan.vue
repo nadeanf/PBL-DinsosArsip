@@ -3,7 +3,7 @@
 import { usePage, router } from '@inertiajs/vue3'
 import { Eye, FileText, FileImage, File } from 'lucide-vue-next'
 import { ChevronRight, ChevronDown } from 'lucide-vue-next'
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import TreeDropdown from '@/components/TreeDropdown.vue'
 import AuthLayoutPimpinan from '@/layouts/AuthLayoutPimpinan.vue'
 
@@ -201,11 +201,35 @@ const openPreview = (doc) => {
 return
 }
 
-  selectedDoc.value = doc
-
   console.log('FULL DOC:', doc)
   console.log('STATUS DOC:', doc.status)
+  
+  // 🔥 buka modal dulu, lalu set selectedDoc
   previewModal.value = true
+  
+  // 🔥 gunakan nextTick untuk memastikan modal sudah render
+  nextTick(() => {
+    selectedDoc.value = doc
+  })
+
+  // catat lihat
+  fetch('/riwayat/view', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-TOKEN': document
+        .querySelector('meta[name="csrf-token"]')
+        .getAttribute('content')
+    },
+    body: JSON.stringify({
+      dokumen_id: doc.id
+    })
+  })
+}
+
+const closePreviewModal = () => {
+  selectedDoc.value = null
+  previewModal.value = false
 }
 
 const handleDownload = (id) => {
@@ -404,9 +428,9 @@ const handleDownload = (id) => {
 </div>
 
 <!-- PREVIEW MODAL FIX -->
-<div v-if="previewModal && selectedDoc"
+<div v-if="selectedDoc"
 class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-6"
-@click.self="previewModal = false"
+@click.self="closePreviewModal"
 >
   <div class="bg-white w-full max-w-5xl rounded-[30px] shadow-2xl overflow-hidden flex flex-col md:flex-row">
     
@@ -463,7 +487,7 @@ class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-
             {{ selectedDoc?.title }}
           </h2>
 
-          <button @click="previewModal = false">✕</button>
+          <button @click="closePreviewModal">✕</button>
         </div>
 
         <div class="flex flex-wrap gap-2 mb-4">
@@ -512,7 +536,7 @@ class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-
 </button>
 
         <button
-          @click="previewModal = false"
+          @click="closePreviewModal"
           class="bg-gray-300 px-4 py-2 rounded-xl font-bold"
         >
           Tutup

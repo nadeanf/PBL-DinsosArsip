@@ -1,6 +1,6 @@
 <script setup>
 import { usePage, router } from '@inertiajs/vue3'
-import { ref, computed } from 'vue'
+import { ref, computed, nextTick } from 'vue'
 import { FileText, FileImage, File } from 'lucide-vue-next'
 import TreeDropdown from '@/components/TreeDropdown.vue'
 
@@ -123,8 +123,13 @@ const previewModal = ref(false)
 const selectedDoc = ref(null)
 
 const openPreview = (item) => {
-  selectedDoc.value = item
+  // 🔥 buka modal dulu, lalu set selectedDoc
   previewModal.value = true
+  
+  // 🔥 gunakan nextTick untuk memastikan modal sudah render
+  nextTick(() => {
+    selectedDoc.value = item
+  })
 
   // 🔥 Track riwayat akses (silent - tidak perlu error dialog)
   const trackView = async () => {
@@ -147,24 +152,8 @@ const openPreview = (item) => {
 }
 
 const handleDownload = (id) => {
-  // 🔥 Track riwayat download (silent - tidak perlu error dialog)
-  const trackDownload = async () => {
-    try {
-      const response = await fetch('/riwayat/view', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
-        },
-        body: JSON.stringify({ dokumen_id: id })
-      })
-      if (!response.ok) throw new Error('Tracking failed')
-    } catch (err) {
-      // Silent - jangan tampilkan error
-      console.debug('Download tracking completed', err)
-    }
-  }
-  trackDownload()
+  // 🔥 Gunakan route download agar controller mencatat download ke riwayat.
+  window.location.href = `/download/${id}`
 }
 </script>
 
@@ -317,6 +306,7 @@ const handleDownload = (id) => {
 <!-- PREVIEW MODAL -->
 <div
 v-if="previewModal"
+@click.self="previewModal = false; selectedDoc = null"
 class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-6"
 >
 
@@ -410,18 +400,14 @@ No: {{ selectedDoc.nomor }}
 
 <button
 v-if="selectedDoc.files.length"
-@click="() => {
-  handleDownload(selectedDoc.id)
-  window.location.href = `/storage/${selectedDoc.files[0].path_file}`
-}"
+@click="() => handleDownload(selectedDoc.id)"
 class="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold"
 >
 Download
 </button>
 
 <button
-@click="previewModal=false"
-class="bg-gray-300 px-4 py-2 rounded-xl font-bold"
+            @click="previewModal=false; selectedDoc = null"
 >
 Tutup
 </button>

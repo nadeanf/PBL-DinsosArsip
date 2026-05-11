@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch  } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { Head, router, usePage } from '@inertiajs/vue3'
 import AdminLayout from '@/layouts/AdminLayout.vue'
 import { FileText, FileImage, File, FileSpreadsheet } from 'lucide-vue-next'
@@ -80,8 +80,18 @@ const previewModal = ref(false)
 const selectedDoc = ref<any>(null)
 
 const openPreview = (item: any) => {
-  selectedDoc.value = item
+  // 🔥 buka modal dulu, lalu set selectedDoc
   previewModal.value = true
+  
+  // 🔥 gunakan nextTick untuk memastikan modal sudah render
+  nextTick(() => {
+    selectedDoc.value = item
+  })
+}
+
+const closePreviewModal = () => {
+  selectedDoc.value = null
+  previewModal.value = false
 }
 
 /* ACTION */
@@ -308,8 +318,10 @@ watch(filterJenis, () => {
   </div>
 
   <!-- PREVIEW MODAL (TIDAK DIUBAH) -->
-  <div v-if="previewModal"
-  class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-6">
+  <div v-if="selectedDoc"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-6"
+  @click.self="closePreviewModal"
+  >
 
   <div class="bg-white w-full max-w-5xl rounded-[30px] shadow-2xl overflow-hidden flex flex-col md:flex-row">
 
@@ -339,7 +351,7 @@ watch(filterJenis, () => {
             {{ selectedDoc.title }}
           </h2>
 
-          <button @click="previewModal = false">✕</button>
+          <button @click="closePreviewModal">✕</button>
         </div>
 
         <div class="flex flex-wrap gap-2 mb-4">
@@ -382,15 +394,14 @@ watch(filterJenis, () => {
       <div class="flex justify-end gap-3 mt-6">
         <a
           v-if="selectedDoc.files.length"
-          :href="`/storage/${selectedDoc.files[0].path_file}`"
-          download
+          :href="`/download/${selectedDoc.id}`"
           class="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold"
         >
           Download
         </a>
 
         <button
-          @click="previewModal = false"
+          @click="closePreviewModal"
           class="bg-gray-300 px-4 py-2 rounded-xl font-bold"
         >
           Tutup

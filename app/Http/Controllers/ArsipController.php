@@ -347,6 +347,48 @@ class ArsipController extends Controller
         ]);
     }
 
+    public function exportPDF(Request $request)
+    {
+        $query = Arsip::with(['kategori', 'user']);
+
+        if ($request->filled('search')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('judul', 'like', '%' . $request->search . '%')
+                  ->orWhere('nomor', 'like', '%' . $request->search . '%')
+                  ->orWhere('deskripsi', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        if ($request->filled('kategori')) {
+            $query->where('id_kategori', $request->kategori);
+        }
+
+        if ($request->filled('tanggal_awal')) {
+            $query->whereDate('created_at', '>=', $request->tanggal_awal);
+        }
+
+        if ($request->filled('tanggal_akhir')) {
+            $query->whereDate('created_at', '<=', $request->tanggal_akhir);
+        }
+
+        $data = $query->latest()->get()->map(function ($item) {
+            return [
+                'judul' => $item->judul,
+                'nomor' => $item->nomor,
+                'tahun' => $item->tahun,
+                'kategori' => $item->kategori->nama ?? '-',
+                'status' => $item->status_akses,
+                'download_url' => url('/download/' . $item->id)
+            ];
+        });
+
+        $pdf = Pdf::loadView('pdf.laporan-arsip', [
+            'data' => $data
+        ]);
+
+        return $pdf->download('laporan-arsip.pdf');
+    }
+
     public function dashboardAdmin(Request $request)
     {
         $query = Arsip::with(['kategori', 'user', 'files']);
@@ -641,7 +683,7 @@ class ArsipController extends Controller
 
     public function download($id)
     {
-        $arsip = Arsip::with('files')->findOrFail($id);
+        $arsip = Arsip::with(['files', 'user'])->findOrFail($id);
 
         if (!$this->canAccessFull($arsip)) {
             abort(403, 'Tidak punya akses');
@@ -713,12 +755,43 @@ class ArsipController extends Controller
         ]);
     }
 
+    public function riwayatPimpinan()
+    {
+        $data = RiwayatAkses::with('arsip.files', 'arsip.kategori', 'arsip.user')
+            ->where('user_id', Auth::id())
+            ->orderBy('updated_at', 'desc')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->arsip->id,
+                    'user_id' => $item->arsip->user_id,
+                    'title' => $item->arsip->judul,
+                    'nomor' => $item->arsip->nomor,
+                    'aksi' => $item->aksi,
+                    'deskripsi' => $item->arsip->deskripsi,
+                    'kategori' => $item->arsip->kategori->nama ?? '-',
+                    'jenis' => $item->arsip->jenis_arsip,
+                    'bidang' => $item->arsip->user->bagian ?? '-',
+                    'tahun' => $item->arsip->tahun,
+                    'lokasi' => $item->arsip->lokasi,
+                    'status' => $item->arsip->status_akses,
+                    'files' => $item->arsip->files ?? [],
+                    'waktu' => $item->updated_at
+                ];
+            });
+
+        return Inertia::render('Pimpinan/RiwayatPimpinan', [
+            'riwayat' => $data
+        ]);
+    }
+
     private function canAccessFull($arsip)
     {
         $user = Auth::user();
 
         if ($arsip->status_akses === 'publik') return true;
         if ($arsip->user_id === $user->id) return true;
+        if ($arsip->status_akses === 'private' && $arsip->user && $arsip->user->bagian === $user->bagian) return true;
 
         $approved = RequestAkses::where('user_id', $user->id)
             ->where('arsip_id', $arsip->id)

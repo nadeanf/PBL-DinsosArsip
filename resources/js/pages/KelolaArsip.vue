@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch  } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { Head, router, usePage } from '@inertiajs/vue3'
 import UserLayout from '@/layouts/UserLayout.vue'
 import { FileText, FileImage, File, FileSpreadsheet } from 'lucide-vue-next'
@@ -80,8 +80,13 @@ const previewModal = ref(false)
 const selectedDoc = ref<any>(null)
 
 const openPreview = (item: any) => {
-  selectedDoc.value = item
+  // 🔥 buka modal dulu, lalu set selectedDoc
   previewModal.value = true
+  
+  // 🔥 gunakan nextTick untuk memastikan modal sudah render
+  nextTick(() => {
+    selectedDoc.value = item
+  })
 
   // 🔥 Track riwayat akses
   router.post('/riwayat/view', { dokumen_id: item.id }, {
@@ -91,13 +96,13 @@ const openPreview = (item: any) => {
   })
 }
 
+const closePreviewModal = () => {
+  selectedDoc.value = null
+  previewModal.value = false
+}
+
 const handleDownload = (id: number) => {
-  // 🔥 Track riwayat download
-  router.post('/riwayat/view', { dokumen_id: id }, {
-    preserveScroll: true,
-    preserveState: true,
-    onError: (err) => console.error('Error tracking download:', err)
-  })
+  window.location.href = `/download/${id}`
 }
 
 /* ACTION */
@@ -135,10 +140,8 @@ watch(filterJenis, () => {
 })
 
 const downloadFile = () => {
+  if (!selectedDoc.value) return
   handleDownload(selectedDoc.value.id)
-
-  window.location.href =
-    `/storage/${selectedDoc.value.files[0].path_file}`
 }
 
 </script>
@@ -331,7 +334,8 @@ const downloadFile = () => {
   </div>
 
   <!-- PREVIEW MODAL (TIDAK DIUBAH) -->
-  <div v-if="previewModal"
+  <div v-if="selectedDoc"
+  @click.self="closePreviewModal"
   class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-6">
 
   <div class="bg-white w-full max-w-5xl rounded-[30px] shadow-2xl overflow-hidden flex flex-col md:flex-row">
@@ -362,7 +366,7 @@ const downloadFile = () => {
             {{ selectedDoc.title }}
           </h2>
 
-          <button @click="previewModal = false">✕</button>
+          <button @click="closePreviewModal">✕</button>
         </div>
 
         <div class="flex flex-wrap gap-2 mb-4">
@@ -412,7 +416,7 @@ const downloadFile = () => {
       </button>
 
         <button
-          @click="previewModal = false"
+          @click="previewModal = false; selectedDoc = null"
           class="bg-gray-300 px-4 py-2 rounded-xl font-bold"
         >
           Tutup
