@@ -1,7 +1,7 @@
 <script setup lang+="ts">
 
 import { usePage, router } from '@inertiajs/vue3'
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { Eye, FileText, FileImage, File } from 'lucide-vue-next'
 import { ChevronRight, ChevronDown } from 'lucide-vue-next'
 import TreeDropdown from '@/components/TreeDropdown.vue'
@@ -168,9 +168,13 @@ const selectedDoc = ref(null)
 const openPreview = (doc) => {
   if (!doc) return
 
-  // 🔥 buka modal dulu
-  selectedDoc.value = doc
+  // 🔥 buka modal dulu, lalu set selectedDoc
   previewModal.value = true
+  
+  // 🔥 gunakan nextTick untuk memastikan modal sudah render
+  nextTick(() => {
+    selectedDoc.value = doc
+  })
 
   // 🔥 track riwayat akses (silent - tidak perlu error dialog)
   const trackView = async () => {
@@ -190,6 +194,11 @@ const openPreview = (doc) => {
     }
   }
   trackView()
+}
+
+const closePreviewModal = () => {
+  selectedDoc.value = null
+  previewModal.value = false
 }
 
 const handleDownload = (id) => {
@@ -380,9 +389,9 @@ const handleDownload = (id) => {
 </div>
 
 <!-- PREVIEW MODAL FIX -->
-<div v-if="previewModal && selectedDoc"
+<div v-if="selectedDoc"
 class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-6"
-@click.self="previewModal = false"
+@click.self="closePreviewModal"
 >
   <div class="bg-white w-full max-w-5xl rounded-[30px] shadow-2xl overflow-hidden flex flex-col md:flex-row">
     
@@ -448,7 +457,7 @@ class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-
             {{ selectedDoc?.title }}
           </h2>
 
-          <button @click="previewModal = false">✕</button>
+          <button @click="closePreviewModal">✕</button>
         </div>
 
         <div class="flex flex-wrap gap-2 mb-4">
@@ -497,7 +506,7 @@ class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-
 </button>
 
         <button
-          @click="previewModal = false"
+          @click="closePreviewModal"
           class="bg-gray-300 px-4 py-2 rounded-xl font-bold"
         >
           Tutup
