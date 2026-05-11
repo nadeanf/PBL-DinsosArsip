@@ -787,7 +787,7 @@ class ArsipController extends Controller
                 ];
             });
 
-        return Inertia::render('admin/RiwayatPimpinan', [
+        return Inertia::render('Pimpinan/RiwayatPimpinan', [
             'riwayat' => $data
         ]);
     }
