@@ -187,6 +187,21 @@ class ArsipController extends Controller
         ]);
     }
 
+    public function landing()
+{
+    $arsip = Arsip::with(['kategori', 'user', 'files'])
+        ->latest()
+        ->take(3)
+        ->get();
+
+    $totalArsip = Arsip::count();
+
+    return Inertia::render('Landing', [
+        'arsip' => $arsip,
+        'totalArsip' => $totalArsip
+    ]);
+}
+
     public function list(Request $request)
     {
         $query = Arsip::with(['kategori', 'user', 'files']);
@@ -252,7 +267,11 @@ class ArsipController extends Controller
             $query->where('id_kategori', $request->kategori);
         }
 
-        return Inertia::render('SuperAdmin/ListArsipSuperAdmin', [
+        if (auth()->user()->role !== 'admin') {
+            abort(403);
+        }
+
+        return Inertia::render('admin/ListArsipAdmin', [
             'arsip' => $query->latest()->get(),
             'kategori' => $this->kategoriTree(),
         ]);
@@ -713,6 +732,36 @@ class ArsipController extends Controller
         ]);
     }
 
+    public function riwayatAdmin()
+    {
+        $data = RiwayatAkses::with('arsip.files', 'arsip.kategori', 'arsip.user')
+            ->where('user_id', Auth::id())
+            ->orderBy('updated_at', 'desc')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->arsip->id,
+                    'user_id' => $item->arsip->user_id,
+                    'title' => $item->arsip->judul,
+                    'nomor' => $item->arsip->nomor,
+                    'aksi' => $item->aksi,
+                    'deskripsi' => $item->arsip->deskripsi,
+                    'kategori' => $item->arsip->kategori->nama ?? '-',
+                    'jenis' => $item->arsip->jenis_arsip,
+                    'bidang' => $item->arsip->user->bagian ?? '-',
+                    'tahun' => $item->arsip->tahun,
+                    'lokasi' => $item->arsip->lokasi,
+                    'status' => $item->arsip->status_akses,
+                    'files' => $item->arsip->files ?? [],
+                    'waktu' => $item->updated_at
+                ];
+            });
+
+        return Inertia::render('admin/RiwayatAdmin', [
+            'riwayat' => $data
+        ]);
+    }
+
     private function canAccessFull($arsip)
     {
         $user = Auth::user();
@@ -834,6 +883,48 @@ class ArsipController extends Controller
         'filters' => $request->only('search')
     ]);
 }
+
+public function exportPDF(Request $request)
+{
+    $query = Arsip::with(['kategori', 'user', 'files']);
+
+    if ($request->search) {
+        $query->where(function ($q) use ($request) {
+            $q->where('judul', 'like', '%' . $request->search . '%')
+              ->orWhere('nomor', 'like', '%' . $request->search . '%');
+        });
+    }
+
+    if ($request->kategori) {
+        $query->where('id_kategori', $request->kategori);
+    }
+
+    if ($request->filled('tanggal_awal')) {
+        $query->whereDate('created_at', '>=', $request->tanggal_awal);
+    }
+
+    if ($request->filled('tanggal_akhir')) {
+        $query->whereDate('created_at', '<=', $request->tanggal_akhir);
+    }
+
+    $arsip = $query->latest()->get()->map(function ($item) {
+        return [
+            'judul' => $item->judul,
+            'nomor' => $item->nomor,
+            'tahun' => $item->tahun,
+            'kategori' => $item->kategori?->nama ?? '-',
+            'status' => $item->status_akses,
+            'download_url' => url('/download/' . $item->id),
+        ];
+    });
+
+    $pdf = Pdf::loadView('pdf.laporan-arsip', [
+        'data' => $arsip,
+    ]);
+
+    return $pdf->download('laporan-arsip.pdf');
+}
+
 public function statistikSuperAdmin(Request $request)
 {
     if (auth()->user()->role !== 'superadmin') {

@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Password;
 use Inertia\Inertia;
 use App\Http\Controllers\ArsipController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\PengumumanController;
+use App\Http\Controllers\LandingController;
 use App\Models\Kategori;
 
 /* PUBLIC ROUTES */
@@ -67,9 +69,8 @@ Route::post('/reset-password', function (Request $request) {
 })->name('password.update');
 
 /* LANDING */
-Route::inertia('/', 'Landing', [
-    'canRegister' => Features::enabled(Features::registration()),
-])->name('home');
+Route::get('/', [LandingController::class, 'index'])
+    ->name('home');
 
 /* LOGOUT */
 Route::post('/logout', function () {
@@ -197,10 +198,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/admin/sampah-admin', [ArsipController::class, 'trashAdmin']);
 
+    Route::get('/admin/riwayat', [ArsipController::class, 'riwayatAdmin']);
+
     Route::get('/admin/pengumuman', function () {
         if (auth()->user()->role !== 'admin') abort(403);
         return Inertia::render('admin/Pengumuman');
     });
+    Route::post('/admin/pengumuman', [PengumumanController::class, 'store']);
 
     Route::get('/admin/kelola-kategori', [ArsipController::class, 'kelolaKategori'])
     ->middleware('auth');

@@ -155,13 +155,13 @@ const user = computed(() => props.user || page.props.auth?.user)
         </Link>
 
         <!-- RIWAYAT -->
-        <Link href="/riwayat"
-          :class="page.url.startsWith('/riwayat')
+        <Link href="/admin/riwayat"
+          :class="page.url.startsWith('/admin/riwayat')
             ? 'bg-[#2f4fa2] text-white shadow-md'
             : 'bg-gray-200 text-gray-800'"
           class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all">
           <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-white">
-            <History :class="page.url.startsWith('/riwayat') ? 'text-[#2f4fa2]' : 'text-gray-700'" class="w-5 h-5" />
+            <History :class="page.url.startsWith('/admin/riwayat') ? 'text-[#2f4fa2]' : 'text-gray-700'" class="w-5 h-5" />
           </span>
           <span class="text-sm font-medium">Riwayat</span>
         </Link>

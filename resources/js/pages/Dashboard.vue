@@ -20,16 +20,16 @@ const canAccessFull = (doc) => {
 
   if (!user) return false
 
-  // ✅ request approved → BOLEH
+  // request approved → BOLEH
   if (doc.request_status === 'approved') return true
 
-  // ✅ publik → BOLEH
+  // publik → BOLEH
   if (doc.status === 'publik') return true
 
-  // ✅ pemilik
+  // pemilik
   if (doc.user_id === user.id) return true
 
-  // ✅ private tapi bagian sama
+  // private tapi bagian sama
   if (doc.status === 'private' && doc.bidang === user.bagian) return true
 
   return false
@@ -168,11 +168,11 @@ const selectedDoc = ref(null)
 const openPreview = (doc) => {
   if (!doc) return
 
-  // 🔥 buka modal dulu
+  // buka modal dulu
   selectedDoc.value = doc
   previewModal.value = true
 
-  // 🔥 track riwayat akses (silent - tidak perlu error dialog)
+  // track riwayat akses (silent - tidak perlu error dialog)
   const trackView = async () => {
     try {
       const response = await fetch('/riwayat/view', {
@@ -206,7 +206,7 @@ const handleDownload = (id) => {
   // update count manual
   totalDownload.value++
 
-  // 🔥 track riwayat download (silent - tidak perlu error dialog)
+  // track riwayat download
   const trackDownload = async () => {
     try {
       const response = await fetch('/riwayat/view', {
