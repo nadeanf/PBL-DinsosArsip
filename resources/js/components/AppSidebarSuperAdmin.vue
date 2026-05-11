@@ -11,8 +11,18 @@ const user = page.props.auth?.user
 
     <div>
       <Link href="/edit-profile" class="flex items-center gap-3 mb-6">
-        <div class="w-12 h-12 flex items-center justify-center rounded-full bg-[#b7d3d8]">
-          <ShieldCheck class="w-6 h-6 text-[#2f4fa2]" />
+        <div class="w-12 h-12 flex items-center justify-center rounded-full bg-[#b7d3d8] overflow-hidden border-2 border-white shadow-sm">
+        <img
+          v-if="user?.photo"
+          :src="`/storage/${user.photo}`"
+          class="w-full h-full object-cover"
+          />
+
+          <ShieldCheck
+          v-else
+          class="w-6 h-6 text-[#2f4fa2]"
+         />
+
         </div>
         <div>
           <p class="text-sm font-semibold text-gray-800">Super Admin</p>

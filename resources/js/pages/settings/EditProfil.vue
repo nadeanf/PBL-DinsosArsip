@@ -86,7 +86,7 @@ export default {
       return h(AdminLayout, [page]);
     } */
 
-    if (role === 'super_admin') {
+    if (role === 'superadmin') {
       return h(SuperAdminLayout, [page]);
     }
 
@@ -102,10 +102,12 @@ export default {
 
     <div class="w-full max-w-3xl space-y-4">
 
+      <!-- TITLE -->
       <h1 class="text-2xl font-bold text-gray-800">
         Profile Saya
       </h1>
 
+      <!-- NOTIF -->
       <div v-if="message" class="bg-green-100 text-green-700 px-4 py-2 rounded">
         {{ message }}
       </div>
@@ -114,16 +116,21 @@ export default {
         {{ error }}
       </div>
 
+      <!-- CARD -->
       <div class="rounded-xl shadow-md overflow-hidden">
 
+        <!-- HEADER -->
         <div class="bg-gradient-to-b from-[#7fa6b3] to-[#4f7d8c] h-6"></div>
 
         <div class="bg-white p-6">
 
+          <!-- PROFILE -->
           <div class="flex items-center gap-4 mb-4">
 
+            <!-- FOTO -->
             <div @click="selectFile" class="cursor-pointer relative">
 
+              <!-- LOADING -->
               <div
                 v-if="loading"
                 class="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center text-white text-xs"
@@ -131,18 +138,21 @@ export default {
                 Upload...
               </div>
 
+              <!-- PREVIEW -->
               <img
                 v-if="preview"
                 :src="preview"
                 class="w-20 h-20 rounded-full object-cover border-2 border-gray-300 hover:opacity-80"
               />
 
+              <!-- FOTO DB -->
               <img
                 v-else-if="user?.photo"
                 :src="`/storage/${user.photo}`"
                 class="w-20 h-20 rounded-full object-cover border-2 border-gray-300 hover:opacity-80"
               />
 
+              <!-- DEFAULT -->
               <div
                 v-else
                 class="w-20 h-20 rounded-full bg-gray-300 flex items-center justify-center text-xs text-gray-600 hover:opacity-80"
@@ -152,6 +162,7 @@ export default {
 
             </div>
 
+            <!-- INFO -->
             <div>
               <div class="bg-[#7fa6b3] text-white px-4 py-1 rounded-md text-sm font-semibold w-fit">
                 {{ user?.name || 'Guest' }}
@@ -164,6 +175,7 @@ export default {
 
           </div>
 
+          <!-- INPUT HIDDEN -->
           <input
             type="file"
             ref="fileInput"
@@ -173,6 +185,7 @@ export default {
 
           <hr class="my-4">
 
+          <!-- INFORMASI AKUN -->
           <div>
             <div class="bg-[#7fa6b3] text-white px-4 py-1 rounded-md text-sm w-fit mb-3">
               Informasi Akun
@@ -205,6 +218,7 @@ export default {
 
         </div>
 
+        <!-- FOOTER -->
         <div class="bg-gradient-to-t from-[#7fa6b3] to-[#4f7d8c] h-6"></div>
 
       </div>

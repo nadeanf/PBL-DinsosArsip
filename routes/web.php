@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
 use Inertia\Inertia;
 use App\Http\Controllers\ArsipController;
+use App\Http\Controllers\UserController;
 use App\Models\Kategori;
 
 /* PUBLIC ROUTES */
@@ -98,20 +99,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/pimpinan/daftar-arsip', [ArsipController::class, 'list']);
 
     // SUPER ADMIN
-    Route::get('/super-admin/dashboard', function () {
-        if (auth()->user()->role !== 'superadmin') abort(403);
-        return Inertia::render('SuperAdmin/DashboardSuperAdmin');
-    });
+    Route::get('/super-admin/dashboard', [ArsipController::class, 'dashboardSuperAdmin']);
 
-    Route::get('/super-admin/statistik', function () {
-        if (auth()->user()->role !== 'superadmin') abort(403);
-        return Inertia::render('SuperAdmin/StatistikSuperAdmin');
-    });
+    Route::get('/super-admin/statistik', [ArsipController::class, 'statistikSuperAdmin']);
 
-    Route::get('/super-admin/kelolauser', function () {
-        if (auth()->user()->role !== 'superadmin') abort(403);
-        return Inertia::render('SuperAdmin/KelolaUser');
-    });
+    Route::get('/super-admin/kelolauser', [ArsipController::class, 'kelolaUserSuperAdmin'])
+    ->name('superadmin.kelolauser');
 
     Route::get('/super-admin/pengaturan', function () {
         if (auth()->user()->role !== 'superadmin') abort(403);
@@ -126,12 +119,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/super-admin/riwayat', function () {
     if (auth()->user()->role !== 'superadmin') abort(403);
     return Inertia::render('SuperAdmin/RiwayatSuperAdmin');
-
-});
+    });
+    Route::patch('/super-admin/user/{id}/toggle', [UserController::class, 'toggleStatus']);
+    Route::post('/super-admin/tambah-user', [UserController::class, 'store']);
+    Route::get('/super-admin/daftar-arsip', [ArsipController::class, 'listAdmin']);
 });
 /* AUTH + FITUR */
 Route::middleware(['auth', 'verified'])->group(function () {
-
+    Route::post('/riwayat/view', [ArsipController::class, 'storeView']);
     Route::get('/sampah', [ArsipController::class, 'trash'])->name('arsip.trash');
     Route::get('/riwayat', [ArsipController::class, 'riwayat'])->name('riwayat');
     Route::get('/edit-dokumen/{id}', [ArsipController::class, 'edit'])->name('arsip.edit');

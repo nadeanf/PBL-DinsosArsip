@@ -63,8 +63,13 @@ const getFileType = (path) => {
 
   const ext = path.split('.').pop()?.toLowerCase()
 
-  if (['jpg','jpeg','png','gif','webp'].includes(ext)) return 'IMAGE'
-  if (ext === 'pdf') return 'PDF'
+  if(['jpg','jpeg','png','gif','webp'].includes(ext)){
+    return 'IMAGE'
+  }
+
+  if(ext === 'pdf'){
+    return 'PDF'
+  }
 
   return 'FILE'
 }
@@ -120,6 +125,46 @@ const selectedDoc = ref(null)
 const openPreview = (item) => {
   selectedDoc.value = item
   previewModal.value = true
+
+  // 🔥 Track riwayat akses (silent - tidak perlu error dialog)
+  const trackView = async () => {
+    try {
+      const response = await fetch('/riwayat/view', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+        },
+        body: JSON.stringify({ dokumen_id: item.id })
+      })
+      if (!response.ok) throw new Error('Tracking failed')
+    } catch (err) {
+      // Silent - jangan tampilkan error
+      console.debug('View tracking completed', err)
+    }
+  }
+  trackView()
+}
+
+const handleDownload = (id) => {
+  // 🔥 Track riwayat download (silent - tidak perlu error dialog)
+  const trackDownload = async () => {
+    try {
+      const response = await fetch('/riwayat/view', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+        },
+        body: JSON.stringify({ dokumen_id: id })
+      })
+      if (!response.ok) throw new Error('Tracking failed')
+    } catch (err) {
+      // Silent - jangan tampilkan error
+      console.debug('Download tracking completed', err)
+    }
+  }
+  trackDownload()
 }
 </script>
 
@@ -143,7 +188,7 @@ const openPreview = (item) => {
       />
     </div>
 
-    <!-- DROPDOWN FIX -->
+    <!-- 🔥 DROPDOWN FIX -->
 <div class="relative w-[300px]">
 
   <!-- BUTTON -->
@@ -198,7 +243,7 @@ const openPreview = (item) => {
 
   <!-- TOTAL -->
   <div class="text-sm">
-    Ditemukan {{ mappedDocuments.length }} arsip
+    Ditemukan <b>{{ documents.length }}</b> arsip
   </div>
 
 
@@ -211,6 +256,7 @@ const openPreview = (item) => {
       @click="openPreview(item)"
       class="cursor-pointer bg-[#7fa6b3] rounded-xl p-4 shadow-md flex items-center gap-4 hover:border-blue-500 transition"
     >
+
       <!-- ICON -->
       <div class="w-12 h-12 flex items-center justify-center rounded-xl bg-gray-100">
 
@@ -263,44 +309,6 @@ const openPreview = (item) => {
     </div>
 
   </div>
-
-  <!-- 🔥 PAGINATION TARUH DI SINI -->
-<div
-  v-if="totalPages > 1"
-  class="flex justify-center items-center gap-2 mt-6"
->
-
-  <button
-    @click="setPage(currentPage - 1)"
-    :disabled="currentPage === 1"
-    class="px-3 py-1 rounded-lg bg-gray-200 disabled:opacity-50"
-  >
-    Prev
-  </button>
-
-  <button
-    v-for="p in totalPages"
-    :key="p"
-    @click="setPage(p)"
-    :class="[
-      'px-3 py-1 rounded-lg',
-      currentPage === p
-        ? 'bg-blue-600 text-white'
-        : 'bg-gray-200'
-    ]"
-  >
-    {{ p }}
-  </button>
-
-  <button
-    @click="setPage(currentPage + 1)"
-    :disabled="currentPage === totalPages"
-    class="px-3 py-1 rounded-lg bg-gray-200 disabled:opacity-50"
-  >
-    Next
-  </button>
-
-</div>
 
 </div>
 
@@ -400,14 +408,16 @@ No: {{ selectedDoc.nomor }}
 
 <div class="flex justify-end gap-3 mt-6">
 
-<a
+<button
 v-if="selectedDoc.files.length"
-:href="`/storage/${selectedDoc.files[0].path_file}`"
-download
+@click="() => {
+  handleDownload(selectedDoc.id)
+  window.location.href = `/storage/${selectedDoc.files[0].path_file}`
+}"
 class="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold"
 >
 Download
-</a>
+</button>
 
 <button
 @click="previewModal=false"

@@ -14,7 +14,7 @@ const filterJenis = ref('')
 /* HELPER FILE TYPE */
 const getFileType = (path: string) => {
   if (!path) return 'FILE'
-  const ext = path.split('.').pop()?.toLowerCase()
+  const ext = path.split('.').pop()?.toLowerCase() || ''
 
   if (['jpg','jpeg','png','gif','webp'].includes(ext)) return 'IMAGE'
   if (ext === 'pdf') return 'PDF'
@@ -25,7 +25,7 @@ const getFileType = (path: string) => {
 
 /* DATA MAPPING */
 const allDocuments = ref(
-  (page.props.arsip || []).map((item: any) => ({
+   ((page.props.arsip as any[]) || []).map((item: any) => ({
     id: item.id,
     title: item.judul,
     nomor: item.nomor,
@@ -82,6 +82,22 @@ const selectedDoc = ref<any>(null)
 const openPreview = (item: any) => {
   selectedDoc.value = item
   previewModal.value = true
+
+  // 🔥 Track riwayat akses
+  router.post('/riwayat/view', { dokumen_id: item.id }, {
+    preserveScroll: true,
+    preserveState: true,
+    onError: (err) => console.error('Error tracking view:', err)
+  })
+}
+
+const handleDownload = (id: number) => {
+  // 🔥 Track riwayat download
+  router.post('/riwayat/view', { dokumen_id: id }, {
+    preserveScroll: true,
+    preserveState: true,
+    onError: (err) => console.error('Error tracking download:', err)
+  })
 }
 
 /* ACTION */
@@ -117,6 +133,13 @@ const handleExecute = () => {
 watch(filterJenis, () => {
   currentPage.value = 1
 })
+
+const downloadFile = () => {
+  handleDownload(selectedDoc.value.id)
+
+  window.location.href =
+    `/storage/${selectedDoc.value.files[0].path_file}`
+}
 
 </script>
 <template>
@@ -380,14 +403,13 @@ watch(filterJenis, () => {
       </div>
 
       <div class="flex justify-end gap-3 mt-6">
-        <a
-          v-if="selectedDoc.files.length"
-          :href="`/storage/${selectedDoc.files[0].path_file}`"
-          download
-          class="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold"
+      <button
+        v-if="selectedDoc.files.length"
+        @click="downloadFile"
+        class="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold"
         >
-          Download
-        </a>
+        Download
+      </button>
 
         <button
           @click="previewModal = false"
