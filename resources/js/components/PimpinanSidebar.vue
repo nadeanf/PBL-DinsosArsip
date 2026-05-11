@@ -65,17 +65,17 @@ const user = computed(() => props.user || page.props.auth?.user)
         </Link>
 
        <Link href="/pimpinan/riwayat"
-  :class="page.url.startsWith('/pimpinan/riwayat')
-    ? 'bg-[#2f4fa2] text-white'
-    : 'bg-gray-200 text-gray-800'"
-  class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all">
+        :class="page.url.startsWith('/pimpinan/riwayat')
+          ? 'bg-[#2f4fa2] text-white'
+          : 'bg-gray-200 text-gray-800'"
+        class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all">
 
-  <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-white">
-    <Clock class="w-5 h-5 text-gray-700" />
-  </span>
+        <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-white">
+          <Clock class="w-5 h-5 text-gray-700" />
+        </span>
 
-  <span class="text-sm font-medium">Riwayat</span>
-</Link>
+        <span class="text-sm font-medium">Riwayat</span>
+      </Link>
 </div>
 
       <div class="mt-8 bg-white/70 p-4 rounded-xl text-xs shadow-inner">

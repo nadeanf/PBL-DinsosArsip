@@ -92,10 +92,7 @@ Route::middleware('auth')->group(function () {
         return Inertia::render('Pimpinan/StatistikPimpinan', ['title' => 'Statistik']);
     });
 
-    Route::get('/pimpinan/riwayat', function () {
-    if (auth()->user()->role !== 'pimpinan') abort(403);
-    return Inertia::render('Pimpinan/RiwayatPimpinan');
-    });
+    Route::get('/pimpinan/riwayat', [ArsipController::class, 'riwayatPimpinan']);
 
     Route::get('/pimpinan/daftar-arsip', [ArsipController::class, 'list']);
 
