@@ -17,7 +17,6 @@ class LandingController extends Controller
         ->get();
 
         $pengumuman = Pengumuman::latest()
-            ->take(3)
             ->get();
 
         return Inertia::render('Landing', [
