@@ -116,10 +116,8 @@ Route::middleware('auth')->group(function () {
     return Inertia::render('SuperAdmin/EditStorageLimit');
     });
     
-    Route::get('/super-admin/riwayat', function () {
-    if (auth()->user()->role !== 'superadmin') abort(403);
-    return Inertia::render('SuperAdmin/RiwayatSuperAdmin');
-    });
+    Route::get('/super-admin/riwayat', [ArsipController::class, 'riwayatSuperAdmin']);
+    
     Route::patch('/super-admin/user/{id}/toggle', [UserController::class, 'toggleStatus']);
     Route::post('/super-admin/tambah-user', [UserController::class, 'store']);
     Route::get('/super-admin/daftar-arsip', [ArsipController::class, 'listAdmin']);

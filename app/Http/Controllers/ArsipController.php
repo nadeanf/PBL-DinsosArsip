@@ -598,6 +598,16 @@ class ArsipController extends Controller
     ->groupBy('nama')
     ->get();
 
+    // Log akses arsip oleh superadmin
+    foreach ($arsip as $item) {
+        RiwayatAkses::create([
+            'user_id' => auth()->id(),
+            'arsip_id' => $item->id,
+            'aksi' => 'lihat', // atau 'download' jika mendownload
+            'created_at' => now(),
+        ]);
+    }
+
     return Inertia::render('SuperAdmin/DashboardSuperAdmin', [
         'arsip' => $arsip,
         'kategoriData' => $this->kategoriTree(),
@@ -713,6 +723,42 @@ class ArsipController extends Controller
         ]);
     }
 
+    public function riwayatSuperAdmin()
+{
+    if (auth()->user()->role !== 'superadmin') {
+        abort(403);
+    }
+
+    $data = RiwayatAkses::with('arsip.files', 'arsip.kategori', 'arsip.user', 'user')
+
+        // FILTER HANYA SUPERADMIN
+        ->whereHas('user', function ($q) {
+            $q->where('role', 'superadmin');
+        })
+
+        ->latest('updated_at')
+        ->get()
+
+        ->map(function ($item) {
+            return [
+                'id' => $item->arsip->id ?? null,
+                'nama_user' => $item->user->name ?? '-',
+                'role' => $item->user->role ?? '-',
+                'title' => $item->arsip->judul ?? '-',
+                'nomor' => $item->arsip->nomor ?? '-',
+                'aksi' => $item->aksi,
+                'kategori' => $item->arsip->kategori->nama ?? '-',
+                'tahun' => $item->arsip->tahun ?? '-',
+                'status' => $item->arsip->status_akses ?? '-',
+                'files' => $item->arsip->files ?? [],
+                'waktu' => $item->updated_at,
+            ];
+        });
+
+    return Inertia::render('SuperAdmin/RiwayatSuperAdmin', [
+        'riwayat' => $data
+    ]);
+}
     private function canAccessFull($arsip)
     {
         $user = Auth::user();
