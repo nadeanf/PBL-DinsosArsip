@@ -147,7 +147,7 @@ const mappedHistory = computed(() => {
 </script>
 
 <template>
-    <Head title="Riwayat - Pimpinan" />
+    <Head title="Riwayat - Admin" />
 
     <div class="py-10 px-6 max-w-7xl mx-auto">
 
