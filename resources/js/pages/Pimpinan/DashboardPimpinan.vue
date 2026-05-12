@@ -204,10 +204,10 @@ return
   console.log('FULL DOC:', doc)
   console.log('STATUS DOC:', doc.status)
   
-  // 🔥 buka modal dulu, lalu set selectedDoc
+  // buka modal dulu, lalu set selectedDoc
   previewModal.value = true
   
-  // 🔥 gunakan nextTick untuk memastikan modal sudah render
+  // gunakan nextTick untuk memastikan modal sudah render
   nextTick(() => {
     selectedDoc.value = doc
   })

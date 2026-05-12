@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import AdminLayout from '@/layouts/AdminLayout.vue'
 import { Plus, Trash2 } from 'lucide-vue-next'
 
@@ -19,6 +19,43 @@ const props = defineProps({
 const showModal = ref(false)
 const newItem = ref('')
 const selectedParent = ref<number | null>(null)
+
+const kategoriList = computed(() => {
+  const list: any[] = []
+
+  const walk = (items: any[] = [], level = 0) => {
+    items.forEach((item) => {
+      list.push({ ...item, level })
+      if (item.children_recursive?.length) {
+        walk(item.children_recursive, level + 1)
+      }
+    })
+  }
+
+  walk(props.kategori || [])
+  return list
+})
+
+const optionLabel = (name: string, level: number) => {
+  return level > 0 ? '— '.repeat(level) + name : name
+}
+
+const categoryBgClass = (level: number) => {
+  switch (level) {
+    case 0:
+      return 'bg-white text-slate-900 border border-slate-200 font-semibold'
+    case 1:
+      return 'bg-sky-100 text-slate-800'
+    case 2:
+      return 'bg-amber-100 text-slate-800'
+    case 3:
+      return 'bg-emerald-100 text-slate-800'
+    case 4:
+      return 'bg-sky-100 text-slate-800'
+    default:
+      return 'bg-purple-100 text-slate-800'
+  }
+}
 
 /* =========================
    CREATE
@@ -44,16 +81,6 @@ const tambahKategori = () => {
 const hapusItem = (id: number) => {
   router.delete(`/kategori/${id}`)
 }
-
-/* =========================
-   RECURSIVE RENDER FUNCTION
-========================= */
-const renderChildren = (children: any[], level = 1) => {
-  return children?.map((child: any) => ({
-    ...child,
-    level
-  })) || []
-}
 </script>
 
 <template>
@@ -76,58 +103,25 @@ const renderChildren = (children: any[], level = 1) => {
     </div>
 
     <!-- ================= LIST ================= -->
-    <div class="space-y-4">
-
-      <div v-for="parent in props.kategori" :key="parent.id">
-
-        <!-- PARENT -->
-        <div class="bg-gray-200 font-bold px-4 py-3 rounded">
-          {{ parent.nama }}
+    <div class="space-y-2">
+      <div
+        v-for="item in kategoriList"
+        :key="item.id"
+        class="flex items-center justify-between rounded"
+        :class="categoryBgClass(item.level)"
+        :style="{ marginLeft: `${item.level * 1.5}rem` }"
+      >
+        <div class="px-4 py-3 w-full">
+          {{ item.nama }}
         </div>
 
-        <!-- CHILDREN LEVEL 1 -->
-        <div
-          v-for="child in parent.children_recursive"
-          :key="child.id"
-          class="flex items-center justify-between mt-2 ml-6"
+        <button
+          @click="hapusItem(item.id)"
+          class="ml-2 p-2 bg-gray-200 hover:bg-red-500 hover:text-white rounded"
         >
-          <div class="bg-[#6f97a8] text-white px-4 py-2 rounded w-full">
-            {{ child.nama }}
-          </div>
-
-          <button
-            @click="hapusItem(child.id)"
-            class="ml-2 p-2 bg-gray-200 hover:bg-red-500 hover:text-white rounded"
-          >
-            <Trash2 class="w-4 h-4" />
-          </button>
-
-          <!-- CHILD LEVEL 2+ -->
-          <div v-if="child.children_recursive?.length" class="w-full ml-6 mt-2">
-
-            <div
-              v-for="grand in child.children_recursive"
-              :key="grand.id"
-              class="flex items-center justify-between mb-2"
-            >
-              <div class="bg-[#4f7d8a] text-white px-4 py-2 rounded w-full">
-                {{ grand.nama }}
-              </div>
-
-              <button
-                @click="hapusItem(grand.id)"
-                class="ml-2 p-2 bg-gray-200 hover:bg-red-500 hover:text-white rounded"
-              >
-                <Trash2 class="w-4 h-4" />
-              </button>
-            </div>
-
-          </div>
-
-        </div>
-
+          <Trash2 class="w-4 h-4" />
+        </button>
       </div>
-
     </div>
 
   </div>
@@ -149,11 +143,11 @@ const renderChildren = (children: any[], level = 1) => {
         <option :value="null">-- Root Kategori --</option>
 
         <option
-          v-for="k in props.kategori"
+          v-for="k in kategoriList"
           :key="k.id"
           :value="k.id"
         >
-          {{ k.nama }}
+          {{ optionLabel(k.nama, k.level) }}
         </option>
       </select>
 
