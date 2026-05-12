@@ -74,6 +74,24 @@ const getFileType = (path) => {
   return 'FILE'
 }
 
+const normalizeText = (value) =>
+  String(value || '').toLowerCase().trim()
+
+const canAccessFull = (doc) => {
+  const user = page.props.auth?.user
+  if (!doc || !user) return false
+
+  if (doc.status_akses === 'publik') return true
+  if (doc.user_id === user.id) return true
+  if (doc.request_status === 'approved') return true
+
+  if (doc.status_akses === 'private') {
+    return normalizeText(user.bagian) === normalizeText(doc.bidang)
+  }
+
+  return false
+}
+
 /* MAPPING FULL DATA */
 const mappedDocuments = computed(() => {
   return dataArsip.value.map(item => ({
@@ -83,10 +101,13 @@ const mappedDocuments = computed(() => {
     deskripsi: item.deskripsi,
     kategori: item.kategori?.nama || '-',
     jenis: item.jenis_arsip || '-',
-    bidang: item.user?.bagian || '-',
+    bidang: item.bagian || item.user?.bagian || '-',
     tahun: item.tahun,
     lokasi: item.lokasi,
     status: item.status_akses,
+    status_akses: item.status_akses,
+    user_id: item.user_id,
+    request_status: item.request_status ?? null,
     files: item.files || [],
     format: item.files?.length
       ? getFileType(item.files[0].path_file)
@@ -123,13 +144,9 @@ const previewModal = ref(false)
 const selectedDoc = ref(null)
 
 const openPreview = (item) => {
-  // 🔥 buka modal dulu, lalu set selectedDoc
+  // 🔥 set data dokumen sebelum buka modal agar status akses langsung benar
+  selectedDoc.value = { ...item }
   previewModal.value = true
-  
-  // 🔥 gunakan nextTick untuk memastikan modal sudah render
-  nextTick(() => {
-    selectedDoc.value = item
-  })
 
   // 🔥 Track riwayat akses (silent - tidak perlu error dialog)
   const trackView = async () => {
@@ -149,6 +166,25 @@ const openPreview = (item) => {
     }
   }
   trackView()
+}
+
+const requestAkses = (arsipId) => {
+  router.post(`/request-akses/${arsipId}`, {}, {
+    preserveState: true,
+    onSuccess: () => {
+      if (selectedDoc.value && selectedDoc.value.id === arsipId) {
+        selectedDoc.value.request_status = 'pending'
+      }
+
+      const doc = documents.value.find(d => d.id === arsipId)
+      if (doc) {
+        doc.request_status = 'pending'
+      }
+    },
+    onError: () => {
+      alert('Gagal mengirim request akses. Silakan coba lagi.')
+    }
+  })
 }
 
 const handleDownload = (id) => {
@@ -348,20 +384,28 @@ class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-
 <!-- LEFT -->
 <div class="w-full md:w-1/2 bg-gray-100 flex items-center justify-center p-6">
 
-<img
-v-if="selectedDoc.format==='IMAGE'"
-:src="`/storage/${selectedDoc.files[0].path_file}`"
-class="max-h-[400px] object-contain rounded-xl shadow"
-/>
+<template v-if="canAccessFull(selectedDoc)">
+  <img
+    v-if="selectedDoc.format==='IMAGE'"
+    :src="`/storage/${selectedDoc.files[0].path_file}`"
+    class="max-h-[400px] object-contain rounded-xl shadow"
+  />
 
-<iframe
-v-else-if="selectedDoc.format==='PDF'"
-:src="`/storage/${selectedDoc.files[0].path_file}`"
-class="w-full h-[400px] rounded-xl"
-/>
+  <iframe
+    v-else-if="selectedDoc.format==='PDF'"
+    :src="`/storage/${selectedDoc.files[0].path_file}`"
+    class="w-full h-[400px] rounded-xl"
+  />
 
-<div v-else class="text-gray-500 text-center">
-📄<br/>Preview tidak tersedia
+  <div v-else class="text-gray-500 text-center">
+    📄<br/>Preview tidak tersedia
+  </div>
+</template>
+
+<div v-else class="text-center text-gray-500">
+  <div class="text-6xl mb-4">🔒</div>
+  <p class="text-lg font-semibold">Akses Terbatas</p>
+  <p class="text-sm">Arsip private di bidang lain. Minta akses untuk melihat isi dokumen.</p>
 </div>
 
 </div>
@@ -431,19 +475,38 @@ No: {{ selectedDoc.nomor }}
 
 <div class="flex justify-end gap-3 mt-6">
 
-<button
-v-if="selectedDoc.files.length"
-@click="() => handleDownload(selectedDoc.id)"
-class="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold"
->
-Download
-</button>
+  <div v-if="selectedDoc?.request_status === 'pending'"
+       class="text-yellow-500 font-semibold text-sm mr-auto">
+    ⏳ Menunggu persetujuan
+  </div>
 
-<button
-            @click="previewModal=false; selectedDoc = null"
->
-Tutup
-</button>
+  <div v-else-if="selectedDoc?.request_status === 'rejected'"
+       class="text-red-500 font-semibold text-sm mr-auto">
+    ❌ Akses ditolak
+  </div>
+
+  <button
+    v-else-if="selectedDoc.status_akses === 'private' && !canAccessFull(selectedDoc)"
+    @click.stop.prevent="requestAkses(selectedDoc.id)"
+    class="bg-yellow-500 text-white px-4 py-2 rounded-lg text-sm font-semibold mr-auto"
+  >
+    Minta Akses
+  </button>
+
+  <button
+    v-if="selectedDoc.files.length && canAccessFull(selectedDoc)"
+    @click="() => handleDownload(selectedDoc.id)"
+    class="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold"
+  >
+    Download
+  </button>
+
+  <button
+    @click="previewModal=false; selectedDoc = null"
+    class="bg-slate-100 px-4 py-2 rounded-xl text-sm"
+  >
+    Tutup
+  </button>
 
 </div>
 

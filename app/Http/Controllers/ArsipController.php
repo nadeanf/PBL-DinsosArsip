@@ -88,10 +88,6 @@ class ArsipController extends Controller
             }
         }
 
-        if (auth()->check() && auth()->user()->role === 'admin') {
-            return redirect('/admin/kelola-arsip-role-admin');
-        }
-
         return redirect()->route('kelola.arsip');
     }
 
