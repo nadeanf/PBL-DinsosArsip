@@ -1066,4 +1066,58 @@ public function statistikAdmin()
         'totalDownload' => $totalDownload
     ]);
 }
+
+public function storeAdmin(Request $request)
+{
+    // copy isi store() kamu ke sini
+
+    $request->validate([
+        'judul' => 'required|string',
+        'tahun' => 'required',
+        'id_kategori' => 'required|exists:kategori,id',
+        'status_akses' => 'required'
+    ]);
+
+    $user = Auth::user();
+
+    if ($request->folder === 'vital') {
+        $jenisArsip = 'vital';
+    } else {
+        $currentYear = now()->year;
+        $jenisArsip = ($currentYear - (int)$request->tahun >= 3)
+            ? 'inaktif'
+            : 'aktif';
+    }
+
+    $arsip = Arsip::create([
+        'user_id' => $user->id,
+        'judul' => $request->judul,
+        'nomor' => $request->nomor,
+        'tahun' => $request->tahun,
+        'id_kategori' => $request->id_kategori,
+        'jenis_arsip' => $jenisArsip,
+        'status_akses' => $request->status_akses,
+        'bagian' => $request->status_akses === 'private' ? $user->bagian : null,
+        'lokasi' => $request->lokasi,
+        'deskripsi' => $request->deskripsi,
+        'status_approval' => 'pending'
+    ]);
+
+    if ($request->hasFile('files')) {
+        foreach ($request->file('files') as $file) {
+            $path = $file->store('arsip', 'public');
+
+            File::create([
+                'arsip_id' => $arsip->id,
+                'path_file' => $path,
+                'nama_file' => $file->getClientOriginalName(),
+                'tipe_file' => strtolower($file->getClientOriginalExtension()),
+                'size' => $file->getSize()
+            ]);
+        }
+    }
+
+    // 🔥 INI YANG PENTING
+    return redirect('/admin/kelola-arsip-role-admin');
+}
 }
