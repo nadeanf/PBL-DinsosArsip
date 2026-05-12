@@ -172,6 +172,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     /* ADMIN*/
     Route::get('/admin/dashboard', [ArsipController::class, 'dashboardAdmin']);
+    Route::post('/admin/arsip', [ArsipController::class, 'storeAdmin'])
+    ->name('admin.arsip.store');
 
     Route::get('/admin/daftar-arsip', [ArsipController::class, 'listAdmin']);
     Route::get('/admin/persetujuan', [ArsipController::class, 'persetujuan'])

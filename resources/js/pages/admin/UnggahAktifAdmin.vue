@@ -100,7 +100,7 @@ const kategoriTree = computed(() => props.kategoriData)
 const goBack = () => window.history.back()
 
 const submit = () => {
-  form.post('/arsip', {
+  form.post('/admin/arsip', {
     forceFormData: true
   })
 }

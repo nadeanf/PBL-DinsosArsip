@@ -154,20 +154,6 @@ const chartOptions = {
     </div>
   </div>
 
-  <!-- AKSES CEPAT -->
-  <div>
-    <h2 class="bg-[#2f4fa2] text-white px-4 py-1 rounded-md w-fit text-sm mb-3">
-      Akses Cepat
-    </h2>
-
-    <div class="grid md:grid-cols-3 gap-4">
-      <div v-for="(item, i) in aksesCepat" :key="i" class="bg-[#6f98a8] p-4 rounded-xl space-y-2">
-        <div class="w-10 h-10 bg-gray-200 rounded"></div>
-        <div class="bg-white text-xs px-2 py-1 rounded w-fit">{{ item.nama }}</div>
-        <div class="h-2 bg-gray-300 rounded w-24"></div>
-      </div>
-    </div>
-  </div>
 
 </div>
 </div>
