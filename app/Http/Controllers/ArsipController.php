@@ -706,6 +706,7 @@ class ArsipController extends Controller
     {
         $data = RiwayatAkses::with('arsip.files', 'arsip.kategori', 'arsip.user')
             ->where('user_id', Auth::id())
+            ->whereHas('arsip') //ops
             ->orderBy('updated_at', 'desc')
             ->get()
             ->map(function ($item) {
@@ -736,6 +737,7 @@ class ArsipController extends Controller
     {
         $data = RiwayatAkses::with('arsip.files', 'arsip.kategori', 'arsip.user')
             ->where('user_id', Auth::id())
+            ->whereHas('arsip') //ops
             ->orderBy('updated_at', 'desc')
             ->get()
             ->map(function ($item) {
@@ -766,6 +768,7 @@ class ArsipController extends Controller
     {
         $data = RiwayatAkses::with('arsip.files', 'arsip.kategori', 'arsip.user')
             ->where('user_id', Auth::id())
+            ->whereHas('arsip') //ops
             ->orderBy('updated_at', 'desc')
             ->get()
             ->map(function ($item) {
@@ -1066,6 +1069,46 @@ public function statistikAdmin()
         'totalDownload' => $totalDownload
     ]);
 }
+
+public function statistikPimpinan()
+{
+    $totalArsip = Arsip::count();
+    $totalDownload = DownloadLog::count();
+
+    $tipeDokumen = File::selectRaw("
+        CASE
+            WHEN LOWER(nama_file) LIKE '%.jpg' 
+                OR LOWER(nama_file) LIKE '%.jpeg'
+                OR LOWER(nama_file) LIKE '%.png'
+            THEN 'Foto / Gambar'
+
+            WHEN LOWER(nama_file) LIKE '%.pdf'
+                OR LOWER(nama_file) LIKE '%.doc'
+                OR LOWER(nama_file) LIKE '%.docx'
+                OR LOWER(nama_file) LIKE '%.xls'
+                OR LOWER(nama_file) LIKE '%.xlsx'
+            THEN 'Dokumen'
+
+            WHEN LOWER(nama_file) LIKE '%.mp4'
+            THEN 'Video'
+
+            WHEN LOWER(nama_file) LIKE '%.mp3'
+            THEN 'Audio'
+
+            ELSE 'Lainnya'
+        END as nama,
+        COUNT(*) as total
+    ")
+    ->groupBy('nama')
+    ->get();
+
+    return Inertia::render('Pimpinan/StatistikPimpinan', [
+        'tipeDokumen' => $tipeDokumen,
+        'totalArsip' => $totalArsip,
+        'totalDownload' => $totalDownload
+    ]);
+}
+
 
 public function storeAdmin(Request $request)
 {

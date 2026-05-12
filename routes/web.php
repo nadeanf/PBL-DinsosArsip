@@ -87,10 +87,11 @@ Route::middleware('auth')->group(function () {
     // PIMPINAN
     Route::get('/pimpinan/dashboard', [ArsipController::class, 'dashboardPimpinan']);
 
-    Route::get('/pimpinan/statistik', function () {
+    /*Route::get('/pimpinan/statistik', function () {
         if (auth()->user()->role !== 'pimpinan') abort(403);
         return Inertia::render('Pimpinan/StatistikPimpinan', ['title' => 'Statistik']);
-    });
+    });*/
+    Route::get('/pimpinan/statistik', [ArsipController::class, 'statistikPimpinan']);
 
     Route::get('/pimpinan/riwayat', [ArsipController::class, 'riwayatPimpinan']);
 
