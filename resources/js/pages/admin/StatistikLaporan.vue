@@ -2,7 +2,16 @@
 import AdminLayout from '@/layouts/AdminLayout.vue'
 import { ref, computed } from 'vue'
 import { Head, usePage } from '@inertiajs/vue3'
-import { Trash2, Eye, Download } from 'lucide-vue-next'
+import { Eye, Download } from 'lucide-vue-next'
+import { Pie } from 'vue-chartjs'
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend
+} from 'chart.js'
+
+ChartJS.register(ArcElement, Tooltip, Legend)
 
 defineOptions({
   layout: AdminLayout
@@ -10,83 +19,81 @@ defineOptions({
 
 const page = usePage()
 
-// ================= AMBIL DATA DARI BACKEND =================
-const dataArsip = computed(() => page.props?.arsip ?? [])
 const tipeDokumen = computed(() => page.props?.tipeDokumen ?? [])
 const totalDownload = computed(() => page.props?.totalDownload ?? 0)
+const totalArsip = computed(() => page.props?.totalArsip ?? 0)
 
-// ================= HITUNG REAL DB =================
-const totalArsip = computed(() => dataArsip.value.length)
-
-// ================= NORMALISASI TIPE DOKUMEN =================
 const normalizeNama = (nama) => {
   if (!nama) return ''
+  nama = nama.toLowerCase()
 
-  if (nama.includes('Foto')) return 'Foto'
-  if (nama.includes('Dokumen')) return 'Dokumen'
-  if (nama.includes('Video')) return 'Video'
-  if (nama.includes('Audio')) return 'Audio'
+  if (nama.includes('foto')) return 'Foto'
+  if (nama.includes('dokumen')) return 'Dokumen'
+  if (nama.includes('video')) return 'Video'
+  if (nama.includes('audio')) return 'Audio'
 
   return nama
 }
 
 const getTipeCount = (nama) => {
-  return tipeDokumen.value.find(i => normalizeNama(i.nama) === nama)?.total || 0
+  return tipeDokumen.value.find(i => normalizeNama(i.nama) === nama)?.total ?? 0
 }
 
-// ================= STATISTIK (FULL DB VERSION) =================
 const statistik = computed(() => ({
   dokumen: getTipeCount('Dokumen'),
   foto: getTipeCount('Foto'),
   video: getTipeCount('Video'),
   audio: getTipeCount('Audio'),
-  download: totalDownload.value,
-  dilihat: totalArsip.value
+  download: totalDownload.value ?? 0,
+  dilihat: totalArsip.value ?? 0
 }))
 
-// ================= FILTER =================
 const search = ref('')
 const kategori = ref('')
 const tanggal_awal = ref('')
 const tanggal_akhir = ref('')
 
-// ================= AKSES CEPAT (tetap dummy) =================
 const aksesCepat = ref([
   { nama: 'Peraturan Daerah' },
   { nama: 'Galeri Foto' },
   { nama: 'Galeri Video' }
 ])
 
-// ================= USERS (MASIH DUMMY SEMENTARA) =================
-const users = ref([
-  {
-    nama: 'Admin Arsip',
-    role: 'Admin',
-    status: 'Aktif',
-    tanggal: '04 Sep 2025',
-    dokumen: 12
-  },
-  {
-    nama: 'User Dinas',
-    role: 'User',
-    status: 'Aktif',
-    tanggal: '10 Okt 2025',
-    dokumen: 8
-  },
-  {
-    nama: 'Super Admin',
-    role: 'Superadmin',
-    status: 'Aktif',
-    tanggal: '01 Jan 2025',
-    dokumen: 25
-  }
-])
+// ================= CHART =================
+const chartData = computed(() => ({
+  labels: ['Dokumen', 'Foto', 'Video', 'Audio'],
+  datasets: [
+    {
+      data: [
+        statistik.value.dokumen,
+        statistik.value.foto,
+        statistik.value.video,
+        statistik.value.audio
+      ],
+      backgroundColor: [
+        '#4f46e5',
+        '#22c55e',
+        '#f59e0b',
+        '#ef4444'
+      ],
+      cutout: '60%' // biar donut
+    }
+  ]
+}))
 
-const handleDelete = (user) => console.log(user)
-const handleView = (user) => console.log(user)
+const chartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      position: 'bottom'
+    }
+  }
+}
 </script>
 
 <template>
+<div>
 <Head title="Statistik & Laporan - Admin" />
 
 <div class="p-6 bg-[#f3f4f6] min-h-screen space-y-6">
@@ -95,36 +102,15 @@ const handleView = (user) => console.log(user)
     Statistik & Laporan Sistem
   </h1>
 
-  <!-- FILTER (TIDAK DIUBAH) -->
-  <div class="bg-[#2f6f7e] p-4 rounded-xl flex flex-wrap gap-3 items-center shadow-md">
+  
 
-    <div class="flex items-center bg-white px-3 py-2 rounded-lg text-sm flex-1">
-      <span class="text-gray-400 mr-2">🔍</span>
-      <input v-model="search" placeholder="Cari dokumen..." class="outline-none w-full"/>
-    </div>
-
-    <select v-model="kategori" class="bg-white px-3 py-2 rounded-lg text-sm">
-      <option value="">Semua Kategori</option>
-      <option>Dokumen</option>
-      <option>Foto</option>
-      <option>Video</option>
-    </select>
-
-    <input type="date" v-model="tanggal_awal" class="bg-white px-3 py-2 rounded-lg text-sm"/>
-    <input type="date" v-model="tanggal_akhir" class="bg-white px-3 py-2 rounded-lg text-sm"/>
-
-    <button class="bg-white px-4 py-2 rounded-lg text-sm font-semibold">
-      Cari
-    </button>
-  </div>
-
-  <!-- STATISTIK (TIDAK DIUBAH STRUKTUR) -->
+  <!-- STATISTIK -->
   <div class="grid md:grid-cols-3 gap-4">
 
-    <!-- CHART -->
+    <!-- CHART (FIXED) -->
     <div class="bg-[#6f98a8] p-4 rounded-xl flex justify-center items-center">
-      <div class="w-52 h-52 bg-white rounded-full flex items-center justify-center">
-        <span class="text-gray-400 text-sm">Pie Chart</span>
+      <div class="bg-white rounded-xl p-4 w-full h-[250px]">
+        <Pie :data="chartData" :options="chartOptions" />
       </div>
     </div>
 
@@ -137,9 +123,8 @@ const handleView = (user) => console.log(user)
     </div>
 
     <!-- PROGRESS -->
-    <div class="space-y-3 flex flex-col justify-between h-full">
+    <div class="space-y-3 flex flex-col">
 
-      <!-- DOWNLOAD -->
       <div class="bg-[#6f98a8] p-4 rounded-xl flex items-center justify-between min-h-[110px]">
         <div>
           <div class="text-xs bg-white px-2 py-1 rounded w-fit mb-2">
@@ -153,7 +138,6 @@ const handleView = (user) => console.log(user)
         </div>
       </div>
 
-      <!-- AKUMULASI ARSIP -->
       <div class="bg-[#6f98a8] p-4 rounded-xl flex items-center justify-between min-h-[110px]">
         <div>
           <div class="text-xs bg-white px-2 py-1 rounded w-fit mb-2">
@@ -170,7 +154,7 @@ const handleView = (user) => console.log(user)
     </div>
   </div>
 
-  <!-- AKSES CEPAT (TETAP DUMMY) -->
+  <!-- AKSES CEPAT -->
   <div>
     <h2 class="bg-[#2f4fa2] text-white px-4 py-1 rounded-md w-fit text-sm mb-3">
       Akses Cepat
@@ -185,51 +169,6 @@ const handleView = (user) => console.log(user)
     </div>
   </div>
 
-  <!-- USER (TETAP DUMMY) -->
-  <div>
-    <h2 class="bg-[#2f4fa2] text-white px-4 py-1 rounded-md w-fit text-sm mb-3">
-      Pengguna Teraktif
-    </h2>
-
-    <div class="bg-[#6f98a8] rounded-xl p-4 overflow-x-auto">
-
-      <table class="w-full text-xs text-white">
-        <thead>
-          <tr class="text-left border-b border-white/30">
-            <th class="py-2">Pengguna</th>
-            <th>Role</th>
-            <th>Status</th>
-            <th>Bergabung</th>
-            <th>Action</th>
-            <th>Dokumen</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          <tr v-for="(user, i) in users" :key="i" class="border-b border-white/20">
-            <td class="py-2">{{ user.nama }}</td>
-            <td>{{ user.role }}</td>
-            <td>{{ user.status }}</td>
-            <td>{{ user.tanggal }}</td>
-
-            <td>
-              <div class="flex gap-2">
-                <button @click="handleDelete(user)">
-                  <Trash2 class="w-4 h-4 text-red-500" />
-                </button>
-                <button @click="handleView(user)">
-                  <Eye class="w-4 h-4 text-blue-500" />
-                </button>
-              </div>
-            </td>
-
-            <td>{{ user.dokumen }}</td>
-          </tr>
-        </tbody>
-      </table>
-
-    </div>
-  </div>
-
+</div>
 </div>
 </template>

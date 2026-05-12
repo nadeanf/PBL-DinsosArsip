@@ -125,8 +125,8 @@ class ArsipController extends Controller
             'deskripsi' => $request->deskripsi,
             'jenis_arsip' => $jenisArsip,
             'bagian' => $request->status_akses === 'private'
-                ? auth()->user()->bagian
-                : null
+    ? $request->bagian
+    : null,
         ]);
 
         if ($request->hasFile('files')) {
@@ -793,19 +793,31 @@ class ArsipController extends Controller
     }
 
     private function canAccessFull($arsip)
-    {
-        $user = Auth::user();
+{
+    $user = Auth::user();
 
-        if ($arsip->status_akses === 'publik') return true;
-        if ($arsip->user_id === $user->id) return true;
+    // publik bebas
+    if ($arsip->status_akses === 'publik') return true;
 
-        $approved = RequestAkses::where('user_id', $user->id)
-            ->where('arsip_id', $arsip->id)
-            ->where('status', 'approved')
-            ->exists();
+    // pemilik arsip
+    if ($arsip->user_id === $user->id) return true;
 
-        return $approved;
+    // 🔥 TAMBAHAN: kalau 1 bidang boleh akses
+    if (
+        strtolower(trim($arsip->bagian ?? '')) === 
+        strtolower(trim($user->bagian ?? ''))
+    ) {
+        return true;
     }
+
+    // kalau sudah di-approve
+    $approved = RequestAkses::where('user_id', $user->id)
+        ->where('arsip_id', $arsip->id)
+        ->where('status', 'approved')
+        ->exists();
+
+    return $approved;
+}
 
     public function requestAkses($id)
     {
@@ -1012,6 +1024,46 @@ public function statistikSuperAdmin(Request $request)
         ],
 
         'users' => $users
+    ]);
+
+    
+}
+public function statistikAdmin()
+{
+    $totalArsip = Arsip::count();
+    $totalDownload = DownloadLog::count();
+
+    $tipeDokumen = File::selectRaw("
+        CASE
+            WHEN LOWER(nama_file) LIKE '%.jpg' 
+                OR LOWER(nama_file) LIKE '%.jpeg'
+                OR LOWER(nama_file) LIKE '%.png'
+            THEN 'Foto / Gambar'
+
+            WHEN LOWER(nama_file) LIKE '%.pdf'
+                OR LOWER(nama_file) LIKE '%.doc'
+                OR LOWER(nama_file) LIKE '%.docx'
+                OR LOWER(nama_file) LIKE '%.xls'
+                OR LOWER(nama_file) LIKE '%.xlsx'
+            THEN 'Dokumen'
+
+            WHEN LOWER(nama_file) LIKE '%.mp4'
+            THEN 'Video'
+
+            WHEN LOWER(nama_file) LIKE '%.mp3'
+            THEN 'Audio'
+
+            ELSE 'Lainnya'
+        END as nama,
+        COUNT(*) as total
+    ")
+    ->groupBy('nama')
+    ->get();
+
+    return Inertia::render('admin/StatistikLaporan', [
+        'tipeDokumen' => $tipeDokumen,
+        'totalArsip' => $totalArsip,
+        'totalDownload' => $totalDownload
     ]);
 }
 }

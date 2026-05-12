@@ -180,11 +180,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/admin/persetujuan/{id}', [ArsipController::class, 'updatePersetujuan'])
     ->name('admin.persetujuan.update');
 
-    Route::get('/admin/statistik', function () {
-        if (auth()->user()->role !== 'admin') abort(403);
-        return Inertia::render('admin/StatistikLaporan');
-    });
-
+    Route::get('/admin/statistik', [ArsipController::class, 'statistikAdmin']);
     Route::get('/admin/kelola-arsip-user', [ArsipController::class, 'kelolaArsipUser']);
 
     // ADMIN
