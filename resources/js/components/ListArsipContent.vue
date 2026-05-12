@@ -21,7 +21,7 @@ const showDropdown = ref(false)
 
 /* PAGINATION */
 const currentPage = ref(1)
-const perPage = 8
+const perPage = 10
 
 /* RESET PAGE kalau filter berubah */
 const resetPage = () => {
@@ -232,7 +232,7 @@ const handleDownload = (id) => {
 
   <!-- TOTAL -->
   <div class="text-sm">
-    Ditemukan <b>{{ documents.length }}</b> arsip
+    Ditemukan <b>{{ totalData }}</b> arsip
   </div>
 
 
@@ -295,6 +295,39 @@ const handleDownload = (id) => {
       class="text-center text-gray-500"
     >
       Tidak ada dokumen
+    </div>
+
+    <div
+      v-if="totalPages > 1"
+      class="mt-4 flex flex-wrap items-center justify-center gap-2"
+    >
+      <button
+        @click="setPage(currentPage - 1)"
+        :disabled="currentPage === 1"
+        class="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        Sebelumnya
+      </button>
+
+      <button
+        v-for="pageNumber in totalPages"
+        :key="pageNumber"
+        @click="setPage(pageNumber)"
+        :class="currentPage === pageNumber
+          ? 'bg-slate-900 text-white border-slate-900'
+          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'"
+        class="inline-flex min-w-[2.4rem] items-center justify-center rounded-lg border px-3 py-2 text-sm font-medium transition"
+      >
+        {{ pageNumber }}
+      </button>
+
+      <button
+        @click="setPage(currentPage + 1)"
+        :disabled="currentPage === totalPages"
+        class="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        Berikutnya
+      </button>
     </div>
 
   </div>
