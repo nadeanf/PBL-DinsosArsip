@@ -17,20 +17,34 @@ console.log('ISI KATEGORI:', page.props.kategori)
 console.log('FULL PAGE PROPS:', page.props)
 console.log('ARSIP:', page.props.arsip)
 console.log('KATEGORI:', page.props.kategori)
-
 const canAccessFull = (doc) => {
   const user = page.props.auth?.user
 
   if (!user) return false
 
-  // publik → bebas
+  console.log('CHECK ACCESS:', {
+    doc,
+    user
+  })
+
+  // SUDAH DI APPROVE → FIX UTAMA
+  if (doc.request_status === 'approved') return true
+
+  // publik
   if (doc.status === 'publik') return true
 
-  // pemilik arsip
+  // pemilik
   if (doc.user_id === user.id) return true
 
-  // private tapi bagian sama
-  if (doc.status === 'private' && doc.bidang === user.bagian) return true
+  // private + bidang sama (FIX LEBIH AMAN)
+  if (
+    doc.status === 'private' &&
+    doc.bidang &&
+    user.bagian &&
+    doc.bidang.toLowerCase().trim() === user.bagian.toLowerCase().trim()
+  ) {
+    return true
+  }
 
   return false
 }

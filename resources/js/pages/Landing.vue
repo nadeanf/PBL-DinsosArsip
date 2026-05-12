@@ -83,11 +83,24 @@ const getFileType = (path) => {
   return 'FILE'
 }
 
+const getPreviewPath = (doc) => {
+  if (!doc) return null
+  if (doc.file) return doc.file
+  return doc?.files?.[0]?.path_file || null
+}
+
+const selectedDocType = ref('')
+
 const openPreview = (doc) => {
   if (!doc) return
 
-  // buka modal dulu
-  selectedDoc.value = doc
+  const previewPath = getPreviewPath(doc)
+  selectedDoc.value = {
+    ...doc,
+    format: getFileType(previewPath),
+    previewPath,
+  }
+  selectedDocType.value = doc.files ? 'arsip' : 'pengumuman'
   previewModal.value = true
 }
 </script>
@@ -214,6 +227,7 @@ const openPreview = (doc) => {
                     <div
                         v-for="(doc, i) in arsip"
                         :key="doc.id"
+                        @click="openPreview(doc)"
                         :class="[
                             'doc-card',
                             i === 0
@@ -223,7 +237,7 @@ const openPreview = (doc) => {
                                 : 'fade-right'
                         ]"
                         :style="{ transitionDelay: `${i * 0.1}s` }"
-                        class="bg-[#8db1c9] p-7 rounded-[22px] flex items-center shadow-lg border border-white/40 relative w-full overflow-hidden transition-transform duration-250 hover:-translate-y-1 hover:shadow-xl"
+                        class="cursor-pointer bg-[#8db1c9] p-7 rounded-[22px] flex items-center shadow-lg border border-white/40 relative w-full overflow-hidden transition-transform duration-250 hover:-translate-y-1 hover:shadow-xl"
                     >
                         <!-- ICON -->
                         <div
@@ -405,81 +419,138 @@ const openPreview = (doc) => {
                 </div>
 
                 <!-- PREVIEW MODAL -->
-<div
-    v-if="previewModal && selectedDoc"
-    class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-6"
-    @click.self="previewModal = false"
->
-    <div
-        class="bg-white w-full max-w-5xl rounded-[30px] shadow-2xl overflow-hidden flex flex-col md:flex-row"
-    >
-
-        <!-- FILE PREVIEW -->
-        <div
-            class="w-full md:w-1/2 bg-gray-100 flex items-center justify-center p-6"
-        >
-
-            <img
-                v-if="selectedDoc.file && getFileType(selectedDoc.file) === 'IMAGE'"
-                :src="`/storage/${selectedDoc.file}`"
-                class="max-h-[400px] object-contain rounded-xl shadow"
-            />
-
-            <iframe
-                v-else-if="selectedDoc.file && getFileType(selectedDoc.file) === 'PDF'"
-                :src="`/storage/${selectedDoc.file}`"
-                class="w-full h-[400px] rounded-xl"
-            />
-
-            <div
-                v-else
-                class="text-slate-400 font-bold text-center"
-            >
-                No preview tersedia
-            </div>
-
-        </div>
-
-        <!-- CONTENT -->
-        <div class="w-full md:w-1/2 p-8 flex flex-col">
-
-            <div class="flex items-start justify-between mb-5">
-
-                <span
-                    class="bg-[#8db1c9]/15 text-[#5b87a3] text-[11px] font-black uppercase tracking-wider px-3 py-1 rounded-full"
+                <div
+                    v-if="previewModal && selectedDoc"
+                    class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-6"
+                    @click.self="previewModal = false"
                 >
-                    {{
-                        new Date(selectedDoc.tanggal).toLocaleDateString('id-ID', {
-                            day: 'numeric',
-                            month: 'long',
-                            year: 'numeric'
-                        })
-                    }}
-                </span>
+                    <div
+                        class="bg-white w-full max-w-5xl rounded-[30px] shadow-2xl overflow-hidden flex flex-col md:flex-row"
+                    >
 
-                <button
-                    @click="previewModal = false"
-                    class="text-2xl font-black text-slate-400 hover:text-black"
-                >
-                    ×
-                </button>
+                        <template v-if="selectedDocType === 'pengumuman'">
+                            <!-- ANNOUNCEMENT PREVIEW (unchanged) -->
+                            <div
+                                class="w-full md:w-1/2 bg-gray-100 flex items-center justify-center p-6"
+                            >
 
-            </div>
+                                <img
+                                    v-if="selectedDoc.file && getFileType(selectedDoc.file) === 'IMAGE'"
+                                    :src="`/storage/${selectedDoc.file}`"
+                                    class="max-h-[400px] object-contain rounded-xl shadow"
+                                />
 
-            <h2 class="text-3xl font-black text-slate-800 mb-4 leading-tight">
-                {{ selectedDoc.judul }}
-            </h2>
+                                <iframe
+                                    v-else-if="selectedDoc.file && getFileType(selectedDoc.file) === 'PDF'"
+                                    :src="`/storage/${selectedDoc.file}`"
+                                    class="w-full h-[400px] rounded-xl"
+                                />
 
-            <p class="text-slate-600 leading-relaxed overflow-y-auto">
-                {{ selectedDoc.deskripsi }}
-            </p>
+                                <div
+                                    v-else
+                                    class="text-slate-400 font-bold text-center"
+                                >
+                                    No preview tersedia
+                                </div>
 
-        </div>
+                            </div>
 
-    </div>
-</div>
-        </main>
+                            <div class="w-full md:w-1/2 p-8 flex flex-col">
 
+                                <div class="flex items-start justify-between mb-5">
+
+                                    <span
+                                        class="bg-[#8db1c9]/15 text-[#5b87a3] text-[11px] font-black uppercase tracking-wider px-3 py-1 rounded-full"
+                                    >
+                                        {{
+                                            new Date(selectedDoc.tanggal || selectedDoc.created_at).toLocaleDateString('id-ID', {
+                                                day: 'numeric',
+                                                month: 'long',
+                                                year: 'numeric'
+                                            })
+                                        }}
+                                    </span>
+
+                                    <button
+                                        @click="previewModal = false"
+                                        class="text-2xl font-black text-slate-400 hover:text-black"
+                                    >
+                                        ×
+                                    </button>
+
+                                </div>
+
+                                <h2 class="text-3xl font-black text-slate-800 mb-4 leading-tight">
+                                    {{ selectedDoc.judul }}
+                                </h2>
+
+                                <p class="text-slate-600 leading-relaxed overflow-y-auto">
+                                    {{ selectedDoc.deskripsi }}
+                                </p>
+                            </div>
+                        </template>
+
+                        <template v-else>
+                            <!-- ARCHIVE PREVIEW -->
+                            <div
+                                class="w-full md:w-1/2 bg-gray-100 flex items-center justify-center p-6"
+                            >
+                                <img
+                                    v-if="selectedDoc.previewPath && selectedDoc.format === 'IMAGE'"
+                                    :src="`/storage/${selectedDoc.previewPath}`"
+                                    class="max-h-[400px] object-contain rounded-xl shadow"
+                                />
+
+                                <iframe
+                                    v-else-if="selectedDoc.previewPath && selectedDoc.format === 'PDF'"
+                                    :src="`/storage/${selectedDoc.previewPath}`"
+                                    class="w-full h-[400px] rounded-xl"
+                                ></iframe>
+
+                                <div
+                                    v-else
+                                    class="text-slate-400 font-bold text-center"
+                                >
+                                    No preview tersedia
+                                </div>
+                            </div>
+
+                            <div class="w-full md:w-1/2 p-8 flex flex-col">
+                                <div class="flex items-start justify-between mb-5">
+
+                                    <span
+                                        class="bg-[#8db1c9]/15 text-[#5b87a3] text-[11px] font-black uppercase tracking-wider px-3 py-1 rounded-full"
+                                    >
+                                        {{
+                                            new Date(selectedDoc.tanggal || selectedDoc.created_at).toLocaleDateString('id-ID', {
+                                                day: 'numeric',
+                                                month: 'long',
+                                                year: 'numeric'
+                                            })
+                                        }}
+                                    </span>
+
+                                    <button
+                                        @click="previewModal = false"
+                                        class="text-2xl font-black text-slate-400 hover:text-black"
+                                    >
+                                        ×
+                                    </button>
+
+                                </div>
+
+                                <h2 class="text-3xl font-black text-slate-800 mb-4 leading-tight">
+                                    {{ selectedDoc.judul }}
+                                </h2>
+
+                                <p class="text-slate-600 leading-relaxed overflow-y-auto">
+                                    {{ selectedDoc.deskripsi }}
+                                </p>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </main>
         <FooterBaru />
     </div>
 </template>

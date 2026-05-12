@@ -14,23 +14,33 @@ defineOptions({
 
 const page = usePage()
 console.log('KATEGORI:', page.props.kategori)
-
 const canAccessFull = (doc) => {
   const user = page.props.auth?.user
-
   if (!user) return false
 
-  // request approved → BOLEH
+  const normalize = (val) =>
+    String(val || '').toLowerCase().trim()
+
+  console.log('=== DEBUG AKSES ===')
+  console.log('DOC BAGIAN:', normalize(doc.bagian))
+  console.log('USER BAGIAN:', normalize(user.bagian))
+
+  // approved
   if (doc.request_status === 'approved') return true
 
-  // publik → BOLEH
+  // publik
   if (doc.status === 'publik') return true
 
   // pemilik
   if (doc.user_id === user.id) return true
 
-  // private tapi bagian sama
-  if (doc.status === 'private' && doc.bidang === user.bagian) return true
+  // 🔥 FIX BAGIAN (FLEX MATCH)
+  if (
+    doc.status === 'private' &&
+    normalize(user.bagian).includes(normalize(doc.bagian))
+  ) {
+    return true
+  }
 
   return false
 }
@@ -119,7 +129,7 @@ const aktivitasTerbaru = computed(() => {
 
     kategori: item.kategori?.nama || '-',
     jenis: item.jenis_arsip || '-',
-    bidang: item.user?.bagian || '-',
+    bagian: item.bagian || null,
 
     tahun: item.tahun,
     lokasi: item.lokasi,
@@ -364,7 +374,7 @@ const handleDownload = (id) => {
         <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
           <span>No : {{ doc.nomor }}</span>
           <span>Kategori : {{ doc.kategori }}</span>
-          <span>Bidang : {{ doc.bidang }}</span>
+          <span>Bidang : {{ doc.bagian }}</span>
           <span>Tahun : {{ doc.tahun }}</span>
         </div>
       </div>
