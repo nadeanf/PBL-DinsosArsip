@@ -74,6 +74,13 @@ class ArsipController extends Controller
             'status_approval' => 'pending'
         ]);
 
+        // Track arsip creation in RiwayatAkses
+        RiwayatAkses::create([
+            'user_id' => $user->id,
+            'arsip_id' => $arsip->id,
+            'aksi' => 'buat'
+        ]);
+
         if ($request->hasFile('files')) {
             foreach ($request->file('files') as $file) {
                 $path = $file->store('arsip', 'public');
@@ -640,16 +647,6 @@ class ArsipController extends Controller
     ->groupBy('nama')
     ->get();
 
-    // Log akses arsip oleh superadmin
-    foreach ($arsip as $item) {
-        RiwayatAkses::create([
-            'user_id' => auth()->id(),
-            'arsip_id' => $item->id,
-            'aksi' => 'lihat', // atau 'download' jika mendownload
-            'created_at' => now(),
-        ]);
-    }
-
     return Inertia::render('SuperAdmin/DashboardSuperAdmin', [
         'arsip' => $arsip,
         'kategoriData' => $this->kategoriTree(),
@@ -662,6 +659,31 @@ class ArsipController extends Controller
     public function show($id)
     {
         $arsip = Arsip::with(['kategori', 'user', 'files'])->findOrFail($id);
+
+        // Track arsip view in RiwayatAkses
+        $userId = auth()->id();
+        $existingView = RiwayatAkses::where('user_id', $userId)
+            ->where('arsip_id', $arsip->id)
+            ->first();
+
+        if ($existingView) {
+            // Jika sudah ada riwayat, dan aksi terakhir bukan "buat", update ke "lihat"
+            if ($existingView->aksi !== 'buat') {
+                $existingView->update([
+                    'aksi' => 'lihat',
+                    'updated_at' => now()
+                ]);
+            } else {
+                // Jika aksi terakhir "buat", update waktu updated_at saja
+                $existingView->touch();
+            }
+        } else {
+            RiwayatAkses::create([
+                'user_id' => $userId,
+                'arsip_id' => $arsip->id,
+                'aksi' => 'lihat'
+            ]);
+        }
 
         return Inertia::render('DetailArsip', [
             'arsip' => $arsip
@@ -835,6 +857,7 @@ class ArsipController extends Controller
     {
         $user = Auth::user();
 
+        if ($user->role === 'superadmin') return true;
         if ($arsip->status_akses === 'publik') return true;
         if ($arsip->user_id === $user->id) return true;
         if ($arsip->status_akses === 'private' && $arsip->user && $arsip->user->bagian === $user->bagian) return true;

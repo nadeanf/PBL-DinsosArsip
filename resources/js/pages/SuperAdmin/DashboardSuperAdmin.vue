@@ -23,7 +23,7 @@ const tanggal_akhir = ref('')
 
 
 const handleSearch = () => {
-  router.get('/daftar-arsip', {
+  router.get('/super-admin/daftar-arsip', {
     search: search.value,
     kategori: kategori.value,
     tanggal_awal: tanggal_awal.value,
