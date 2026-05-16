@@ -68,11 +68,14 @@ $request->validate([
                 : 'aktif';
         }
 
+        $kategoriModel = Kategori::find($request->id_kategori);
+
         $arsip = Arsip::create([
             'user_id' => $user->id,
             'judul' => $request->judul,
             'nomor' => $request->nomor,
             'tahun' => $request->tahun,
+            'kategori' => $kategoriModel?->nama ?? '',
             'id_kategori' => $request->id_kategori,
             'jenis_arsip' => $jenisArsip,
             'status_akses' => $request->status_akses,
@@ -145,10 +148,13 @@ $request->validate([
             ? 'inaktif'
             : 'aktif';
 
+        $kategoriModel = Kategori::find($request->id_kategori);
+
         $arsip->update([
             'judul' => $request->judul,
             'nomor' => $request->nomor,
             'tahun' => $request->tahun,
+            'kategori' => $kategoriModel?->nama ?? '',
             'id_kategori' => $request->id_kategori,
             'status_akses' => $request->status_akses,
             'lokasi' => $request->lokasi,
@@ -759,6 +765,9 @@ $request->validate([
                     'tahun' => $item->arsip->tahun,
                     'lokasi' => $item->arsip->lokasi,
                     'status' => $item->arsip->status_akses,
+                    'request_status' => RequestAkses::where('user_id', Auth::id())
+                        ->where('arsip_id', $item->arsip->id)
+                        ->value('status'),
                     'files' => $item->arsip->files ?? [],
                     'waktu' => $item->updated_at
                 ];
@@ -789,6 +798,9 @@ $request->validate([
                     'tahun' => $item->arsip->tahun,
                     'lokasi' => $item->arsip->lokasi,
                     'status' => $item->arsip->status_akses,
+                    'request_status' => RequestAkses::where('user_id', Auth::id())
+                        ->where('arsip_id', $item->arsip->id)
+                        ->value('status'),
                     'files' => $item->arsip->files ?? [],
                     'waktu' => $item->updated_at
                 ];
@@ -819,6 +831,9 @@ $request->validate([
                     'tahun' => $item->arsip->tahun,
                     'lokasi' => $item->arsip->lokasi,
                     'status' => $item->arsip->status_akses,
+                    'request_status' => RequestAkses::where('user_id', Auth::id())
+                        ->where('arsip_id', $item->arsip->id)
+                        ->value('status'),
                     'files' => $item->arsip->files ?? [],
                     'waktu' => $item->updated_at
                 ];
@@ -1131,11 +1146,14 @@ $request->validate([
             : 'aktif';
     }
 
+    $kategoriModel = Kategori::find($request->id_kategori);
+
     $arsip = Arsip::create([
         'user_id' => $user->id,
         'judul' => $request->judul,
         'nomor' => $request->nomor,
         'tahun' => $request->tahun,
+        'kategori' => $kategoriModel?->nama ?? '',
         'id_kategori' => $request->id_kategori,
         'jenis_arsip' => $jenisArsip,
         'status_akses' => $request->status_akses,

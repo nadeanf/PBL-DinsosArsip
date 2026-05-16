@@ -104,6 +104,7 @@ const canAccessFull = (doc) => {
   if (doc.status === 'publik') return true
   if (doc.user_id === user.id) return true
   if (doc.status === 'private' && doc.bidang === user.bagian) return true
+  if (doc.request_status === 'approved') return true
 
   return false
 }
@@ -118,7 +119,9 @@ const requestAkses = (arsipId) => {
         .getAttribute('content')
     }
   }).then(() => {
-    selectedDoc.value.request_status = 'pending'
+    if (selectedDoc.value?.id === arsipId) {
+      selectedDoc.value.request_status = 'pending'
+    }
   })
 }
 
@@ -168,8 +171,12 @@ const mappedHistory = computed(() => {
 
             <div class="flex justify-between">
                 <div>
+                    <p class="text-xs uppercase tracking-wider text-gray-300">Nama Arsip</p>
                     <p class="font-bold text-lg">{{ item.title }}</p>
-                    <p class="text-sm">{{ item.aksi }}</p>
+                    <p class="text-sm mt-1">
+                      <span class="font-semibold">Status:</span>
+                      {{ item.aksi }}
+                    </p>
                 </div>
 
                 <p class="text-xs bg-white/20 px-2 py-1 rounded">
@@ -303,8 +310,9 @@ class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-
 
           <span class="bg-green-100 px-3 py-1 rounded-full text-xs font-bold uppercase">
             {{ selectedDoc?.jenis }}
-          </span>
-        </div>
+          </span>          <span class="bg-gray-100 px-3 py-1 rounded-full text-xs font-bold">
+            Status: {{ selectedDoc?.aksi }}
+          </span>        </div>
 
         <div class="grid grid-cols-2 gap-4 text-sm">
           <div>
