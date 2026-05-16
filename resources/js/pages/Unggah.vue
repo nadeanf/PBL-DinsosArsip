@@ -60,6 +60,10 @@ const kategoriData = {
           <span class="mt-6 text-2xl font-black text-gray-800 uppercase tracking-tighter">
             Aktif / Inaktif
           </span>
+          <p class="text-sm text-gray-600 text-center mt-2 max-w-[200px]">
+  Arsip aktif digunakan dalam kegiatan sehari-hari (≤ 3 tahun), 
+  sedangkan arsip inaktif jarang digunakan namun masih disimpan.
+</p>
         </Link>
 
         <Link href="/unggah/vital" class="group flex flex-col items-center">
@@ -71,6 +75,10 @@ const kategoriData = {
           <span class="mt-6 text-2xl font-black text-gray-800 uppercase tracking-tighter">
             Vital
           </span>
+          <p class="text-sm text-gray-600 text-center mt-2 max-w-[200px]">
+  Arsip penting yang harus dijaga karena menyangkut kelangsungan 
+  organisasi dan tidak dapat digantikan jika hilang.
+</p>
         </Link>
 
       </div>

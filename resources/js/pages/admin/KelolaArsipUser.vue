@@ -9,6 +9,7 @@ defineOptions({ layout: AdminLayout })
 const page = usePage()
 
 const filterJenis = ref('')
+const search = ref('')
 
 const getFileType = (path: string) => {
   if (!path) return 'FILE'
@@ -46,9 +47,18 @@ const allDocuments = ref(
 )
 
 const filteredDocuments = computed(() => {
-  return allDocuments.value.filter(item =>
-    filterJenis.value ? item.jenis === filterJenis.value : true
-  )
+  return allDocuments.value.filter(item => {
+    const cocokJenis = filterJenis.value
+      ? item.jenis === filterJenis.value
+      : true
+
+    const cocokSearch = search.value
+      ? item.title.toLowerCase().includes(search.value.toLowerCase()) ||
+        item.nomor.toLowerCase().includes(search.value.toLowerCase())
+      : true
+
+    return cocokJenis && cocokSearch
+  })
 })
 
 const itemsPerPage = 5
@@ -130,16 +140,25 @@ const updateStatus = (id: number, value: string) => {
       Kelola Arsip User
     </h1>
 
-    <!-- FILTER -->
-    <div class="flex gap-4 mb-6">
-      <select v-model="filterJenis" class="p-3 rounded-xl border">
-        <option value="">Semua Jenis</option>
-        <option value="aktif">Aktif</option>
-        <option value="inaktif">Inaktif</option>
-        <option value="vital">Vital</option>
-      </select>
-    </div>
+   <div class="flex gap-4 mb-6 items-center">
 
+  <!-- SEARCH -->
+  <input
+    v-model="search"
+    type="text"
+    placeholder="Cari judul / nomor..."
+    class="p-3 rounded-xl border w-full max-w-md"
+  />
+
+  <!-- FILTER -->
+  <select v-model="filterJenis" class="p-3 rounded-xl border">
+    <option value="">Semua Jenis</option>
+    <option value="aktif">Aktif</option>
+    <option value="inaktif">Inaktif</option>
+    <option value="vital">Vital</option>
+  </select>
+
+</div>
     <!-- LIST (SAMA PERSIS USER) -->
     <div class="space-y-4 mb-8">
 

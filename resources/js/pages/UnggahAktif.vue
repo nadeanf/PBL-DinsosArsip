@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { Head, useForm } from '@inertiajs/vue3'
 import UserLayout from '@/layouts/UserLayout.vue'
 import { UploadCloud } from 'lucide-vue-next'
@@ -29,6 +29,11 @@ const form = useForm({
 
 /* STATE */
 const isPrivate = computed(() => form.status_akses === 'private')
+watch(() => form.status_akses, (val) => {
+  if (val === 'publik') {
+    form.bagian = ''
+  }
+})
 const isDragging = ref(false)
 
 const showDropdown = ref(false)
@@ -214,9 +219,15 @@ const submit = () => {
             <label class="block font-black mb-1 text-sm uppercase text-gray-800">
               Nomor
             </label>
-            <input v-model="form.nomor"
-              class="w-full p-4 bg-white text-black rounded-2xl border border-gray-300" />
-          </div>
+
+  <input v-model="form.nomor"
+    class="w-full p-4 bg-white text-black rounded-2xl border border-gray-300" />
+
+  <!-- ERROR -->
+  <p v-if="form.errors.nomor" class="text-red-600 text-sm mt-1">
+    {{ form.errors.nomor }}
+  </p>
+</div>
 
           <div>
             <label class="block font-black mb-1 text-sm uppercase text-gray-800">
@@ -263,16 +274,30 @@ const submit = () => {
 
           <!-- status -->
           <div>
-            <label class="block font-black mb-1 text-sm uppercase text-gray-800">
-              Status Akses
-            </label>
+  <label class="block font-black mb-2 text-sm uppercase">Status Akses</label>
 
-            <select v-model="form.status_akses"
-              class="w-full p-4 bg-white text-black rounded-2xl border border-gray-300">
-              <option value="publik">Publik</option>
-              <option value="private">Private</option>
-            </select>
-          </div>
+  <div class="flex gap-6">
+    <label class="flex items-center gap-2 cursor-pointer">
+      <input
+        type="radio"
+        value="publik"
+        v-model="form.status_akses"
+        class="accent-blue-600"
+      />
+      <span class="font-medium">Publik</span>
+    </label>
+
+    <label class="flex items-center gap-2 cursor-pointer">
+      <input
+        type="radio"
+        value="private"
+        v-model="form.status_akses"
+        class="accent-red-600"
+      />
+      <span class="font-medium">Private</span>
+    </label>
+  </div>
+</div>
 
           <!-- bidang -->
           <div v-if="isPrivate">
@@ -314,10 +339,11 @@ const submit = () => {
 
         <!-- BUTTON -->
         <div class="flex justify-end gap-4 mt-10">
-          <button type="submit"
-            class="bg-blue-700 text-white px-8 py-3 rounded-xl font-bold">
-            Simpan
-          </button>
+         <button type="submit"
+  :disabled="form.processing"
+  class="bg-blue-700 text-white px-8 py-3 rounded-xl font-bold disabled:opacity-50">
+  Simpan
+</button>
 
           <button type="button"
             @click="goBack"

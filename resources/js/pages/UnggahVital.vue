@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { Head, useForm } from '@inertiajs/vue3'
 import UserLayout from '@/layouts/UserLayout.vue'
 import { UploadCloud } from 'lucide-vue-next'
@@ -28,6 +28,11 @@ const form = useForm({
 
 /* PRIVATE */
 const isPrivate = computed(() => form.status_akses === 'private')
+watch(() => form.status_akses, (val) => {
+  if (val === 'publik') {
+    form.bagian = ''
+  }
+})
 
 /* BIDANG */
 const bidangList = [
@@ -150,7 +155,18 @@ const submit = () => {
             class="w-full p-4 bg-white rounded-2xl border text-black font-bold outline-none focus:ring-2 focus:ring-blue-400" />
 
           <input v-model="form.nomor" placeholder="Nomor"
-            class="w-full p-4 bg-white rounded-2xl border text-black font-bold outline-none" />
+  :class="[
+    'w-full p-4 rounded-2xl border text-black font-bold outline-none',
+    form.errors.nomor ? 'border-red-500' : 'border-gray-300'
+  ]"
+/>
+
+<p v-if="form.errors.nomor" class="text-red-600 text-sm mt-1">
+  {{ form.errors.nomor }}
+</p>
+<p class="text-xs text-gray-500 mt-1">
+  Nomor dokumen tidak boleh sama
+</p>
 
           <input v-model="form.tahun" placeholder="Tahun"
             class="w-full p-4 bg-white rounded-2xl border text-black font-bold outline-none" />
@@ -166,11 +182,21 @@ const submit = () => {
             </option>
           </select>
 
-          <select v-model="form.status_akses"
-            class="w-full p-4 bg-white rounded-2xl border text-black font-bold outline-none">
-            <option value="publik" class="text-black">Publik</option>
-            <option value="private" class="text-black">Private</option>
-          </select>
+          <div>
+  <label class="block font-black mb-2 text-sm uppercase">Status Akses</label>
+
+  <div class="flex gap-6">
+    <label class="flex items-center gap-2 cursor-pointer">
+      <input type="radio" value="publik" v-model="form.status_akses" />
+      <span>Publik</span>
+    </label>
+
+    <label class="flex items-center gap-2 cursor-pointer">
+      <input type="radio" value="private" v-model="form.status_akses" />
+      <span>Private</span>
+    </label>
+  </div>
+</div>
 
           <select v-if="isPrivate"
             v-model="form.bagian"

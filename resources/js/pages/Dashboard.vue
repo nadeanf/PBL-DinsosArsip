@@ -16,35 +16,27 @@ const page = usePage()
 console.log('KATEGORI:', page.props.kategori)
 const canAccessFull = (doc) => {
   const user = page.props.auth?.user
-  if (!user) return false
+  if (!doc || !user) return false
 
   const normalize = (val) =>
     String(val || '').toLowerCase().trim()
 
-  console.log('=== DEBUG AKSES ===')
-  console.log('DOC BAGIAN:', normalize(doc.bagian))
-  console.log('USER BAGIAN:', normalize(user.bagian))
+  // ✅ publik
+  if (doc.status_akses === 'publik') return true
 
-  // approved
-  if (doc.request_status === 'approved') return true
-
-  // publik
-  if (doc.status === 'publik') return true
-
-  // pemilik
+  // ✅ pemilik
   if (doc.user_id === user.id) return true
 
-  // 🔥 FIX BAGIAN (FLEX MATCH)
-  if (
-    doc.status === 'private' &&
-    normalize(user.bagian).includes(normalize(doc.bagian))
-  ) {
-    return true
+  // ✅ sudah approve
+  if (doc.request_status === 'approved') return true
+
+  // ✅ private tapi 1 bidang
+  if (doc.status_akses === 'private') {
+    return normalize(user.bagian) === normalize(doc.bidang)
   }
 
   return false
 }
-
 const requestAkses = (arsipId) => {
   console.log('KLIK MASUK', arsipId)
 
@@ -129,12 +121,14 @@ const aktivitasTerbaru = computed(() => {
 
     kategori: item.kategori?.nama || '-',
     jenis: item.jenis_arsip || '-',
-    bagian: item.bagian || null,
+    bagian: item.bagian || item.user?.bagian || '-',
+    bidang: item.bagian || item.user?.bagian || '-',
 
     tahun: item.tahun,
     lokasi: item.lokasi,
 
     status: item.status_akses,
+    status_akses: item.status_akses,
 
     
     request_status: item.request_status ?? null,
@@ -389,46 +383,119 @@ const handleDownload = (id) => {
 
 </div>
 
-<!-- PREVIEW MODAL FIX -->
-<div v-if="previewModal && selectedDoc"
-class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-6"
-@click.self="previewModal = false"
+<!-- PREVIEW MODAL -->
+<div
+  v-if="previewModal && selectedDoc"
+  @click.self="previewModal = false; selectedDoc = null"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-6"
 >
   <div class="bg-white w-full max-w-5xl rounded-[30px] shadow-2xl overflow-hidden flex flex-col md:flex-row">
-    
+
+    <!-- LEFT -->
     <div class="w-full md:w-1/2 bg-gray-100 flex items-center justify-center p-6">
 
-     <!-- IMAGE -->
-<img 
-  v-if="selectedDoc?.format === 'IMAGE' && canAccessFull(selectedDoc)"
-  :src="`/storage/${selectedDoc?.files?.[0]?.path_file}`"
-  class="max-h-[400px] object-contain rounded-xl shadow" 
-/>
+      <!-- ✅ ADA AKSES -->
+      <template v-if="canAccessFull(selectedDoc)">
+        
+        <!-- IMAGE -->
+        <img
+          v-if="selectedDoc.format === 'IMAGE'"
+          :src="`/storage/${selectedDoc.files?.[0]?.path_file}`"
+          class="max-h-[400px] object-contain rounded-xl shadow"
+        />
 
-<!-- PDF -->
-<iframe 
-  v-else-if="selectedDoc?.format === 'PDF' && canAccessFull(selectedDoc)"
-  :src="`/storage/${selectedDoc?.files?.[0]?.path_file}`"
-  class="w-full h-[400px] rounded-xl">
-</iframe>
+        <!-- PDF -->
+        <iframe
+          v-else-if="selectedDoc.format === 'PDF'"
+          :src="`/storage/${selectedDoc.files?.[0]?.path_file}`"
+          class="w-full h-[400px] rounded-xl"
+        />
 
-<!-- TIDAK ADA AKSES -->
- <!-- KALAU PUBLIC, JANGAN TAMPILKAN REQUEST STATUS -->
-<div v-if="selectedDoc?.status === 'publik'">
-  <!-- kosong -->
-</div>
+        <!-- OTHER -->
+        <div v-else class="text-gray-500 text-center">
+          📄<br/>Preview tidak tersedia
+        </div>
 
-<div
-  v-if="!canAccessFull(selectedDoc)"
-  class="text-gray-500 text-center space-y-3"
->
-  
-  <div>
-    🔒 Dokumen ini bersifat privat <br/>
-    Anda tidak memiliki akses
-  </div>
+      </template>
 
-  <!-- STATUS REQUEST -->
+      <!-- ❌ TIDAK ADA AKSES -->
+      <div v-else class="text-center text-gray-500 space-y-3">
+
+        <div class="text-6xl">🔒</div>
+
+        <p class="text-lg font-semibold">Akses Terbatas</p>
+
+        <p class="text-sm">
+          Arsip private di bidang lain. Minta akses untuk melihat isi dokumen.
+        </p>
+
+        <!-- STATUS REQUEST -->
+        <div v-if="selectedDoc?.request_status === 'pending'"
+             class="text-yellow-500 font-semibold text-sm">
+          ⏳ Menunggu persetujuan
+        </div>
+
+        <div v-else-if="selectedDoc?.request_status === 'rejected'"
+             class="text-red-500 font-semibold text-sm">
+          ❌ Akses ditolak
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- RIGHT -->
+    <div class="w-full md:w-1/2 p-8 flex flex-col justify-between">
+
+      <div>
+        <div class="flex justify-between items-start mb-4">
+          <h2 class="text-2xl font-black text-gray-800">
+            {{ selectedDoc.title }}
+          </h2>
+
+          <button @click="previewModal=false">✕</button>
+        </div>
+
+        <div class="flex flex-wrap gap-2 mb-4">
+          <span class="bg-gray-200 px-3 py-1 rounded-full text-xs font-bold">
+            No: {{ selectedDoc.nomor }}
+          </span>
+
+          <span class="bg-blue-100 px-3 py-1 rounded-full text-xs font-bold">
+            {{ selectedDoc.kategori }}
+          </span>
+
+          <span class="bg-green-100 px-3 py-1 rounded-full text-xs font-bold uppercase">
+            {{ selectedDoc.jenis }}
+          </span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <p class="font-bold">Tahun</p>
+            <p>{{ selectedDoc.tahun }}</p>
+          </div>
+
+          <div>
+            <p class="font-bold">Status</p>
+            <p>{{ selectedDoc.status_akses }}</p>
+          </div>
+
+          <div class="col-span-2">
+            <p class="font-bold">Lokasi</p>
+            <p>{{ selectedDoc.lokasi }}</p>
+          </div>
+        </div>
+
+        <div class="mt-6">
+          <p class="font-bold">Deskripsi</p>
+          <p>{{ selectedDoc.deskripsi || '-' }}</p>
+        </div>
+      </div>
+
+      <div v-if="!canAccessFull(selectedDoc)" class="mt-4 space-y-2">
+
+  <!-- STATUS -->
   <div v-if="selectedDoc?.request_status === 'pending'"
        class="text-yellow-500 font-semibold text-sm">
     ⏳ Menunggu persetujuan
@@ -441,7 +508,7 @@ class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-
 
   <!-- BUTTON -->
   <button
-    v-else
+    v-else-if="selectedDoc.status_akses === 'private'"
     @click.stop.prevent="requestAkses(selectedDoc.id)"
     class="bg-yellow-500 text-white px-4 py-2 rounded-lg text-sm font-semibold"
   >
@@ -449,73 +516,31 @@ class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-
   </button>
 
 </div>
-</div>
-    <div class="w-full md:w-1/2 p-8 flex flex-col justify-between">
 
-      <div>
-        <div class="flex justify-between items-start mb-4">
-          <h2 class="text-2xl font-black text-gray-800">
-            {{ selectedDoc?.title }}
-          </h2>
-
-          <button @click="previewModal = false">✕</button>
-        </div>
-
-        <div class="flex flex-wrap gap-2 mb-4">
-          <span class="bg-gray-200 px-3 py-1 rounded-full text-xs font-bold">
-            No: {{ selectedDoc?.nomor }}
-          </span>
-
-          <span class="bg-blue-100 px-3 py-1 rounded-full text-xs font-bold">
-            {{ selectedDoc?.kategori }}
-          </span>
-
-          <span class="bg-green-100 px-3 py-1 rounded-full text-xs font-bold uppercase">
-            {{ selectedDoc?.jenis }}
-          </span>
-        </div>
-
-        <div class="grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <p class="font-bold">Tahun</p>
-            <p>{{ selectedDoc?.tahun }}</p>
-          </div>
-
-          <div>
-            <p class="font-bold">Status</p>
-            <p>{{ selectedDoc?.status }}</p>
-          </div>
-
-          <div class="col-span-2">
-            <p class="font-bold">Lokasi</p>
-            <p>{{ selectedDoc?.lokasi }}</p>
-          </div>
-        </div>
-
-        <div class="mt-6">
-          <p class="font-bold">Deskripsi</p>
-          <p>{{ selectedDoc?.deskripsi || '-' }}</p>
-        </div>
-      </div>
-
+      <!-- ACTION -->
       <div class="flex justify-end gap-3 mt-6">
-       <button
-  @click="handleDownload(selectedDoc.id)"
-  class="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold"
->
-  Download
-</button>
 
+        <!-- DOWNLOAD -->
         <button
-          @click="previewModal = false"
-          class="bg-gray-300 px-4 py-2 rounded-xl font-bold"
+          v-if="selectedDoc.files?.length && canAccessFull(selectedDoc)"
+          @click="handleDownload(selectedDoc.id)"
+          class="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold"
+        >
+          Download
+        </button>
+
+        <!-- CLOSE -->
+        <button
+          @click="previewModal=false; selectedDoc = null"
+          class="bg-slate-100 px-4 py-2 rounded-xl text-sm"
         >
           Tutup
         </button>
+
       </div>
 
     </div>
-   
+
   </div>
 </div>
 

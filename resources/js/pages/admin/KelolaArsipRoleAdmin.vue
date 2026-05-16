@@ -10,6 +10,7 @@ const page = usePage()
 
 /* FILTER (JENIS ARSIP) */
 const filterJenis = ref('')
+const search = ref('')
 
 /* HELPER FILE TYPE */
 const getFileType = (path: string) => {
@@ -51,9 +52,16 @@ const allDocuments = ref(
 /* FILTER */
 const filteredDocuments = computed(() => {
   return allDocuments.value.filter(item => {
-    return filterJenis.value
+    const cocokJenis = filterJenis.value
       ? item.jenis === filterJenis.value
       : true
+
+    const cocokSearch = search.value
+      ? item.title.toLowerCase().includes(search.value.toLowerCase()) ||
+        item.nomor.toLowerCase().includes(search.value.toLowerCase())
+      : true
+
+    return cocokJenis && cocokSearch
   })
 })
 
@@ -137,16 +145,25 @@ watch(filterJenis, () => {
     <h1 class="text-4xl font-black mb-6 text-gray-800 uppercase">
       Kelola Arsip Saya
     </h1>
+<div class="flex gap-4 mb-6 items-center">
 
-    <!-- FILTER -->
-    <div class="flex gap-4 mb-6">
-      <select v-model="filterJenis" class="p-3 rounded-xl border">
-        <option value="">Semua Jenis</option>
-        <option value="aktif">Aktif</option>
-        <option value="inaktif">Inaktif</option>
-        <option value="vital">Vital</option>
-      </select>
-    </div>
+  <!-- SEARCH -->
+  <input
+    v-model="search"
+    type="text"
+    placeholder="Cari judul / nomor..."
+    class="p-3 rounded-xl border w-full max-w-md"
+  />
+
+  <!-- FILTER -->
+  <select v-model="filterJenis" class="p-3 rounded-xl border">
+    <option value="">Semua Jenis</option>
+    <option value="aktif">Aktif</option>
+    <option value="inaktif">Inaktif</option>
+    <option value="vital">Vital</option>
+  </select>
+
+</div>
 
     <!-- LIST -->
     <div class="space-y-4 mb-8">
@@ -311,10 +328,6 @@ watch(filterJenis, () => {
       </button>
     </div>
 
-    <!-- EMPTY -->
-    <div v-if="filteredDocuments.length === 0" class="text-center py-10">
-      Tidak ada arsip
-    </div>
   </div>
 
   <!-- PREVIEW MODAL (TIDAK DIUBAH) -->

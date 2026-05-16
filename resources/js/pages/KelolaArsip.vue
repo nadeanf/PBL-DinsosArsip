@@ -11,6 +11,8 @@ const page = usePage()
 /* FILTER (JENIS ARSIP) */
 const filterJenis = ref('')
 
+const searchQuery = ref('')
+
 /* HELPER FILE TYPE */
 const getFileType = (path: string) => {
   if (!path) return 'FILE'
@@ -51,9 +53,16 @@ const allDocuments = ref(
 /* FILTER */
 const filteredDocuments = computed(() => {
   return allDocuments.value.filter(item => {
-    return filterJenis.value
+    const matchJenis = filterJenis.value
       ? item.jenis === filterJenis.value
       : true
+
+    const matchSearch = searchQuery.value
+      ? item.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+        item.nomor.toLowerCase().includes(searchQuery.value.toLowerCase())
+      : true
+
+    return matchJenis && matchSearch
   })
 })
 
@@ -135,7 +144,7 @@ const handleExecute = () => {
   })
 }
 
-watch(filterJenis, () => {
+watch([filterJenis, searchQuery], () => {
   currentPage.value = 1
 })
 
@@ -154,15 +163,21 @@ const downloadFile = () => {
       Kelola Arsip Saya
     </h1>
 
-    <!-- FILTER -->
     <div class="flex gap-4 mb-6">
-      <select v-model="filterJenis" class="p-3 rounded-xl border">
-        <option value="">Semua Jenis</option>
-        <option value="aktif">Aktif</option>
-        <option value="inaktif">Inaktif</option>
-        <option value="vital">Vital</option>
-      </select>
-    </div>
+  <input
+    v-model="searchQuery"
+    type="text"
+    placeholder="Cari judul / nomor arsip..."
+    class="p-3 rounded-xl border w-full max-w-xs"
+  />
+
+  <select v-model="filterJenis" class="p-3 rounded-xl border">
+    <option value="">Semua Jenis</option>
+    <option value="aktif">Aktif</option>
+    <option value="inaktif">Inaktif</option>
+    <option value="vital">Vital</option>
+  </select>
+</div>
 
     <!-- LIST -->
     <div class="space-y-4 mb-8">
@@ -325,11 +340,6 @@ const downloadFile = () => {
       >
         Next
       </button>
-    </div>
-
-    <!-- EMPTY -->
-    <div v-if="filteredDocuments.length === 0" class="text-center py-10">
-      Tidak ada arsip
     </div>
   </div>
 

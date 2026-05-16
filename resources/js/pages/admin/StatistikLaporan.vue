@@ -104,57 +104,62 @@ const chartOptions = {
 
   
 
-  <!-- STATISTIK -->
-  <div class="grid md:grid-cols-3 gap-4">
+ <!-- STATISTIK BARU (1 CARD SAJA) -->
+<div class="bg-white rounded-2xl shadow p-6 space-y-6">
 
-    <!-- CHART (FIXED) -->
-    <div class="bg-[#6f98a8] p-4 rounded-xl flex justify-center items-center">
-      <div class="bg-white rounded-xl p-4 w-full h-[250px]">
-        <Pie :data="chartData" :options="chartOptions" />
-      </div>
-    </div>
+  <div class="flex justify-between items-center">
 
-    <!-- TOTAL -->
-    <div class="bg-[#6f98a8] p-4 rounded-xl space-y-3">
-      <div class="bg-white rounded px-3 py-2 text-sm">Dokumen : {{ statistik.dokumen }}</div>
-      <div class="bg-white rounded px-3 py-2 text-sm">Foto : {{ statistik.foto }}</div>
-      <div class="bg-white rounded px-3 py-2 text-sm">Video : {{ statistik.video }}</div>
-      <div class="bg-white rounded px-3 py-2 text-sm">Audio : {{ statistik.audio }}</div>
-    </div>
-
-    <!-- PROGRESS -->
-    <div class="space-y-3 flex flex-col">
-
-      <div class="bg-[#6f98a8] p-4 rounded-xl flex items-center justify-between min-h-[110px]">
-        <div>
-          <div class="text-xs bg-white px-2 py-1 rounded w-fit mb-2">
-            {{ statistik.download }}
-          </div>
-          <p class="text-white text-sm">Dokumen diunduh</p>
-        </div>
-
-        <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
-          <Download class="w-5 h-5 text-[#2f4fa2]" />
-        </div>
-      </div>
-
-      <div class="bg-[#6f98a8] p-4 rounded-xl flex items-center justify-between min-h-[110px]">
-        <div>
-          <div class="text-xs bg-white px-2 py-1 rounded w-fit mb-2">
-            {{ statistik.dilihat }}
-          </div>
-          <p class="text-white text-sm">Akumulasi Arsip</p>
-        </div>
-
-        <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
-          <Eye class="w-5 h-5 text-[#2f4fa2]" />
-        </div>
-      </div>
-
+    <div class="text-xs text-gray-500">
+      Total Arsip: {{ totalArsip }}
     </div>
   </div>
 
+  <div class="grid md:grid-cols-2 gap-6 items-center">
+
+    <div class="h-[240px]">
+      <Pie :data="chartData" :options="chartOptions" />
+    </div>
+
+    <div class="space-y-3">
+      <div class="flex justify-between bg-gray-50 p-3 rounded-xl">
+        <span>Dokumen</span>
+        <b>{{ statistik.dokumen }}</b>
+      </div>
+
+      <div class="flex justify-between bg-gray-50 p-3 rounded-xl">
+        <span>Foto</span>
+        <b>{{ statistik.foto }}</b>
+      </div>
+
+      <div class="flex justify-between bg-gray-50 p-3 rounded-xl">
+        <span>Video</span>
+        <b>{{ statistik.video }}</b>
+      </div>
+
+      <div class="flex justify-between bg-gray-50 p-3 rounded-xl">
+        <span>Audio</span>
+        <b>{{ statistik.audio }}</b>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="grid grid-cols-2 gap-4 pt-4 border-t">
+
+    <div class="flex justify-between bg-blue-50 p-3 rounded-xl">
+      <span>Download</span>
+      <b>{{ statistik.download }}</b>
+    </div>
+
+    <div class="flex justify-between bg-green-50 p-3 rounded-xl">
+      <span>Dilihat</span>
+      <b>{{ statistik.dilihat }}</b>
+    </div>
+
+  </div>
 
 </div>
-</div>
+
+    </div>
+  </div>
 </template>

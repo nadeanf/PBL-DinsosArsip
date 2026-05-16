@@ -64,7 +64,8 @@ const bidangList = [
   'Pemberdayaan Sosial'
 ];
 
-const isPrivate = computed(() => form.status_akses === 'Private');
+const isPrivate = computed(() => form.status_akses === 'private');
+
 const subKategoriList = computed(() => {
     return form.kategori_kelompok ? kategoriAktifInaktif[form.kategori_kelompok] : [];
 });
@@ -76,7 +77,7 @@ watch(() => form.kategori_kelompok, () => {
 
 // TAMBAHAN reset bidang
 watch(() => form.status_akses, (val) => {
-  if (val !== 'Private') {
+  if (val !== 'private') {
     // @ts-ignore
     form.bidang = '';
   }
@@ -87,7 +88,12 @@ const triggerUpload = () => fileInput.value?.click();
 const handleFileChange = (e: any) => { form.files = e.target.files; };
 
 const submit = () => {
-    console.log("Data dikirim:", form.data());
+  form.post(route('arsip.store'), {
+    forceFormData: true, // penting buat upload file
+    onError: (errors) => {
+      console.log(errors);
+    }
+  });
 };
 </script>
 
@@ -157,6 +163,9 @@ const submit = () => {
               <div>
                 <label class="block text-black font-black mb-1.5 ml-3 text-sm uppercase">Nomor Dokumen</label>
                 <input v-model="form.nomor" type="text" placeholder="Nomor dokumen arsip..." class="w-full p-4 bg-white text-black font-medium rounded-2xl border border-gray-300 shadow-sm outline-none" />
+                <div v-if="form.errors.nomor" class="text-red-500 text-sm">
+  {{ form.errors.nomor }}
+</div>
               </div>
               <div>
                 <label class="block text-black font-black mb-1.5 ml-3 text-sm uppercase">Tahun Arsip</label>
@@ -191,14 +200,31 @@ const submit = () => {
             </div>
 
             <!-- STATUS -->
-            <div class="grid grid-cols- gap-4">
-              <div>
-                <label class="block text-black font-black mb-1.5 ml-3 text-sm uppercase">Status Akses</label>
-                <select v-model="form.status_akses" class="w-full p-4 bg-white text-black font-medium rounded-2xl border border-gray-300 shadow-sm outline-none">
-                  <option>Publik</option>
-                  <option>Private</option>
-                </select>
-              </div>
+            <div>
+  <label class="block font-black mb-2 text-sm uppercase">Status Akses</label>
+
+  <div class="flex gap-6">
+    <label class="flex items-center gap-2 cursor-pointer">
+      <input
+        type="radio"
+        value="publik"
+        v-model="form.status_akses"
+        class="accent-blue-600"
+      />
+      <span class="font-medium">Publik</span>
+    </label>
+
+    <label class="flex items-center gap-2 cursor-pointer">
+      <input
+        type="radio"
+        value="private"
+        v-model="form.status_akses"
+        class="accent-red-600"
+      />
+      <span class="font-medium">Private</span>
+    </label>
+  </div>
+</div>
 
               <!-- SAAT PRIVATE MUNCUL BIDANG -->
               <div v-if="isPrivate">

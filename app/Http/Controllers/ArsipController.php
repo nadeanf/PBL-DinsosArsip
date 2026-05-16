@@ -14,6 +14,9 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\RequestAkses;
 use App\Models\DownloadLog;
 use App\Models\RiwayatAkses;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class ArsipController extends Controller
 {
@@ -42,12 +45,17 @@ class ArsipController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'judul' => 'required|string',
-            'tahun' => 'required',
-            'id_kategori' => 'required|exists:kategori,id',
-            'status_akses' => 'required'
-        ]);
+       $request->merge([
+    'nomor' => strtolower(trim($request->nomor))
+]);
+
+$request->validate([
+    'judul' => 'required|string',
+    'nomor' => 'required|string|unique:arsip,nomor',
+    'tahun' => 'required',
+    'id_kategori' => 'required|exists:kategori,id',
+    'status_akses' => 'required'
+]);
 
         $user = Auth::user();
 
@@ -74,20 +82,36 @@ class ArsipController extends Controller
             'status_approval' => 'pending'
         ]);
 
-        if ($request->hasFile('files')) {
-            foreach ($request->file('files') as $file) {
-                $path = $file->store('arsip', 'public');
+       if ($request->hasFile('files')) {
 
-                File::create([
-                    'arsip_id' => $arsip->id,
-                    'path_file' => $path,
-                    'nama_file' => $file->getClientOriginalName(),
-                    'tipe_file' => strtolower($file->getClientOriginalExtension()),
-                    'size' => $file->getSize()
-                ]);
-            }
-        }
+    $judul = Str::slug($request->judul);
+    $kategoriModel = Kategori::find($request->id_kategori);
+    $kategori = Str::slug($kategoriModel?->nama ?? 'umum');
+    $tanggal = Carbon::now()->format('Y-m-d');
 
+    foreach ($request->file('files') as $file) {
+
+        $ext = $file->getClientOriginalExtension();
+
+        $namaFile = "{$judul}-{$kategori}-{$tanggal}.{$ext}";
+        $namaFile = uniqid() . '-' . $namaFile;
+
+        $folder = 'arsip/' . $kategori;
+
+        $path = $file->storeAs($folder, $namaFile, 'public');
+
+        File::create([
+            'arsip_id' => $arsip->id,
+            'path_file' => $path,
+
+            // 🔥 simpan nama BARU biar konsisten
+            'nama_file' => $namaFile,
+
+            'tipe_file' => strtolower($ext),
+            'size' => $file->getSize()
+        ]);
+    }
+}
         return redirect()->route('kelola.arsip');
     }
 
@@ -102,15 +126,21 @@ class ArsipController extends Controller
             return back();
         }
 
-        $request->validate([
-            'judul' => 'required|string',
-            'nomor' => 'nullable|string',
-            'tahun' => 'required|integer',
-            'id_kategori' => 'required|exists:kategori,id',
-            'status_akses' => 'required',
-            'files.*' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png,mp4|max:20480'
-        ]);
+       $request->merge([
+    'nomor' => strtolower(trim($request->nomor))
+]);
 
+$request->validate([
+    'judul' => 'required|string',
+    'nomor' => [
+        'required',
+        'string',
+        Rule::unique('arsip', 'nomor')->ignore($id)
+    ],
+    'tahun' => 'required|integer',
+    'id_kategori' => 'required|exists:kategori,id',
+    'status_akses' => 'required',
+]);
         $jenisArsip = (now()->year - (int)$request->tahun >= 5)
             ? 'inaktif'
             : 'aktif';
@@ -129,25 +159,32 @@ class ArsipController extends Controller
     : null,
         ]);
 
-        if ($request->hasFile('files')) {
-            foreach ($arsip->files as $old) {
-                Storage::disk('public')->delete($old->path_file);
-                $old->delete();
-            }
+       if ($request->hasFile('files')) {
 
-            foreach ($request->file('files') as $file) {
-                $path = $file->store('arsip', 'public');
+    $judul = Str::slug($request->judul);
+    $kategori = Str::slug(Kategori::find($request->id_kategori)?->nama ?? 'umum');
+    $tanggal = Carbon::now()->format('Y-m-d');
 
-                File::create([
-                    'arsip_id' => $arsip->id,
-                    'path_file' => $path,
-                    'nama_file' => $file->getClientOriginalName(),
-                    'tipe_file' => strtolower($file->getClientOriginalExtension()),
-                    'size' => $file->getSize()
-                ]);
-            }
-        }
+    foreach ($request->file('files') as $file) {
 
+        $ext = $file->getClientOriginalExtension();
+
+        $namaFile = "{$judul}-{$kategori}-{$tanggal}.{$ext}";
+        $namaFile = uniqid() . '-' . $namaFile;
+
+        $folder = 'arsip/' . $kategori;
+
+        $path = $file->storeAs($folder, $namaFile, 'public');
+
+        File::create([
+            'arsip_id' => $arsip->id,
+            'path_file' => $path,
+            'nama_file' => $namaFile, // 🔥 ini penting (bukan original lagi)
+            'tipe_file' => strtolower($ext),
+            'size' => $file->getSize()
+        ]);
+    }
+}
         if (auth()->check() && auth()->user()->role === 'admin') {
             return redirect('/admin/kelola-arsip-role-admin')
                 ->with('success', 'Arsip berhasil diperbarui');
@@ -1071,12 +1108,17 @@ public function storeAdmin(Request $request)
 {
     // copy isi store() kamu ke sini
 
-    $request->validate([
-        'judul' => 'required|string',
-        'tahun' => 'required',
-        'id_kategori' => 'required|exists:kategori,id',
-        'status_akses' => 'required'
-    ]);
+    $request->merge([
+    'nomor' => strtolower(trim($request->nomor))
+]);
+
+$request->validate([
+    'judul' => 'required|string',
+    'nomor' => 'required|string|unique:arsip,nomor',
+    'tahun' => 'required',
+    'id_kategori' => 'required|exists:kategori,id',
+    'status_akses' => 'required'
+]);
 
     $user = Auth::user();
 
@@ -1104,18 +1146,31 @@ public function storeAdmin(Request $request)
     ]);
 
     if ($request->hasFile('files')) {
-        foreach ($request->file('files') as $file) {
-            $path = $file->store('arsip', 'public');
 
-            File::create([
-                'arsip_id' => $arsip->id,
-                'path_file' => $path,
-                'nama_file' => $file->getClientOriginalName(),
-                'tipe_file' => strtolower($file->getClientOriginalExtension()),
-                'size' => $file->getSize()
-            ]);
-        }
+    $judul = Str::slug($request->judul);
+    $kategori = Str::slug(Kategori::find($request->id_kategori)?->nama ?? 'umum');
+    $tanggal = Carbon::now()->format('Y-m-d');
+
+    foreach ($request->file('files') as $file) {
+
+        $ext = $file->getClientOriginalExtension();
+
+        $namaFile = "{$judul}-{$kategori}-{$tanggal}.{$ext}";
+        $namaFile = uniqid() . '-' . $namaFile;
+
+        $folder = 'arsip/' . $kategori;
+
+        $path = $file->storeAs($folder, $namaFile, 'public');
+
+        File::create([
+            'arsip_id' => $arsip->id,
+            'path_file' => $path,
+            'nama_file' => $namaFile, // 🔥 ini penting (bukan original lagi)
+            'tipe_file' => strtolower($ext),
+            'size' => $file->getSize()
+        ]);
     }
+}
 
     // 🔥 INI YANG PENTING
     return redirect('/admin/kelola-arsip-role-admin');

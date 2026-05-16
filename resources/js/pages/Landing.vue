@@ -3,6 +3,7 @@ import { Head, usePage } from '@inertiajs/vue3';
 import HeaderBaru from '@/components/header.vue';
 import FooterBaru from '@/components/footer.vue';
 import { ref, onMounted, computed } from 'vue';
+import { FileText, FileImage, FileSpreadsheet, File } from 'lucide-vue-next'
 
 const page = usePage();
 
@@ -11,6 +12,41 @@ const pengumuman = page.props.pengumuman || []
 const totalArsip = page.props.totalArsip || 0;
 const currentPage = ref(0);
 const itemsPerPage = 3;
+const openPreview = (doc) => {
+  if (!doc) return
+
+  const previewPath = getPreviewPath(doc)
+
+  // ✅ CEK: ini arsip atau pengumuman
+  if (doc.files) {
+    // ===== ARSIP =====
+    selectedDocType.value = 'arsip'
+
+    selectedDoc.value = {
+      ...doc,
+      title: doc.judul,
+      nomor: doc.nomor,
+      kategori: doc.kategori?.nama || '-',
+      jenis: getFileType(previewPath),
+      tahun: new Date(doc.created_at).getFullYear(),
+      lokasi: doc.user?.bagian || '-',
+      format: getFileType(previewPath),
+      previewPath,
+    }
+
+  } else {
+    // ===== PENGUMUMAN =====
+    selectedDocType.value = 'pengumuman'
+
+    selectedDoc.value = {
+      ...doc,
+      format: getFileType(previewPath),
+      previewPath,
+    }
+  }
+
+  previewModal.value = true
+}
 
 const paginatedPengumuman = computed(() => {
     const start = currentPage.value * itemsPerPage;
@@ -91,18 +127,21 @@ const getPreviewPath = (doc) => {
 
 const selectedDocType = ref('')
 
-const openPreview = (doc) => {
-  if (!doc) return
+const getFileIcon = (filePath) => {
+  if (!filePath || typeof filePath !== 'string') return File
 
-  const previewPath = getPreviewPath(doc)
-  selectedDoc.value = {
-    ...doc,
-    format: getFileType(previewPath),
-    previewPath,
-  }
-  selectedDocType.value = doc.files ? 'arsip' : 'pengumuman'
-  previewModal.value = true
+  const ext = filePath.split('.').pop()?.toLowerCase()
+
+  if (!ext) return File
+
+  if (ext === 'pdf') return FileText
+  if (['doc', 'docx'].includes(ext)) return FileText
+  if (['xls', 'xlsx', 'csv'].includes(ext)) return FileSpreadsheet
+  if (['jpg', 'jpeg', 'png', 'webp'].includes(ext)) return FileImage
+
+  return File
 }
+
 </script>
 
 <template>
@@ -239,18 +278,16 @@ const openPreview = (doc) => {
                         :style="{ transitionDelay: `${i * 0.1}s` }"
                         class="cursor-pointer bg-[#8db1c9] p-7 rounded-[22px] flex items-center shadow-lg border border-white/40 relative w-full overflow-hidden transition-transform duration-250 hover:-translate-y-1 hover:shadow-xl"
                     >
-                        <!-- ICON -->
+                       <!-- ICON -->
                         <div
-                            class="bg-white rounded-xl shadow-inner flex-shrink-0 flex items-center justify-center mr-7"
-                            style="width:72px;height:72px;"
-                        >
-                            <span
-                                class="text-slate-300 font-black text-[10px] uppercase"
-                            >
-                                DOCS
-                            </span>
-                        </div>
-
+    class="bg-white rounded-xl shadow-inner flex-shrink-0 flex items-center justify-center mr-7"
+    style="width:72px;height:72px;"
+>
+    <component
+        :is="getFileIcon(getPreviewPath(doc) || '')"
+        class="w-8 h-8 text-gray-500"
+    />
+</div>
                         <!-- CONTENT -->
                         <div class="flex-grow text-white">
                             <h4
@@ -489,65 +526,102 @@ const openPreview = (doc) => {
                                 </p>
                             </div>
                         </template>
+<template v-else>
+  <!-- LEFT -->
+  <div class="w-full md:w-1/2 bg-gray-100 flex items-center justify-center p-6">
 
-                        <template v-else>
-                            <!-- ARCHIVE PREVIEW -->
-                            <div
-                                class="w-full md:w-1/2 bg-gray-100 flex items-center justify-center p-6"
-                            >
-                                <img
-                                    v-if="selectedDoc.previewPath && selectedDoc.format === 'IMAGE'"
-                                    :src="`/storage/${selectedDoc.previewPath}`"
-                                    class="max-h-[400px] object-contain rounded-xl shadow"
-                                />
+    <img
+      v-if="selectedDoc.format === 'IMAGE'"
+      :src="`/storage/${selectedDoc.previewPath}`"
+      class="max-h-[400px] object-contain rounded-xl shadow"
+    />
 
-                                <iframe
-                                    v-else-if="selectedDoc.previewPath && selectedDoc.format === 'PDF'"
-                                    :src="`/storage/${selectedDoc.previewPath}`"
-                                    class="w-full h-[400px] rounded-xl"
-                                ></iframe>
+    <iframe
+      v-else-if="selectedDoc.format === 'PDF'"
+      :src="`/storage/${selectedDoc.previewPath}`"
+      class="w-full h-[400px] rounded-xl"
+    ></iframe>
 
-                                <div
-                                    v-else
-                                    class="text-slate-400 font-bold text-center"
-                                >
-                                    No preview tersedia
-                                </div>
-                            </div>
+    <div v-else class="text-gray-500 text-center">
+      📄<br/>Preview tidak tersedia
+    </div>
 
-                            <div class="w-full md:w-1/2 p-8 flex flex-col">
-                                <div class="flex items-start justify-between mb-5">
+  </div>
 
-                                    <span
-                                        class="bg-[#8db1c9]/15 text-[#5b87a3] text-[11px] font-black uppercase tracking-wider px-3 py-1 rounded-full"
-                                    >
-                                        {{
-                                            new Date(selectedDoc.tanggal || selectedDoc.created_at).toLocaleDateString('id-ID', {
-                                                day: 'numeric',
-                                                month: 'long',
-                                                year: 'numeric'
-                                            })
-                                        }}
-                                    </span>
+  <!-- RIGHT -->
+  <div class="w-full md:w-1/2 p-8 flex flex-col justify-between">
 
-                                    <button
-                                        @click="previewModal = false"
-                                        class="text-2xl font-black text-slate-400 hover:text-black"
-                                    >
-                                        ×
-                                    </button>
+    <div>
+      <div class="flex justify-between items-start mb-4">
+        <h2 class="text-2xl font-black text-gray-800">
+          {{ selectedDoc.title }}
+        </h2>
 
-                                </div>
+        <button @click="previewModal=false">✕</button>
+      </div>
 
-                                <h2 class="text-3xl font-black text-slate-800 mb-4 leading-tight">
-                                    {{ selectedDoc.judul }}
-                                </h2>
+      <!-- TAG -->
+      <div class="flex flex-wrap gap-2 mb-4">
+        <span class="bg-gray-200 px-3 py-1 rounded-full text-xs font-bold">
+          No: {{ selectedDoc.nomor }}
+        </span>
 
-                                <p class="text-slate-600 leading-relaxed overflow-y-auto">
-                                    {{ selectedDoc.deskripsi }}
-                                </p>
-                            </div>
-                        </template>
+        <span class="bg-blue-100 px-3 py-1 rounded-full text-xs font-bold">
+          {{ selectedDoc.kategori }}
+        </span>
+
+        <span class="bg-green-100 px-3 py-1 rounded-full text-xs font-bold uppercase">
+          {{ selectedDoc.jenis }}
+        </span>
+      </div>
+
+      <!-- GRID -->
+      <div class="grid grid-cols-2 gap-4 text-sm">
+        <div>
+          <p class="font-bold">Tahun</p>
+          <p>{{ selectedDoc.tahun }}</p>
+        </div>
+
+        <div>
+          <p class="font-bold">Status</p>
+          <p>Public</p>
+        </div>
+
+        <div class="col-span-2">
+          <p class="font-bold">Lokasi</p>
+          <p>{{ selectedDoc.lokasi }}</p>
+        </div>
+      </div>
+
+      <!-- DESC -->
+      <div class="mt-6">
+        <p class="font-bold">Deskripsi</p>
+        <p>{{ selectedDoc.deskripsi || '-' }}</p>
+      </div>
+    </div>
+
+    <!-- ACTION -->
+    <div class="flex justify-end gap-3 mt-6">
+
+      <button
+        v-if="selectedDoc.files?.length"
+        @click="handleDownload(selectedDoc.id)"
+        class="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold"
+      >
+        Download
+      </button>
+
+      <button
+        @click="previewModal=false; selectedDoc = null"
+        class="bg-slate-100 px-4 py-2 rounded-xl text-sm"
+      >
+        Tutup
+      </button>
+
+    </div>
+
+  </div>
+</template>
                     </div>
                 </div>
             </main>
