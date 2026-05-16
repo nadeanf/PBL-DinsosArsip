@@ -51,16 +51,21 @@ const setPage = (page) => {
 // format tanggal
 const formatTanggal = (dateString) => {
     if (!dateString) return ''
-
     const date = new Date(dateString)
-
-    return date.toLocaleString('id-ID', {
+    return date.toLocaleDateString('id-ID', {
         day: '2-digit',
         month: 'long',
-        year: 'numeric',
+        year: 'numeric'
+    })
+}
+
+const formatWaktu = (dateString) => {
+    if (!dateString) return ''
+    const date = new Date(dateString)
+    return 'pukul ' + date.toLocaleTimeString('id-ID', {
         hour: '2-digit',
         minute: '2-digit'
-    })
+    }).replace('.', ':') // Mengubah format bawaan ID (17.59) menjadi (17:59) jika diperlukan, atau hapus .replace jika ingin tetap titik.
 }
 
 const openPreview = (item) => {
@@ -183,9 +188,10 @@ const mappedHistory = computed(() => {
                     </p>
                 </div>
 
-                <p class="text-xs bg-white/20 px-2 py-1 rounded">
-                    {{ formatTanggal(item.waktu) }}
-                </p>
+                <div class="text-right text-xs bg-white/20 px-2 py-1 rounded flex flex-col justify-center items-end">
+    <span class="font-medium">{{ formatTanggal(item.waktu) }}</span>
+    <span class="opacity-80">{{ formatWaktu(item.waktu) }}</span>
+</div>
 
             </div>
 
