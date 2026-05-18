@@ -721,6 +721,7 @@ class ArsipController extends Controller
             abort(403, 'Tidak punya akses');
         }
 
+        // TRACKING HARUS DILAKUKAN PERTAMA SEBELUM APAPUN
         $userId = auth()->id();
 
         $existingView = RiwayatAkses::where('user_id', $userId)
@@ -740,16 +741,18 @@ class ArsipController extends Controller
             ]);
         }
 
+        // DOWNLOAD LOG
+        DownloadLog::create([
+            'user_id' => $userId,
+            'arsip_id' => $arsip->id
+        ]);
+
+        // KEMUDIAN CARI FILE
         $file = $arsip->files->first();
 
         if (!$file || !Storage::disk('public')->exists($file->path_file)) {
             abort(404, 'File tidak ditemukan');
         }
-
-        DownloadLog::create([
-            'user_id' => Auth::id(),
-            'arsip_id' => $arsip->id
-        ]);
 
         return response()->download(
             storage_path('app/public/' . $file->path_file),

@@ -66,9 +66,24 @@ const formatTanggal = (dateString) => {
     })
 }
 
+const handleDownload = (docId) => {
+    // Download file via GET request yang akan memanggil controller download method
+    window.location.href = `/download/${docId}`
+}
+
 const openPreview = (item) => {
     selectedDoc.value = item
     previewModal.value = true
+    
+    // Track preview view dari halaman riwayat
+    fetch('/riwayat/view', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+        },
+        body: JSON.stringify({ dokumen_id: item.id })
+    }).catch(err => console.debug('Preview tracking:', err))
 }
 
 const getFileType = (path) => {
@@ -307,13 +322,13 @@ const mappedHistory = computed(() => {
 
                 <div class="flex justify-end gap-3 mt-6">
 
-                    <a
+                    <button
                         v-if="selectedDoc?.files?.length"
-                        :href="`/download/${selectedDoc?.id}`"
-                        class="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold"
+                        @click="handleDownload(selectedDoc.id)"
+                        class="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold hover:bg-blue-700 transition"
                     >
                         Download
-                    </a>
+                    </button>
 
                     <button
                         @click="previewModal = false"
