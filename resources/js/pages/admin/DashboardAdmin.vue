@@ -20,35 +20,47 @@ console.log('KATEGORI:', page.props.kategori)
 const canAccessFull = (doc) => {
   const user = page.props.auth?.user
 
-  if (!user) return false
+  if (!doc || !user) return false
 
-  console.log('CHECK ACCESS:', {
-    doc,
-    user
-  })
+  const normalize = (val) =>
+    String(val || '').toLowerCase().trim()
 
-  // SUDAH DI APPROVE → FIX UTAMA
-  if (doc.request_status === 'approved') return true
+  // ADMIN / SUPERADMIN
+  if (['admin', 'superadmin'].includes(user.role)) {
+    return true
+  }
 
-  // publik
-  if (doc.status === 'publik') return true
+  // SUDAH APPROVED
+  if (doc.request_status === 'approved') {
+    return true
+  }
 
-  // pemilik
-  if (doc.user_id === user.id) return true
+  // PUBLIK
+  if (normalize(doc.status) === 'publik') {
+    return true
+  }
 
-  // private + bidang sama (FIX LEBIH AMAN)
+  // PEMILIK
+  if (doc.user_id === user.id) {
+    return true
+  }
+
+  // BIDANG SAMA
+  const userBagian = normalize(user.bagian)
+  const docBidang = normalize(doc.bidang)
+
   if (
-    doc.status === 'private' &&
-    doc.bidang &&
-    user.bagian &&
-    doc.bidang.toLowerCase().trim() === user.bagian.toLowerCase().trim()
+    normalize(doc.status) === 'private' &&
+    (
+      userBagian.includes(docBidang) ||
+      docBidang.includes(userBagian)
+    )
   ) {
     return true
   }
 
   return false
 }
-
 const requestAkses = (arsipId) => {
   console.log('KLIK MASUK', arsipId)
 
@@ -118,14 +130,19 @@ const exportPDF = () => {
   window.location.href = `/export/pdf?search=${search.value}&kategori=${kategori.value}&tanggal_awal=${tanggal_awal.value}&tanggal_akhir=${tanggal_akhir.value}`
 }
 
-/* HELPER FILE TYPE */
-const getFileType = (path) => {
-  if (!path) return 'FILE'
-  const ext = path.split('.').pop()?.toLowerCase()
+/* HELPER FILE TYPE */const getFileType = (path) => {
+    if (!path) return 'FILE'
 
-  if (['jpg','jpeg','png','gif','webp'].includes(ext)) return 'IMAGE'
-  if (ext === 'pdf') return 'PDF'
-  return 'FILE'
+    const ext = path.split('.').pop()?.toLowerCase()
+
+    if (['jpg','jpeg','png','gif','webp'].includes(ext)) return 'IMAGE'
+
+    if (ext === 'pdf') return 'PDF'
+
+    // 🔥 TAMBAH INI
+    if (['xls', 'xlsx', 'csv'].includes(ext)) return 'EXCEL'
+
+    return 'FILE'
 }
 
 /* MAPPING DATA */
@@ -140,7 +157,7 @@ const aktivitasTerbaru = computed(() => {
 
     kategori: item.kategori?.nama || '-',
     jenis: item.jenis_arsip || '-',
-    bidang: item.user?.bagian || '-',
+    bidang: item.bagian || '-',
 
     tahun: item.tahun,
     lokasi: item.lokasi,
@@ -455,6 +472,23 @@ class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-
   class="w-full h-[400px] rounded-xl">
 </iframe>
 
+<!-- EXCEL -->
+<div
+    v-else-if="selectedDoc?.format === 'EXCEL' && canAccessFull(selectedDoc)"
+    class="text-center"
+>
+    <p class="mb-4 text-gray-600">
+        File Excel tidak bisa dipreview
+    </p>
+
+    <a
+        :href="`/download/${selectedDoc?.id}`"
+        class="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold"
+    >
+        Download Excel
+    </a>
+</div>
+
 <!-- TIDAK ADA AKSES -->
 <div v-else class="text-gray-500 text-center space-y-3">
   <div>
@@ -469,7 +503,7 @@ class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-
 </div>
 
 <!-- DITOLAK -->
-<div v-else-if="selectedDoc?.request_status === 'ditolak'"
+<div v-else-if="selectedDoc?.request_status === 'rejected'"
      class="text-red-500 font-semibold text-sm">
   ❌ Akses ditolak
 </div>
@@ -534,6 +568,7 @@ class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-
 
       <div class="flex justify-end gap-3 mt-6">
        <button
+  v-if="canAccessFull(selectedDoc)"
   @click="handleDownload(selectedDoc.id)"
   class="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold"
 >

@@ -97,13 +97,41 @@ const downloadFile = (item) => {
     });
 }
 
+const normalizeText = (value) =>
+  String(value || '').toLowerCase().trim()
+
 const canAccessFull = (doc) => {
   const user = page.props.auth?.user
 
-  if (!user) return false
-  if (doc.status === 'publik') return true
-  if (doc.user_id === user.id) return true
-  if (doc.status === 'private' && doc.bidang === user.bagian) return true
+  if (!doc || !user) return false
+
+  // ADMIN
+  if (['admin', 'superadmin'].includes(user.role)) {
+    return true
+  }
+
+  // PUBLIC
+  if (normalizeText(doc.status_akses) === 'publik') {
+    return true
+  }
+
+  // OWNER
+  if (doc.user_id === user.id) {
+    return true
+  }
+
+  // APPROVED
+  if (doc.request_status === 'approved') {
+    return true
+  }
+
+  // BIDANG SAMA
+  if (
+    normalizeText(doc.status_akses) === 'private' &&
+    normalizeText(doc.bidang) === normalizeText(user.bagian)
+  ) {
+    return true
+  }
 
   return false
 }
@@ -124,10 +152,16 @@ const requestAkses = (arsipId) => {
 
 const getFileType = (path) => {
   if (!path) return 'FILE'
+
   const ext = path.split('.').pop()?.toLowerCase()
 
   if (['jpg','jpeg','png','gif','webp'].includes(ext)) return 'IMAGE'
+
   if (ext === 'pdf') return 'PDF'
+
+  // TAMBAH INI
+  if (['xls', 'xlsx', 'csv'].includes(ext)) return 'EXCEL'
+
   return 'FILE'
 }
 
@@ -169,12 +203,17 @@ const mappedHistory = computed(() => {
             <div class="flex justify-between">
                 <div>
                     <p class="font-bold text-lg">{{ item.title }}</p>
-                    <p class="text-sm">{{ item.aksi }}</p>
                 </div>
 
-                <p class="text-xs bg-white/20 px-2 py-1 rounded">
-                    {{ formatTanggal(item.waktu) }}
-                </p>
+                <div class="text-right">
+    <p class="text-sm font-semibold text-white">
+        Status: {{ item.aksi || 'Lihat' }}
+    </p>
+
+    <p class="text-xs text-black mt-1">
+        {{ formatTanggal(item.waktu) }}
+    </p>
+</div>
             </div>
 
         </div>
@@ -244,7 +283,6 @@ class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-
   :src="`/storage/${selectedDoc?.files?.[0]?.path_file}`"
   class="max-h-[400px] object-contain rounded-xl shadow" 
 />
-
 <!-- PDF -->
 <iframe 
   v-else-if="selectedDoc?.format === 'PDF' && canAccessFull(selectedDoc)"
@@ -252,12 +290,22 @@ class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-
   class="w-full h-[400px] rounded-xl">
 </iframe>
 
+<!-- FILE LAIN (EXCEL/DOCX/ZIP DLL) -->
+<div
+  v-else-if="canAccessFull(selectedDoc)"
+  class="text-center space-y-4"
+>
+  <div class="text-6xl">
+    📄
+  </div>
+
+  <p class="font-semibold text-gray-700">
+    File tidak dapat dipreview
+  </p>
+</div>
+
 <!-- TIDAK ADA AKSES -->
 <div v-else class="text-gray-500 text-center space-y-3">
-  <div>
-    🔒 Dokumen ini bersifat privat <br/>
-    Anda tidak memiliki akses
-  </div>
 
  <!-- SUDAH REQUEST -->
 <div v-if="selectedDoc?.request_status === 'pending'"
@@ -266,7 +314,7 @@ class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-
 </div>
 
 <!-- DITOLAK -->
-<div v-else-if="selectedDoc?.request_status === 'ditolak'"
+<div v-else-if="selectedDoc?.request_status === 'rejected'"
      class="text-red-500 font-semibold text-sm">
   ❌ Akses ditolak
 </div>
@@ -314,7 +362,7 @@ class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-
 
           <div>
             <p class="font-bold">Status</p>
-            <p>{{ selectedDoc?.status }}</p>
+           <p>{{ selectedDoc?.status_akses }}</p>
           </div>
 
           <div class="col-span-2">

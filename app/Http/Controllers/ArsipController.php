@@ -76,7 +76,9 @@ $request->validate([
             'id_kategori' => $request->id_kategori,
             'jenis_arsip' => $jenisArsip,
             'status_akses' => $request->status_akses,
-            'bagian' => $request->status_akses === 'private' ? $user->bagian : null,
+           'bagian' => $request->status_akses === 'private'
+            ? $request->bagian
+            : null,
             'lokasi' => $request->lokasi,
             'deskripsi' => $request->deskripsi,
             'status_approval' => 'pending'
@@ -745,59 +747,79 @@ $request->validate([
             ->where('user_id', Auth::id())
             ->orderBy('updated_at', 'desc')
             ->get()
-            ->map(function ($item) {
-                return [
-                    'id' => $item->arsip->id,
-                    'user_id' => $item->arsip->user_id,
-                    'title' => $item->arsip->judul,
-                    'nomor' => $item->arsip->nomor,
-                    'aksi' => $item->aksi,
-                    'deskripsi' => $item->arsip->deskripsi,
-                    'kategori' => $item->arsip->kategori->nama ?? '-',
-                    'jenis' => $item->arsip->jenis_arsip,
-                    'bidang' => $item->arsip->user->bagian ?? '-',
-                    'tahun' => $item->arsip->tahun,
-                    'lokasi' => $item->arsip->lokasi,
-                    'status' => $item->arsip->status_akses,
-                    'files' => $item->arsip->files ?? [],
-                    'waktu' => $item->updated_at
-                ];
-            });
+          ->map(function ($item) {
 
+    $request = RequestAkses::where('user_id', Auth::id())
+        ->where('arsip_id', $item->arsip->id)
+        ->first();
+
+    return [
+        'id' => $item->arsip->id,
+        'user_id' => $item->arsip->user_id,
+        'title' => $item->arsip->judul,
+        'nomor' => $item->arsip->nomor,
+        'aksi' => $item->aksi,
+        'deskripsi' => $item->arsip->deskripsi,
+        'kategori' => $item->arsip->kategori->nama ?? '-',
+        'jenis' => $item->arsip->jenis_arsip,
+        'bidang' => $item->arsip->bagian ?? '-',
+        'tahun' => $item->arsip->tahun,
+        'lokasi' => $item->arsip->lokasi,
+
+        // FIX
+        'status_akses' => $item->arsip->status_akses,
+
+        // FIX
+        'request_status' => $request?->status,
+
+        'files' => $item->arsip->files ?? [],
+        'waktu' => $item->updated_at
+    ];
+});
         return Inertia::render('Riwayat', [
             'riwayat' => $data
         ]);
     }
+public function riwayatAdmin()
+{
+    $data = RiwayatAkses::with('arsip.files', 'arsip.kategori', 'arsip.user')
+        ->where('user_id', Auth::id())
+        ->orderBy('updated_at', 'desc')
+        ->get()
 
-    public function riwayatAdmin()
-    {
-        $data = RiwayatAkses::with('arsip.files', 'arsip.kategori', 'arsip.user')
-            ->where('user_id', Auth::id())
-            ->orderBy('updated_at', 'desc')
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'id' => $item->arsip->id,
-                    'user_id' => $item->arsip->user_id,
-                    'title' => $item->arsip->judul,
-                    'nomor' => $item->arsip->nomor,
-                    'aksi' => $item->aksi,
-                    'deskripsi' => $item->arsip->deskripsi,
-                    'kategori' => $item->arsip->kategori->nama ?? '-',
-                    'jenis' => $item->arsip->jenis_arsip,
-                    'bidang' => $item->arsip->user->bagian ?? '-',
-                    'tahun' => $item->arsip->tahun,
-                    'lokasi' => $item->arsip->lokasi,
-                    'status' => $item->arsip->status_akses,
-                    'files' => $item->arsip->files ?? [],
-                    'waktu' => $item->updated_at
-                ];
-            });
+        ->filter(function ($item) {
+            return $item->arsip !== null;
+        })
 
-        return Inertia::render('admin/RiwayatAdmin', [
-            'riwayat' => $data
-        ]);
-    }
+        ->map(function ($item) {
+            return [
+                'id' => $item->arsip?->id,
+                'user_id' => $item->arsip?->user_id,
+                'title' => $item->arsip?->judul,
+                'nomor' => $item->arsip?->nomor,
+                'aksi' => $item->aksi,
+                'deskripsi' => $item->arsip?->deskripsi,
+
+                // FIX
+                'kategori' => $item->arsip?->kategori?->nama ?? '-',
+
+                'jenis' => $item->arsip?->jenis_arsip,
+
+                // FIX
+                'bidang' => $item->arsip?->user?->bagian ?? '-',
+
+                'tahun' => $item->arsip?->tahun,
+                'lokasi' => $item->arsip?->lokasi,
+                'status' => $item->arsip?->status_akses,
+                'files' => $item->arsip?->files ?? [],
+                'waktu' => $item->updated_at
+            ];
+        });
+
+    return Inertia::render('admin/RiwayatAdmin', [
+    'riwayat' => $data->values()->all()
+]);
+}
 
     public function riwayatPimpinan()
     {
@@ -829,9 +851,14 @@ $request->validate([
         ]);
     }
 
-    private function canAccessFull($arsip)
+  private function canAccessFull($arsip)
 {
     $user = Auth::user();
+
+    // 🔥 ADMIN & SUPERADMIN AKSES SEMUA
+    if (in_array($user->role, ['admin', 'superadmin'])) {
+        return true;
+    }
 
     // publik bebas
     if ($arsip->status_akses === 'publik') return true;
@@ -839,15 +866,15 @@ $request->validate([
     // pemilik arsip
     if ($arsip->user_id === $user->id) return true;
 
-    // 🔥 TAMBAHAN: kalau 1 bidang boleh akses
+    // bidang sama
     if (
-        strtolower(trim($arsip->bagian ?? '')) === 
+        strtolower(trim($arsip->bagian ?? '')) ===
         strtolower(trim($user->bagian ?? ''))
     ) {
         return true;
     }
 
-    // kalau sudah di-approve
+    // approved
     $approved = RequestAkses::where('user_id', $user->id)
         ->where('arsip_id', $arsip->id)
         ->where('status', 'approved')
@@ -855,7 +882,6 @@ $request->validate([
 
     return $approved;
 }
-
     public function requestAkses($id)
     {
         $user = Auth::user();
@@ -1139,7 +1165,9 @@ $request->validate([
         'id_kategori' => $request->id_kategori,
         'jenis_arsip' => $jenisArsip,
         'status_akses' => $request->status_akses,
-        'bagian' => $request->status_akses === 'private' ? $user->bagian : null,
+        'bagian' => $request->status_akses === 'private'
+        ? $request->bagian
+        : null,
         'lokasi' => $request->lokasi,
         'deskripsi' => $request->deskripsi,
         'status_approval' => 'pending'

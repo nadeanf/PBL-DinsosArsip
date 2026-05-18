@@ -76,22 +76,36 @@ const getFileType = (path) => {
 
 const normalizeText = (value) =>
   String(value || '').toLowerCase().trim()
-
 const canAccessFull = (doc) => {
   const user = page.props.auth?.user
+
   if (!doc || !user) return false
 
-  if (doc.status_akses === 'publik') return true
-  if (doc.user_id === user.id) return true
-  if (doc.request_status === 'approved') return true
+  // ADMIN
+  if (['admin', 'superadmin'].includes(user.role)) {
+    return true
+  }
 
-  if (doc.status_akses === 'private') {
-    return normalizeText(user.bagian) === normalizeText(doc.bidang)
+  // PUBLIK
+  if (normalizeText(doc.status_akses) === 'publik') {
+    return true
+  }
+
+  // PEMILIK DOKUMEN
+  if (doc.user_id === user.id) {
+    return true
+  }
+
+  // SUDAH DI-APPROVE
+  if (
+    doc.request_status === 'approved' &&
+    doc.request_user_id === user.id
+  ) {
+    return true
   }
 
   return false
 }
-
 /* MAPPING FULL DATA */
 const mappedDocuments = computed(() => {
   return dataArsip.value.map(item => ({

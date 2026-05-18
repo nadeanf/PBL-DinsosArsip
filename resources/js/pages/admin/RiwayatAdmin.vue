@@ -19,11 +19,15 @@ const props = defineProps({
 const searchQuery = ref('')
 const currentPage = ref(1)
 const itemsPerPage = 5
-
 const filteredHistory = computed(() => {
     return mappedHistory.value.filter(item =>
-        item.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        item.aksi.toLowerCase().includes(searchQuery.value.toLowerCase())
+        String(item.title || '')
+            .toLowerCase()
+            .includes(searchQuery.value.toLowerCase()) ||
+
+        String(item.aksi || '')
+            .toLowerCase()
+            .includes(searchQuery.value.toLowerCase())
     )
 })
 
@@ -90,27 +94,44 @@ const openPreview = (item) => {
 const downloadFile = (item) => {
     window.location.href = `/download/${item.id}`
 }
+const normalizeText = (value) =>
+    String(value || '').toLowerCase().trim()
 
 const canAccessFull = (doc) => {
     const user = page.props.auth?.user
 
-    if (!user) return false
+    if (!doc || !user) return false
 
-    // approved
-    if (doc.request_status === 'approved') return true
+    // 🔥 ADMIN & SUPERADMIN
+    if (['admin', 'superadmin'].includes(user.role)) {
+        return true
+    }
 
-    // publik
-    if (doc.status === 'publik') return true
+    // PUBLIK
+    if (normalizeText(doc.status) === 'publik') {
+        return true
+    }
 
-    // pemilik
-    if (doc.user_id === user.id) return true
+    // OWNER
+    if (doc.user_id === user.id) {
+        return true
+    }
 
-    // private tapi bagian sama
-    if (doc.status === 'private' && doc.bidang === user.bagian) return true
+    // APPROVED
+    if (doc.request_status === 'approved') {
+        return true
+    }
+
+    // BIDANG SAMA
+    if (
+        normalizeText(doc.status) === 'private' &&
+        normalizeText(doc.bidang) === normalizeText(user.bagian)
+    ) {
+        return true
+    }
 
     return false
 }
-
 const requestAkses = (arsipId) => {
     fetch(`/request-akses/${arsipId}`, {
         method: 'POST',
@@ -124,23 +145,25 @@ const requestAkses = (arsipId) => {
         selectedDoc.value.request_status = 'pending'
     })
 }
-
 const getFileType = (path) => {
     if (!path) return 'FILE'
 
     const ext = path.split('.').pop()?.toLowerCase()
 
     if (['jpg','jpeg','png','gif','webp'].includes(ext)) return 'IMAGE'
+
     if (ext === 'pdf') return 'PDF'
+
+    // TAMBAH INI
+    if (['xls', 'xlsx', 'csv'].includes(ext)) return 'EXCEL'
 
     return 'FILE'
 }
-
 const mappedHistory = computed(() => {
     return (props.riwayat || []).map(item => ({
         ...item,
         format: item.files?.length
-            ? getFileType(item.files[0].path_file)
+            ? getFileType(item.files?.[0]?.path_file)
             : 'FILE'
     }))
 })
@@ -177,15 +200,17 @@ const mappedHistory = computed(() => {
                     <p class="font-bold text-lg">
                         {{ item.title }}
                     </p>
-
-                    <p class="text-sm">
-                        {{ item.aksi }}
-                    </p>
                 </div>
 
-                <p class="text-xs bg-white/20 px-2 py-1 rounded">
-                    {{ formatTanggal(item.waktu) }}
-                </p>
+                  <div class="text-right">
+    <p class="text-sm font-semibold text-white">
+        Status: {{ item.aksi || 'Lihat' }}
+    </p>
+
+    <p class="text-xs text-black mt-1">
+        {{ formatTanggal(item.waktu) }}
+    </p>
+    </div>
 
             </div>
 
@@ -268,6 +293,20 @@ const mappedHistory = computed(() => {
                     class="w-full h-[400px] rounded-xl"
                 >
                 </iframe>
+
+                <!-- FILE LAIN (EXCEL/DOCX/ZIP DLL) -->
+<div
+    v-else-if="canAccessFull(selectedDoc)"
+    class="text-center space-y-4"
+>
+    <div class="text-6xl">
+        📄
+    </div>
+
+    <p class="font-semibold text-gray-700">
+        Preview tidak tersedia
+    </p>
+</div>
 
                 <!-- NO ACCESS -->
                 <div

@@ -13,27 +13,55 @@ defineOptions({
 })
 
 const page = usePage()
-console.log('KATEGORI:', page.props.kategori)
+
+console.log('USER LOGIN:', page.props.auth?.user)
 const canAccessFull = (doc) => {
   const user = page.props.auth?.user
+
   if (!doc || !user) return false
 
   const normalize = (val) =>
     String(val || '').toLowerCase().trim()
 
-  // ✅ publik
-  if (doc.status_akses === 'publik') return true
-
-  // ✅ pemilik
-  if (doc.user_id === user.id) return true
-
-  // ✅ sudah approve
-  if (doc.request_status === 'approved') return true
-
-  // ✅ private tapi 1 bidang
-  if (doc.status_akses === 'private') {
-    return normalize(user.bagian) === normalize(doc.bidang)
+  // 🔥 ADMIN / SUPERADMIN
+  if (['admin', 'superadmin'].includes(user.role)) {
+    return true
   }
+
+  // PUBLIC
+  if (normalize(doc.status_akses) === 'publik') {
+    return true
+  }
+
+  // PEMILIK
+  if (doc.user_id === user.id) {
+    return true
+  }
+
+  // SUDAH APPROVED
+  if (doc.request_status === 'approved') {
+    return true
+  }
+
+  // BIDANG SAMA
+  const bidangDoc =
+    doc.bidang ||
+    doc.bagian ||
+    doc.user?.bagian ||
+    ''
+
+ const userBagian = normalize(user.bagian)
+const docBidang = normalize(bidangDoc)
+
+if (
+  normalize(doc.status_akses) === 'private' &&
+  (
+    userBagian.includes(docBidang) ||
+    docBidang.includes(userBagian)
+  )
+) {
+  return true
+}
 
   return false
 }
@@ -171,8 +199,12 @@ const previewModal = ref(false)
 const selectedDoc = ref(null)
 const openPreview = (doc) => {
   if (!doc) return
+ console.log('DOC:', doc)
+  console.log('STATUS:', doc.status_akses)
+  console.log('BIDANG DOC:', doc.bidang)
+  console.log('BAGIAN USER:', page.props.auth?.user?.bagian)
+  console.log('HASIL AKSES:', canAccessFull(doc))
 
-  // buka modal dulu
   selectedDoc.value = doc
   previewModal.value = true
 
