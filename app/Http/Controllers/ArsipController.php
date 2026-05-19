@@ -48,6 +48,12 @@ class ArsipController extends Controller
 
     public function store(Request $request)
     {
+        $request->validate([
+            'judul' => 'required|string',
+            'tahun' => 'required',
+            'id_kategori' => 'required|exists:kategori,id',
+            'status_akses' => 'required'
+        ]);
        $request->merge([
     'nomor' => strtolower(trim($request->nomor))
 ]);
@@ -107,9 +113,7 @@ $request->validate([
             'id_kategori' => $request->id_kategori,
             'jenis_arsip' => $jenisArsip,
             'status_akses' => $request->status_akses,
-           'bagian' => $request->status_akses === 'private'
-            ? $request->bagian
-            : null,
+            'bagian' => $request->status_akses === 'private' ? $user->bagian : null,
             'lokasi' => $request->lokasi,
             'deskripsi' => $request->deskripsi,
             'status_approval' => 'pending'
@@ -140,18 +144,16 @@ $request->validate([
 
         $path = $file->storeAs($folder, $namaFile, 'public');
 
-        File::create([
-            'arsip_id' => $arsip->id,
-            'path_file' => $path,
+                File::create([
+                    'arsip_id' => $arsip->id,
+                    'path_file' => $path,
+                    'nama_file' => $file->getClientOriginalName(),
+                    'tipe_file' => strtolower($file->getClientOriginalExtension()),
+                    'size' => $file->getSize()
+                ]);
+            }
+        }
 
-            // 🔥 simpan nama BARU biar konsisten
-            'nama_file' => $namaFile,
-
-            'tipe_file' => strtolower($ext),
-            'size' => $file->getSize()
-        ]);
-    }
-}
         return redirect()->route('kelola.arsip');
     }
 
@@ -166,9 +168,14 @@ $request->validate([
             return back();
         }
 
-       $request->merge([
-    'nomor' => strtolower(trim($request->nomor))
-]);
+        $request->validate([
+            'judul' => 'required|string',
+            'nomor' => 'nullable|string',
+            'tahun' => 'required|integer',
+            'id_kategori' => 'required|exists:kategori,id',
+            'status_akses' => 'required',
+            'files.*' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png,mp4|max:20480'
+        ]);
 
 $request->validate([
     'judul' => 'required|string',
@@ -241,16 +248,8 @@ $request->validate([
     $kategori = Str::slug(Kategori::find($request->id_kategori)?->nama ?? 'umum');
     $tanggal = Carbon::now()->format('Y-m-d');
 
-    foreach ($request->file('files') as $file) {
-
-        $ext = $file->getClientOriginalExtension();
-
-        $namaFile = "{$judul}-{$kategori}-{$tanggal}.{$ext}";
-        $namaFile = uniqid() . '-' . $namaFile;
-
-        $folder = 'arsip/' . $kategori;
-
-        $path = $file->storeAs($folder, $namaFile, 'public');
+            foreach ($request->file('files') as $file) {
+                $path = $file->store('arsip', 'public');
 
         File::create([
             'arsip_id' => $arsip->id,
@@ -345,7 +344,6 @@ $request->validate([
                 ->first();
 
             $item->request_status = $req?->status;
-             $item->request_user_id = $req?->user_id; 
             return $item;
         });
 
@@ -863,86 +861,69 @@ $request->validate([
     {
         $data = RiwayatAkses::with('arsip.files', 'arsip.kategori', 'arsip.user')
             ->where('user_id', Auth::id())
+            ->whereHas('arsip') //ops
             ->orderBy('updated_at', 'desc')
             ->get()
-          ->map(function ($item) {
+            ->map(function ($item) {
+                return [
+                    'id' => $item->arsip->id,
+                    'user_id' => $item->arsip->user_id,
+                    'title' => $item->arsip->judul,
+                    'nomor' => $item->arsip->nomor,
+                    'aksi' => $item->aksi,
+                    'deskripsi' => $item->arsip->deskripsi,
+                    'kategori' => $item->arsip->kategori->nama ?? '-',
+                    'jenis' => $item->arsip->jenis_arsip,
+                    'bidang' => $item->arsip->user->bagian ?? '-',
+                    'tahun' => $item->arsip->tahun,
+                    'lokasi' => $item->arsip->lokasi,
+                    'status' => $item->arsip->status_akses,
+                    'files' => $item->arsip->files ?? [],
+                    'waktu' => $item->updated_at
+                ];
+            });
 
-    $request = RequestAkses::where('user_id', Auth::id())
-        ->where('arsip_id', $item->arsip->id)
-        ->first();
-
-    return [
-        'id' => $item->arsip->id,
-        'user_id' => $item->arsip->user_id,
-        'title' => $item->arsip->judul,
-        'nomor' => $item->arsip->nomor,
-        'aksi' => $item->aksi,
-        'deskripsi' => $item->arsip->deskripsi,
-        'kategori' => $item->arsip->kategori->nama ?? '-',
-        'jenis' => $item->arsip->jenis_arsip,
-        'bidang' => $item->arsip->bagian ?? '-',
-        'tahun' => $item->arsip->tahun,
-        'lokasi' => $item->arsip->lokasi,
-
-        // FIX
-        'status_akses' => $item->arsip->status_akses,
-
-        // FIX
-        'request_status' => $request?->status,
-
-        'files' => $item->arsip->files ?? [],
-        'waktu' => $item->updated_at
-    ];
-});
         return Inertia::render('Riwayat', [
             'riwayat' => $data
         ]);
     }
-public function riwayatAdmin()
-{
-    $data = RiwayatAkses::with('arsip.files', 'arsip.kategori', 'arsip.user')
-        ->where('user_id', Auth::id())
-        ->orderBy('updated_at', 'desc')
-        ->get()
 
-        ->filter(function ($item) {
-            return $item->arsip !== null;
-        })
+    public function riwayatAdmin()
+    {
+        $data = RiwayatAkses::with('arsip.files', 'arsip.kategori', 'arsip.user')
+            ->where('user_id', Auth::id())
+            ->whereHas('arsip') //ops
+            ->orderBy('updated_at', 'desc')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->arsip->id,
+                    'user_id' => $item->arsip->user_id,
+                    'title' => $item->arsip->judul,
+                    'nomor' => $item->arsip->nomor,
+                    'aksi' => $item->aksi,
+                    'deskripsi' => $item->arsip->deskripsi,
+                    'kategori' => $item->arsip->kategori->nama ?? '-',
+                    'jenis' => $item->arsip->jenis_arsip,
+                    'bidang' => $item->arsip->user->bagian ?? '-',
+                    'tahun' => $item->arsip->tahun,
+                    'lokasi' => $item->arsip->lokasi,
+                    'status' => $item->arsip->status_akses,
+                    'files' => $item->arsip->files ?? [],
+                    'waktu' => $item->updated_at
+                ];
+            });
 
-        ->map(function ($item) {
-            return [
-                'id' => $item->arsip?->id,
-                'user_id' => $item->arsip?->user_id,
-                'title' => $item->arsip?->judul,
-                'nomor' => $item->arsip?->nomor,
-                'aksi' => $item->aksi,
-                'deskripsi' => $item->arsip?->deskripsi,
-
-                // FIX
-                'kategori' => $item->arsip?->kategori?->nama ?? '-',
-
-                'jenis' => $item->arsip?->jenis_arsip,
-
-                // FIX
-                'bidang' => $item->arsip?->user?->bagian ?? '-',
-
-                'tahun' => $item->arsip?->tahun,
-                'lokasi' => $item->arsip?->lokasi,
-                'status' => $item->arsip?->status_akses,
-                'files' => $item->arsip?->files ?? [],
-                'waktu' => $item->updated_at
-            ];
-        });
-
-    return Inertia::render('admin/RiwayatAdmin', [
-    'riwayat' => $data->values()->all()
-]);
-}
+        return Inertia::render('admin/RiwayatAdmin', [
+            'riwayat' => $data
+        ]);
+    }
 
     public function riwayatPimpinan()
     {
         $data = RiwayatAkses::with('arsip.files', 'arsip.kategori', 'arsip.user')
             ->where('user_id', Auth::id())
+            ->whereHas('arsip') //ops
             ->orderBy('updated_at', 'desc')
             ->get()
             ->map(function ($item) {
@@ -1021,15 +1002,15 @@ public function riwayatAdmin()
     // pemilik arsip
     if ($arsip->user_id === $user->id) return true;
 
-    // bidang sama
+    // 🔥 TAMBAHAN: kalau 1 bidang boleh akses
     if (
-        strtolower(trim($arsip->bagian ?? '')) ===
+        strtolower(trim($arsip->bagian ?? '')) === 
         strtolower(trim($user->bagian ?? ''))
     ) {
         return true;
     }
 
-    // approved
+    // kalau sudah di-approve
     $approved = RequestAkses::where('user_id', $user->id)
         ->where('arsip_id', $arsip->id)
         ->where('status', 'approved')
@@ -1037,6 +1018,7 @@ public function riwayatAdmin()
 
     return $approved;
 }
+
     public function requestAkses($id)
     {
         $user = Auth::user();
@@ -1062,51 +1044,32 @@ public function riwayatAdmin()
                 ->first()?->children ?? []
         ]);
     }
-public function persetujuan(Request $request)
-{
-    if (auth()->user()->role !== 'admin') abort(403);
 
-    $query = RequestAkses::with([
-        'user:id,name,bagian',
-        'arsip:id,judul,nomor,bagian'
-    ]);
+    public function persetujuan()
+    {
+        if (auth()->user()->role !== 'admin') abort(403);
 
-    // 🔍 SEARCH
-    if ($request->search) {
-    $query->whereHas('arsip', function ($q) use ($request) {
-        $q->where('judul', 'like', $request->search . '%');
-    });
-}
+        $data = RequestAkses::with([
+            'user:id,name,bagian',
+            'arsip:id,judul,nomor,bagian'
+        ])
+            ->latest()
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'status' => $item->status,
+                    'created_at' => $item->created_at->format('d M Y'),
+                    'user' => $item->user,
+                    'arsip' => $item->arsip
+                ];
+            });
 
-
-    // 🎯 FILTER STATUS
-    if ($request->status) {
-        $query->where('status', $request->status);
+        return Inertia::render('admin/PersetujuanAkses', [
+            'requests' => $data
+        ]);
     }
 
-    // ⚡ PRIORITAS: pending di atas
-    $query->orderByRaw("status = 'pending' DESC")
-          ->latest();
-
-    // 🚀 PAGINATION (INI KUNCI NYA)
-    $data = $query->paginate(10)->withQueryString();
-
-    // format data
-    $data->getCollection()->transform(function ($item) {
-        return [
-            'id' => $item->id,
-            'status' => $item->status,
-            'created_at' => $item->created_at->format('d M Y'),
-            'user' => $item->user,
-            'arsip' => $item->arsip
-        ];
-    });
-
-    return Inertia::render('admin/PersetujuanAkses', [
-        'requests' => $data,
-        'filters' => $request->only(['search', 'status'])
-    ]);
-}
     public function updatePersetujuan(Request $request, $id)
     {
         $request->validate([
@@ -1303,6 +1266,51 @@ public function statistikAdmin()
     ->get();
 
     return Inertia::render('admin/StatistikLaporan', [
+        'tipeDokumen' => $tipeDokumen,
+        'totalArsip' => $totalArsip,
+        'totalDownload' => $totalDownload,
+        'kategoriStat' => $kategoriStat
+    ]);
+}
+
+public function statistikPimpinan()
+{
+    $totalArsip = Arsip::count();
+    $totalDownload = DownloadLog::count();
+
+    $tipeDokumen = File::selectRaw("
+        CASE
+            WHEN LOWER(nama_file) LIKE '%.jpg' 
+                OR LOWER(nama_file) LIKE '%.jpeg'
+                OR LOWER(nama_file) LIKE '%.png'
+            THEN 'Foto / Gambar'
+
+            WHEN LOWER(nama_file) LIKE '%.pdf'
+                OR LOWER(nama_file) LIKE '%.doc'
+                OR LOWER(nama_file) LIKE '%.docx'
+                OR LOWER(nama_file) LIKE '%.xls'
+                OR LOWER(nama_file) LIKE '%.xlsx'
+            THEN 'Dokumen'
+
+            WHEN LOWER(nama_file) LIKE '%.mp4'
+            THEN 'Video'
+
+            WHEN LOWER(nama_file) LIKE '%.mp3'
+            THEN 'Audio'
+
+            ELSE 'Lainnya'
+        END as nama,
+        COUNT(*) as total
+    ")
+    ->groupBy('nama')
+    ->get();
+
+    $kategoriStat = Arsip::selectRaw('kategori.nama as nama, COUNT(*) as total')
+    ->join('kategori', 'arsip.id_kategori', '=', 'kategori.id')
+    ->groupBy('kategori.nama')
+    ->get();
+
+    return Inertia::render('Pimpinan/StatistikPimpinan', [
         'tipeDokumen' => $tipeDokumen,
         'totalArsip' => $totalArsip,
         'totalDownload' => $totalDownload,
