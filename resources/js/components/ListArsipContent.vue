@@ -1,6 +1,6 @@
 <script setup>
 import { usePage, router } from '@inertiajs/vue3'
-import { ref, computed, nextTick } from 'vue'
+import { ref, computed, nextTick, watch, onMounted } from 'vue'
 import { FileText, FileImage, File } from 'lucide-vue-next'
 import TreeDropdown from '@/components/TreeDropdown.vue'
 
@@ -73,6 +73,21 @@ const getFileType = (path) => {
 
   return 'FILE'
 }
+
+const getTodayDate = () => {
+  return new Date().toISOString().slice(0, 10)
+}
+
+watch(tanggal_awal, (val) => {
+  if (val && !tanggal_akhir.value) tanggal_akhir.value = getTodayDate()
+}, { immediate: true })
+
+onMounted(() => {
+  if (filters.from_dashboard) {
+    tanggal_awal.value = ''
+    tanggal_akhir.value = ''
+  }
+})
 
 const normalizeText = (value) =>
   String(value || '').toLowerCase().trim()
