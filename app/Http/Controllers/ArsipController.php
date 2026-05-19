@@ -48,6 +48,19 @@ class ArsipController extends Controller
             'id_kategori' => 'required|exists:kategori,id',
             'status_akses' => 'required'
         ]);
+       $request->merge([
+    'nomor' => strtolower(trim($request->nomor))
+]);
+
+$request->validate([
+    'judul' => 'required|string',
+    'nomor' => 'required|string|unique:arsip,nomor',
+    'tahun' => 'required',
+    'id_kategori' => 'required|exists:kategori,id',
+    'status_akses' => 'required',
+
+    'files.*' => 'file|max:2048'
+]);
 
         $user = Auth::user();
 
@@ -111,6 +124,19 @@ class ArsipController extends Controller
             'files.*' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png,mp4|max:20480'
         ]);
 
+$request->validate([
+    'judul' => 'required|string',
+    'nomor' => [
+        'required',
+        'string',
+        Rule::unique('arsip', 'nomor')->ignore($id)
+    ],
+    'tahun' => 'required|integer',
+    'id_kategori' => 'required|exists:kategori,id',
+    'status_akses' => 'required',
+
+    'files.*' => 'file|max:2048'
+]);
         $jenisArsip = (now()->year - (int)$request->tahun >= 5)
             ? 'inaktif'
             : 'aktif';
@@ -1103,6 +1129,15 @@ public function statistikPimpinan()
                 OR LOWER(nama_file) LIKE '%.xls'
                 OR LOWER(nama_file) LIKE '%.xlsx'
             THEN 'Dokumen'
+$request->validate([
+    'judul' => 'required|string',
+    'nomor' => 'required|string|unique:arsip,nomor',
+    'tahun' => 'required',
+    'id_kategori' => 'required|exists:kategori,id',
+    'status_akses' => 'required',
+
+    'files.*' => 'file|max:2048'
+]);
 
             WHEN LOWER(nama_file) LIKE '%.mp4'
             THEN 'Video'
