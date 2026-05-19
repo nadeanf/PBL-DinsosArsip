@@ -122,6 +122,7 @@ const mappedDocuments = computed(() => {
     status_akses: item.status_akses,
     user_id: item.user_id,
     request_status: item.request_status ?? null,
+    request_user_id: item.request_user_id ?? null,
     files: item.files || [],
     format: item.files?.length
       ? getFileType(item.files[0].path_file)

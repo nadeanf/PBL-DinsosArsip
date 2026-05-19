@@ -271,6 +271,7 @@ $request->validate([
                 ->first();
 
             $item->request_status = $req?->status;
+             $item->request_user_id = $req?->user_id; 
             return $item;
         });
 
@@ -907,32 +908,51 @@ public function riwayatAdmin()
                 ->first()?->children ?? []
         ]);
     }
+public function persetujuan(Request $request)
+{
+    if (auth()->user()->role !== 'admin') abort(403);
 
-    public function persetujuan()
-    {
-        if (auth()->user()->role !== 'admin') abort(403);
+    $query = RequestAkses::with([
+        'user:id,name,bagian',
+        'arsip:id,judul,nomor,bagian'
+    ]);
 
-        $data = RequestAkses::with([
-            'user:id,name,bagian',
-            'arsip:id,judul,nomor,bagian'
-        ])
-            ->latest()
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'status' => $item->status,
-                    'created_at' => $item->created_at->format('d M Y'),
-                    'user' => $item->user,
-                    'arsip' => $item->arsip
-                ];
-            });
+    // 🔍 SEARCH
+    if ($request->search) {
+    $query->whereHas('arsip', function ($q) use ($request) {
+        $q->where('judul', 'like', $request->search . '%');
+    });
+}
 
-        return Inertia::render('admin/PersetujuanAkses', [
-            'requests' => $data
-        ]);
+
+    // 🎯 FILTER STATUS
+    if ($request->status) {
+        $query->where('status', $request->status);
     }
 
+    // ⚡ PRIORITAS: pending di atas
+    $query->orderByRaw("status = 'pending' DESC")
+          ->latest();
+
+    // 🚀 PAGINATION (INI KUNCI NYA)
+    $data = $query->paginate(10)->withQueryString();
+
+    // format data
+    $data->getCollection()->transform(function ($item) {
+        return [
+            'id' => $item->id,
+            'status' => $item->status,
+            'created_at' => $item->created_at->format('d M Y'),
+            'user' => $item->user,
+            'arsip' => $item->arsip
+        ];
+    });
+
+    return Inertia::render('admin/PersetujuanAkses', [
+        'requests' => $data,
+        'filters' => $request->only(['search', 'status'])
+    ]);
+}
     public function updatePersetujuan(Request $request, $id)
     {
         $request->validate([

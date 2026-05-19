@@ -460,18 +460,6 @@ const handleDownload = (id) => {
         <p class="text-sm">
           Arsip private di bidang lain. Minta akses untuk melihat isi dokumen.
         </p>
-
-        <!-- STATUS REQUEST -->
-        <div v-if="selectedDoc?.request_status === 'pending'"
-             class="text-yellow-500 font-semibold text-sm">
-          ⏳ Menunggu persetujuan
-        </div>
-
-        <div v-else-if="selectedDoc?.request_status === 'rejected'"
-             class="text-red-500 font-semibold text-sm">
-          ❌ Akses ditolak
-        </div>
-
       </div>
 
     </div>
