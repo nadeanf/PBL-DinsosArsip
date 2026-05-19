@@ -1315,14 +1315,13 @@ $request->validate([
         File::create([
             'arsip_id' => $arsip->id,
             'path_file' => $path,
-            'nama_file' => $namaFile, // 🔥 ini penting (bukan original lagi)
+            'nama_file' => $namaFile, 
             'tipe_file' => strtolower($ext),
             'size' => $file->getSize()
         ]);
     }
 }
 
-    // 🔥 INI YANG PENTING
     return redirect('/admin/kelola-arsip-role-admin');
 }
 
