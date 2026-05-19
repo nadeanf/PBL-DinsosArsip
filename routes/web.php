@@ -227,6 +227,20 @@ Route::delete('/kategori/{id}', function ($id) {
     return back();
 });
 
+Route::patch('/kategori/{id}', function (Illuminate\Http\Request $request, $id) {
+
+    if (auth()->user()->role !== 'admin') abort(403);
+
+    $request->validate([
+        'nama' => 'required|string',
+    ]);
+
+    $kategori = \App\Models\Kategori::findOrFail($id);
+    $kategori->update(['nama' => $request->nama]);
+
+    return back();
+});
+
     Route::get('/admin/unggah/{folder}', [ArsipController::class, 'createAdmin']);
 
     Route::get('/admin/unggah/vital', function () {
