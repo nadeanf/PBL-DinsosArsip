@@ -3,15 +3,25 @@ import AdminLayout from '@/layouts/AdminLayout.vue'
 import { ref, computed } from 'vue'
 import { Head, usePage } from '@inertiajs/vue3'
 import { Eye, Download } from 'lucide-vue-next'
-import { Pie } from 'vue-chartjs'
+import { Pie, Bar } from 'vue-chartjs'
 import {
   Chart as ChartJS,
   ArcElement,
   Tooltip,
-  Legend
+  Legend,
+  CategoryScale,
+  LinearScale,
+  BarElement
 } from 'chart.js'
 
-ChartJS.register(ArcElement, Tooltip, Legend)
+ChartJS.register(
+  ArcElement,
+  Tooltip,
+  Legend,
+  CategoryScale,
+  LinearScale,
+  BarElement
+)
 
 defineOptions({
   layout: AdminLayout
@@ -90,8 +100,30 @@ const chartOptions = {
     }
   }
 }
-</script>
 
+  const kategoriData = computed(() => page.props?.kategoriStat ?? [])
+
+const barChartData = computed(() => ({
+  labels: kategoriData.value.map(i => i.nama),
+  datasets: [
+    {
+      label: 'Jumlah Arsip',
+      data: kategoriData.value.map(i => i.total),
+      backgroundColor: '#3b82f6'
+    }
+  ]
+}))
+
+const barChartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      display: false
+    }
+  }
+}
+</script>
 <template>
 <div>
 <Head title="Statistik & Laporan - Admin" />
@@ -102,64 +134,70 @@ const chartOptions = {
     Statistik & Laporan Sistem
   </h1>
 
-  
+  <!-- CARD 1 -->
+  <div class="bg-white rounded-2xl shadow p-6 space-y-6">
 
- <!-- STATISTIK BARU (1 CARD SAJA) -->
-<div class="bg-white rounded-2xl shadow p-6 space-y-6">
-
-  <div class="flex justify-between items-center">
-
-    <div class="text-xs text-gray-500">
-      Total Arsip: {{ totalArsip }}
+    <div class="flex justify-between items-center">
+      <div class="text-xs text-gray-500">
+        Total Arsip: {{ totalArsip }}
+      </div>
     </div>
+
+    <div class="grid md:grid-cols-2 gap-6 items-center">
+
+      <div class="h-[240px]">
+        <Pie :data="chartData" :options="chartOptions" />
+      </div>
+
+      <div class="space-y-3">
+        <div class="flex justify-between bg-gray-50 p-3 rounded-xl">
+          <span>Dokumen</span>
+          <b>{{ statistik.dokumen }}</b>
+        </div>
+
+        <div class="flex justify-between bg-gray-50 p-3 rounded-xl">
+          <span>Foto</span>
+          <b>{{ statistik.foto }}</b>
+        </div>
+
+        <div class="flex justify-between bg-gray-50 p-3 rounded-xl">
+          <span>Video</span>
+          <b>{{ statistik.video }}</b>
+        </div>
+
+        <div class="flex justify-between bg-gray-50 p-3 rounded-xl">
+          <span>Audio</span>
+          <b>{{ statistik.audio }}</b>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="grid grid-cols-2 gap-4 pt-4 border-t">
+      <div class="flex justify-between bg-blue-50 p-3 rounded-xl">
+        <span>Download</span>
+        <b>{{ statistik.download }}</b>
+      </div>
+
+      <div class="flex justify-between bg-green-50 p-3 rounded-xl">
+        <span>Dilihat</span>
+        <b>{{ statistik.dilihat }}</b>
+      </div>
+    </div>
+
   </div>
 
-  <div class="grid md:grid-cols-2 gap-6 items-center">
+  <!-- CARD 2 (BAR CHART) -->
+  <div class="bg-white rounded-2xl shadow p-6 space-y-4">
+    <h2 class="font-semibold text-gray-700">
+      Statistik Per Kategori
+    </h2>
 
-    <div class="h-[240px]">
-      <Pie :data="chartData" :options="chartOptions" />
+    <div class="h-[300px]">
+      <Bar :data="barChartData" :options="barChartOptions" />
     </div>
-
-    <div class="space-y-3">
-      <div class="flex justify-between bg-gray-50 p-3 rounded-xl">
-        <span>Dokumen</span>
-        <b>{{ statistik.dokumen }}</b>
-      </div>
-
-      <div class="flex justify-between bg-gray-50 p-3 rounded-xl">
-        <span>Foto</span>
-        <b>{{ statistik.foto }}</b>
-      </div>
-
-      <div class="flex justify-between bg-gray-50 p-3 rounded-xl">
-        <span>Video</span>
-        <b>{{ statistik.video }}</b>
-      </div>
-
-      <div class="flex justify-between bg-gray-50 p-3 rounded-xl">
-        <span>Audio</span>
-        <b>{{ statistik.audio }}</b>
-      </div>
-    </div>
-
-  </div>
-
-  <div class="grid grid-cols-2 gap-4 pt-4 border-t">
-
-    <div class="flex justify-between bg-blue-50 p-3 rounded-xl">
-      <span>Download</span>
-      <b>{{ statistik.download }}</b>
-    </div>
-
-    <div class="flex justify-between bg-green-50 p-3 rounded-xl">
-      <span>Dilihat</span>
-      <b>{{ statistik.dilihat }}</b>
-    </div>
-
   </div>
 
 </div>
-
-    </div>
-  </div>
+</div>
 </template>

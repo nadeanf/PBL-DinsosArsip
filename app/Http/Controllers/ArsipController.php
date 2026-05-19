@@ -1162,10 +1162,16 @@ public function statistikAdmin()
     ->groupBy('nama')
     ->get();
 
+    $kategoriStat = Arsip::selectRaw('kategori.nama as nama, COUNT(*) as total')
+    ->join('kategori', 'arsip.id_kategori', '=', 'kategori.id')
+    ->groupBy('kategori.nama')
+    ->get();
+
     return Inertia::render('admin/StatistikLaporan', [
         'tipeDokumen' => $tipeDokumen,
         'totalArsip' => $totalArsip,
-        'totalDownload' => $totalDownload
+        'totalDownload' => $totalDownload,
+        'kategoriStat' => $kategoriStat
     ]);
 }
 
