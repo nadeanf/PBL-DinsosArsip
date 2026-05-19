@@ -8,13 +8,23 @@ import TreeDropdown from '@/components/TreeDropdown.vue'
 
 defineOptions({ layout: UserLayout })
 
-
+const fileError = ref('')
+const MAX_SIZE = 2 * 1024 * 1024 // 2MB
 const isDragging = ref(false)
-
 const setFiles = (files: File[]) => {
-  form.files = files
+  fileError.value = ''
 
-  filePreviews.value = files.map((file: any) => ({
+  const validFiles = files.filter(file => {
+    if (file.size > MAX_SIZE) {
+      fileError.value = 'Ukuran file maksimal 2 MB!'
+      return false
+    }
+    return true
+  })
+
+  form.files = validFiles
+
+  filePreviews.value = validFiles.map((file: any) => ({
     name: file.name,
     type: file.type,
     url: URL.createObjectURL(file)
@@ -133,6 +143,16 @@ const submit = () => {
             File Dokumen
           </span>
 
+          <div 
+  v-if="fileError" 
+  class="flex items-center gap-3 bg-red-100 border border-red-400 text-red-800 px-4 py-3 rounded-xl shadow-sm mt-2"
+>
+  <span class="text-xl"></span>
+  <p class="text-sm font-semibold">
+    {{ fileError }}
+  </p>
+</div>
+
           <div
             @click="triggerUpload"
             @dragover.prevent="handleDragOver"
@@ -182,6 +202,9 @@ const submit = () => {
               <p class="text-gray-400 text-xs mt-2">
                 PDF, DOC, XLS, JPG, PNG, MP3, MP4
               </p>
+              <p class="text-gray-400 text-xs mt-2">
+                (Max. 2 MB) 
+                </p>
 
             </div>
 

@@ -54,7 +54,9 @@ $request->validate([
     'nomor' => 'required|string|unique:arsip,nomor',
     'tahun' => 'required',
     'id_kategori' => 'required|exists:kategori,id',
-    'status_akses' => 'required'
+    'status_akses' => 'required',
+
+    'files.*' => 'file|max:2048'
 ]);
 
         $user = Auth::user();
@@ -142,6 +144,8 @@ $request->validate([
     'tahun' => 'required|integer',
     'id_kategori' => 'required|exists:kategori,id',
     'status_akses' => 'required',
+
+    'files.*' => 'file|max:2048'
 ]);
         $jenisArsip = (now()->year - (int)$request->tahun >= 5)
             ? 'inaktif'
@@ -1163,7 +1167,9 @@ $request->validate([
     'nomor' => 'required|string|unique:arsip,nomor',
     'tahun' => 'required',
     'id_kategori' => 'required|exists:kategori,id',
-    'status_akses' => 'required'
+    'status_akses' => 'required',
+
+    'files.*' => 'file|max:2048'
 ]);
 
     $user = Auth::user();
