@@ -945,9 +945,9 @@ public function riwayatAdmin()
         'riwayat' => $data
     ]);
 }
-  private function canAccessFull($arsip)
-{
-    $user = Auth::user();
+    private function canAccessFull($arsip)
+    {
+        $user = Auth::user();
 
     // 🔥 ADMIN & SUPERADMIN AKSES SEMUA
     if (in_array($user->role, ['admin', 'superadmin'])) {
@@ -955,6 +955,7 @@ public function riwayatAdmin()
     }
 
     // publik bebas
+        if ($user->role === 'superadmin') return true;
     if ($arsip->status_akses === 'publik') return true;
 
     // pemilik arsip
@@ -1323,90 +1324,6 @@ $request->validate([
 
     // 🔥 INI YANG PENTING
     return redirect('/admin/kelola-arsip-role-admin');
-}
-
-public function editStorage()
-{
-    $total = disk_total_space("/");
-    $free = disk_free_space("/");
-    $used = $total - $free;
-
-    $totalGB = round($total / 1073741824, 2);
-    $usedGB = round($used / 1073741824, 2);
-
-    $percentage = round(($usedGB / $totalGB) * 100);
-
-    return Inertia::render('SuperAdmin/EditStorageLimit', [
-        'storageData' => [
-            'terpakai' => $usedGB . ' GB',
-            'limitSaatIni' => $totalGB . ' GB',
-            'penggunaan' => $percentage . '%',
-        ]
-    ]);
-}
-public function pengaturanSuperAdmin()
-{
-    $total = disk_total_space("/");
-    $free = disk_free_space("/");
-    $used = $total - $free;
-
-    $totalGB = round($total / 1073741824, 2);
-    $usedGB = round($used / 1073741824, 2);
-
-    $totalUsers = User::count();
-    $totalDokumen = Arsip::count();
-
-    $storageUsers = User::select('id', 'name', 'email', 'role')
-    ->latest()
-    ->paginate(7)
-    ->through(function ($user) {
-
-        // dummy sementara
-        $used = rand(1, 5) . ' GB';
-        $limit = '10 GB';
-
-        return [
-            'id' => $user->id,
-            'nama' => $user->name,
-            'email' => $user->email,
-            'role' => ucfirst($user->role),
-            'terpakai' => $used,
-            'limit' => $limit,
-        ];
-    });
-    return Inertia::render('SuperAdmin/Pengaturan', [
-        'stats' => [
-            'totalUsers' => $totalUsers,
-            'totalDokumen' => $totalDokumen,
-            'storageTerpakai' => $usedGB . ' GB',
-            'storageTotal' => $totalGB . ' GB',
-        ],
-
-        'storageUsers' => $storageUsers,
-    ]);
-}
-public function backupDatabase()
-{
-    $filename = 'backup_' . now()->format('d-m-Y_H-i-s') . '.sql';
-
-    $path = storage_path('app/backups/' . $filename);
-
-    // pastikan folder backups ada
-    if (!file_exists(storage_path('app/backups'))) {
-        mkdir(storage_path('app/backups'), 0777, true);
-    }
-
-    $command = sprintf(
-        'mysqldump --user=%s --password=%s %s > %s',
-        env('DB_USERNAME'),
-        env('DB_PASSWORD'),
-        env('DB_DATABASE'),
-        $path
-    );
-
-    system($command);
-
-    return response()->download($path)->deleteFileAfterSend(true);
 }
 
 public function editStorage()
