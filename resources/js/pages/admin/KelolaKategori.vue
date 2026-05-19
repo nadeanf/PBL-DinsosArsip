@@ -125,7 +125,7 @@ const renameKategori = () => {
       </button>
     </div>
 
-    <!-- ================= LIST ================= -->
+    <!-- LIST -->
     <div class="space-y-2">
       <div
         v-for="item in kategoriList"
