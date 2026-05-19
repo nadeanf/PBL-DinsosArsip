@@ -1104,10 +1104,16 @@ public function statistikAdmin()
     ->groupBy('nama')
     ->get();
 
+    $kategoriStat = Arsip::selectRaw('kategori.nama as nama, COUNT(*) as total')
+    ->join('kategori', 'arsip.id_kategori', '=', 'kategori.id')
+    ->groupBy('kategori.nama')
+    ->get();
+
     return Inertia::render('admin/StatistikLaporan', [
         'tipeDokumen' => $tipeDokumen,
         'totalArsip' => $totalArsip,
-        'totalDownload' => $totalDownload
+        'totalDownload' => $totalDownload,
+        'kategoriStat' => $kategoriStat
     ]);
 }
 
@@ -1129,15 +1135,6 @@ public function statistikPimpinan()
                 OR LOWER(nama_file) LIKE '%.xls'
                 OR LOWER(nama_file) LIKE '%.xlsx'
             THEN 'Dokumen'
-$request->validate([
-    'judul' => 'required|string',
-    'nomor' => 'required|string|unique:arsip,nomor',
-    'tahun' => 'required',
-    'id_kategori' => 'required|exists:kategori,id',
-    'status_akses' => 'required',
-
-    'files.*' => 'file|max:2048'
-]);
 
             WHEN LOWER(nama_file) LIKE '%.mp4'
             THEN 'Video'
@@ -1152,10 +1149,93 @@ $request->validate([
     ->groupBy('nama')
     ->get();
 
+    $kategoriStat = Arsip::selectRaw('kategori.nama as nama, COUNT(*) as total')
+    ->join('kategori', 'arsip.id_kategori', '=', 'kategori.id')
+    ->groupBy('kategori.nama')
+    ->get();
+
     return Inertia::render('Pimpinan/StatistikPimpinan', [
         'tipeDokumen' => $tipeDokumen,
         'totalArsip' => $totalArsip,
-        'totalDownload' => $totalDownload
+        'totalDownload' => $totalDownload,
+        'kategoriStat' => $kategoriStat
     ]);
 }
+
+public function storeAdmin(Request $request)
+{
+    // copy isi store() kamu ke sini
+
+    $request->merge([
+    'nomor' => strtolower(trim($request->nomor))
+]);
+
+$request->validate([
+    'judul' => 'required|string',
+    'nomor' => 'required|string|unique:arsip,nomor',
+    'tahun' => 'required',
+    'id_kategori' => 'required|exists:kategori,id',
+    'status_akses' => 'required',
+
+    'files.*' => 'file|max:2048'
+]);
+
+    $user = Auth::user();
+
+    if ($request->folder === 'vital') {
+        $jenisArsip = 'vital';
+    } else {
+        $currentYear = now()->year;
+        $jenisArsip = ($currentYear - (int)$request->tahun >= 3)
+            ? 'inaktif'
+            : 'aktif';
+    }
+
+    $arsip = Arsip::create([
+        'user_id' => $user->id,
+        'judul' => $request->judul,
+        'nomor' => $request->nomor,
+        'tahun' => $request->tahun,
+        'id_kategori' => $request->id_kategori,
+        'jenis_arsip' => $jenisArsip,
+        'status_akses' => $request->status_akses,
+        'bagian' => $request->status_akses === 'private'
+        ? $request->bagian
+        : null,
+        'lokasi' => $request->lokasi,
+        'deskripsi' => $request->deskripsi,
+        'status_approval' => 'pending'
+    ]);
+
+    if ($request->hasFile('files')) {
+
+    $judul = Str::slug($request->judul);
+    $kategori = Str::slug(Kategori::find($request->id_kategori)?->nama ?? 'umum');
+    $tanggal = Carbon::now()->format('Y-m-d');
+
+    foreach ($request->file('files') as $file) {
+
+        $ext = $file->getClientOriginalExtension();
+
+        $namaFile = "{$judul}-{$kategori}-{$tanggal}.{$ext}";
+        $namaFile = uniqid() . '-' . $namaFile;
+
+        $folder = 'arsip/' . $kategori;
+
+        $path = $file->storeAs($folder, $namaFile, 'public');
+
+        File::create([
+            'arsip_id' => $arsip->id,
+            'path_file' => $path,
+            'nama_file' => $namaFile, // 🔥 ini penting (bukan original lagi)
+            'tipe_file' => strtolower($ext),
+            'size' => $file->getSize()
+        ]);
+    }
+}
+
+    // 🔥 INI YANG PENTING
+    return redirect('/admin/kelola-arsip-role-admin');
+}
+
 }
