@@ -64,21 +64,38 @@ const fileInput = ref<HTMLInputElement | null>(null)
 const filePreviews = ref<any[]>([])
 
 const triggerUpload = () => fileInput.value?.click()
-const MAX_SIZE =  2 * 1024 * 1024 // 2MB
+const getLimit = (ext: string) => {
+  const dokumen = ['pdf','doc','docx','xls','xlsx','ppt','pptx','txt']
+  const audio = ['mp3','wav','ogg','flac','aac','wma','m4a','opus','alac','aiff','dsd','pcm']
+  const video = ['mp4','avi','mkv','mov','wmv','flv','mpeg']
+
+  if (dokumen.includes(ext)) return 2
+  if (audio.includes(ext)) return 25
+  if (video.includes(ext)) return 100
+
+  return 2
+}
+
 const setFiles = (files: File[]) => {
   fileError.value = ''
+  const validFiles: File[] = []
 
-  const validFiles = files.filter(file => {
-    if (file.size > MAX_SIZE) {
-      fileError.value = 'Ukuran file maksimal 2 MB!'
-      return false
+  for (const file of files) {
+    const ext = file.name.split('.').pop()?.toLowerCase() || ''
+    const sizeMB = file.size / 1024 / 1024
+    const limit = getLimit(ext)
+
+    if (sizeMB > limit) {
+      fileError.value = `${file.name} melebihi batas ${limit}MB`
+      continue
     }
-    return true
-  })
+
+    validFiles.push(file)
+  }
 
   form.files = validFiles
 
-  filePreviews.value = validFiles.map((file: any) => ({
+  filePreviews.value = validFiles.map(file => ({
     name: file.name,
     type: file.type,
     url: URL.createObjectURL(file)
@@ -219,7 +236,7 @@ const submit = () => {
               </p>
 
               <p class="text-gray-400 text-xs mt-2">
-                (Max. 2 MB)
+                (Max: Dokumen 2 MB | Audio 25 MB | Video 100 MB)
               </p>
             </div>
 

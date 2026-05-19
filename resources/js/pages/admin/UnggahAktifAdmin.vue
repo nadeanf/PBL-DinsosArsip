@@ -28,8 +28,6 @@ const form = useForm({
 })
 
 const fileError = ref('')
-const MAX_SIZE = 2 * 1024 * 1024 // 2MB
-
 /* STATE */
 const isPrivate = computed(() => form.status_akses === 'private')
 watch(() => form.status_akses, (val) => {
@@ -70,13 +68,32 @@ const triggerUpload = () => fileInput.value?.click()
 const setFiles = (files: File[]) => {
   fileError.value = ''
 
-  const validFiles = files.filter(file => {
-    if (file.size > MAX_SIZE) {
-      fileError.value = 'Ukuran file maksimal 2 MB!'
-      return false
+  const validFiles: File[] = []
+
+  const getLimit = (ext: string) => {
+    const dokumen = ['pdf','doc','docx','xls','xlsx','ppt','pptx','txt']
+    const audio = ['mp3','wav','ogg','flac','aac','wma','m4a','opus','alac','aiff','dsd','pcm']
+    const video = ['mp4','avi','mkv','mov','wmv','flv','mpeg']
+
+    if (dokumen.includes(ext)) return 2 // MB
+    if (audio.includes(ext)) return 25 // MB
+    if (video.includes(ext)) return 100 // MB
+
+    return 2 // default
+  }
+
+  for (const file of files) {
+    const ext = file.name.split('.').pop()?.toLowerCase() || ''
+    const sizeMB = file.size / 1024 / 1024
+    const limit = getLimit(ext)
+
+    if (sizeMB > limit) {
+      fileError.value = `${file.name} melebihi batas ${limit}MB`
+      continue
     }
-    return true
-  })
+
+    validFiles.push(file)
+  }
 
   form.files = validFiles
 
@@ -219,10 +236,9 @@ const submit = () => {
 
               <p class="text-gray-400 text-xs mt-2">
                 PDF, DOC, XLS, JPG, PNG, MP3, MP4
-              </p>
-              <p class="text-gray-400 text-xs mt-2">
-                (Max. 2 MB) 
-                </p>
+              </p><p class="text-gray-400 text-xs mt-2">
+  (Max : Dokumen 2 MB | Audio 25 MB | Video 100 MB)
+</p>
             </div>
 
           </div>
