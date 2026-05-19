@@ -17,6 +17,9 @@ use App\Models\RiwayatAkses;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use Symfony\Component\Process\Process;
+use Symfony\Component\Process\Exception\ProcessFailedException;
+use Illuminate\Support\Facades\Response;
 
 class ArsipController extends Controller
 {
@@ -84,6 +87,13 @@ $request->validate([
             'lokasi' => $request->lokasi,
             'deskripsi' => $request->deskripsi,
             'status_approval' => 'pending'
+        ]);
+
+        // Track arsip creation in RiwayatAkses
+        RiwayatAkses::create([
+            'user_id' => $user->id,
+            'arsip_id' => $arsip->id,
+            'aksi' => 'buat'
         ]);
 
        if ($request->hasFile('files')) {
@@ -689,6 +699,31 @@ $request->validate([
     {
         $arsip = Arsip::with(['kategori', 'user', 'files'])->findOrFail($id);
 
+        // Track arsip view in RiwayatAkses
+        $userId = auth()->id();
+        $existingView = RiwayatAkses::where('user_id', $userId)
+            ->where('arsip_id', $arsip->id)
+            ->first();
+
+        if ($existingView) {
+            // Jika sudah ada riwayat, dan aksi terakhir bukan "buat", update ke "lihat"
+            if ($existingView->aksi !== 'buat') {
+                $existingView->update([
+                    'aksi' => 'lihat',
+                    'updated_at' => now()
+                ]);
+            } else {
+                // Jika aksi terakhir "buat", update waktu updated_at saja
+                $existingView->touch();
+            }
+        } else {
+            RiwayatAkses::create([
+                'user_id' => $userId,
+                'arsip_id' => $arsip->id,
+                'aksi' => 'lihat'
+            ]);
+        }
+
         return Inertia::render('DetailArsip', [
             'arsip' => $arsip
         ]);
@@ -725,6 +760,7 @@ $request->validate([
             abort(403, 'Tidak punya akses');
         }
 
+        // TRACKING HARUS DILAKUKAN PERTAMA SEBELUM APAPUN
         $userId = auth()->id();
 
         $existingView = RiwayatAkses::where('user_id', $userId)
@@ -744,16 +780,18 @@ $request->validate([
             ]);
         }
 
+        // DOWNLOAD LOG
+        DownloadLog::create([
+            'user_id' => $userId,
+            'arsip_id' => $arsip->id
+        ]);
+
+        // KEMUDIAN CARI FILE
         $file = $arsip->files->first();
 
         if (!$file || !Storage::disk('public')->exists($file->path_file)) {
             abort(404, 'File tidak ditemukan');
         }
-
-        DownloadLog::create([
-            'user_id' => Auth::id(),
-            'arsip_id' => $arsip->id
-        ]);
 
         return response()->download(
             storage_path('app/public/' . $file->path_file),
@@ -871,6 +909,42 @@ public function riwayatAdmin()
         ]);
     }
 
+    public function riwayatSuperAdmin()
+{
+    if (auth()->user()->role !== 'superadmin') {
+        abort(403);
+    }
+
+    $data = RiwayatAkses::with('arsip.files', 'arsip.kategori', 'arsip.user', 'user')
+
+        // FILTER HANYA SUPERADMIN
+        ->whereHas('user', function ($q) {
+            $q->where('role', 'superadmin');
+        })
+
+        ->latest('updated_at')
+        ->get()
+
+        ->map(function ($item) {
+            return [
+                'id' => $item->arsip->id ?? null,
+                'nama_user' => $item->user->name ?? '-',
+                'role' => $item->user->role ?? '-',
+                'title' => $item->arsip->judul ?? '-',
+                'nomor' => $item->arsip->nomor ?? '-',
+                'aksi' => $item->aksi,
+                'kategori' => $item->arsip->kategori->nama ?? '-',
+                'tahun' => $item->arsip->tahun ?? '-',
+                'status' => $item->arsip->status_akses ?? '-',
+                'files' => $item->arsip->files ?? [],
+                'waktu' => $item->updated_at,
+            ];
+        });
+
+    return Inertia::render('SuperAdmin/RiwayatSuperAdmin', [
+        'riwayat' => $data
+    ]);
+}
   private function canAccessFull($arsip)
 {
     $user = Auth::user();
@@ -1249,5 +1323,173 @@ $request->validate([
 
     // 🔥 INI YANG PENTING
     return redirect('/admin/kelola-arsip-role-admin');
+}
+
+public function editStorage()
+{
+    $total = disk_total_space("/");
+    $free = disk_free_space("/");
+    $used = $total - $free;
+
+    $totalGB = round($total / 1073741824, 2);
+    $usedGB = round($used / 1073741824, 2);
+
+    $percentage = round(($usedGB / $totalGB) * 100);
+
+    return Inertia::render('SuperAdmin/EditStorageLimit', [
+        'storageData' => [
+            'terpakai' => $usedGB . ' GB',
+            'limitSaatIni' => $totalGB . ' GB',
+            'penggunaan' => $percentage . '%',
+        ]
+    ]);
+}
+public function pengaturanSuperAdmin()
+{
+    $total = disk_total_space("/");
+    $free = disk_free_space("/");
+    $used = $total - $free;
+
+    $totalGB = round($total / 1073741824, 2);
+    $usedGB = round($used / 1073741824, 2);
+
+    $totalUsers = User::count();
+    $totalDokumen = Arsip::count();
+
+    $storageUsers = User::select('id', 'name', 'email', 'role')
+    ->latest()
+    ->paginate(7)
+    ->through(function ($user) {
+
+        // dummy sementara
+        $used = rand(1, 5) . ' GB';
+        $limit = '10 GB';
+
+        return [
+            'id' => $user->id,
+            'nama' => $user->name,
+            'email' => $user->email,
+            'role' => ucfirst($user->role),
+            'terpakai' => $used,
+            'limit' => $limit,
+        ];
+    });
+    return Inertia::render('SuperAdmin/Pengaturan', [
+        'stats' => [
+            'totalUsers' => $totalUsers,
+            'totalDokumen' => $totalDokumen,
+            'storageTerpakai' => $usedGB . ' GB',
+            'storageTotal' => $totalGB . ' GB',
+        ],
+
+        'storageUsers' => $storageUsers,
+    ]);
+}
+public function backupDatabase()
+{
+    $filename = 'backup_' . now()->format('d-m-Y_H-i-s') . '.sql';
+
+    $path = storage_path('app/backups/' . $filename);
+
+    // pastikan folder backups ada
+    if (!file_exists(storage_path('app/backups'))) {
+        mkdir(storage_path('app/backups'), 0777, true);
+    }
+
+    $command = sprintf(
+        'mysqldump --user=%s --password=%s %s > %s',
+        env('DB_USERNAME'),
+        env('DB_PASSWORD'),
+        env('DB_DATABASE'),
+        $path
+    );
+
+    system($command);
+
+    return response()->download($path)->deleteFileAfterSend(true);
+}
+
+public function editStorage()
+{
+    $total = disk_total_space("/");
+    $free = disk_free_space("/");
+    $used = $total - $free;
+
+    $totalGB = round($total / 1073741824, 2);
+    $usedGB = round($used / 1073741824, 2);
+
+    $percentage = round(($usedGB / $totalGB) * 100);
+
+    return Inertia::render('SuperAdmin/EditStorageLimit', [
+        'storageData' => [
+            'terpakai' => $usedGB . ' GB',
+            'limitSaatIni' => $totalGB . ' GB',
+            'penggunaan' => $percentage . '%',
+        ]
+    ]);
+}
+public function pengaturanSuperAdmin()
+{
+    $total = disk_total_space("/");
+    $free = disk_free_space("/");
+    $used = $total - $free;
+
+    $totalGB = round($total / 1073741824, 2);
+    $usedGB = round($used / 1073741824, 2);
+
+    $totalUsers = User::count();
+    $totalDokumen = Arsip::count();
+
+    $storageUsers = User::select('id', 'name', 'email', 'role')
+    ->latest()
+    ->paginate(7)
+    ->through(function ($user) {
+
+        // dummy sementara
+        $used = rand(1, 5) . ' GB';
+        $limit = '10 GB';
+
+        return [
+            'id' => $user->id,
+            'nama' => $user->name,
+            'email' => $user->email,
+            'role' => ucfirst($user->role),
+            'terpakai' => $used,
+            'limit' => $limit,
+        ];
+    });
+    return Inertia::render('SuperAdmin/Pengaturan', [
+        'stats' => [
+            'totalUsers' => $totalUsers,
+            'totalDokumen' => $totalDokumen,
+            'storageTerpakai' => $usedGB . ' GB',
+            'storageTotal' => $totalGB . ' GB',
+        ],
+
+        'storageUsers' => $storageUsers,
+    ]);
+}
+public function backupDatabase()
+{
+    $filename = 'backup_' . now()->format('d-m-Y_H-i-s') . '.sql';
+
+    $path = storage_path('app/backups/' . $filename);
+
+    // pastikan folder backups ada
+    if (!file_exists(storage_path('app/backups'))) {
+        mkdir(storage_path('app/backups'), 0777, true);
+    }
+
+    $command = sprintf(
+        'mysqldump --user=%s --password=%s %s > %s',
+        env('DB_USERNAME'),
+        env('DB_PASSWORD'),
+        env('DB_DATABASE'),
+        $path
+    );
+
+    system($command);
+
+    return response()->download($path)->deleteFileAfterSend(true);
 }
 }

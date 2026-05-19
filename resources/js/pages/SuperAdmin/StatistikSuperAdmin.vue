@@ -73,9 +73,14 @@ const pieData = computed(() => ({
 
 const pieOptions = {
   responsive: true,
+  cutout: '60%',
   plugins: {
     legend: {
-      position: 'bottom'
+      position: 'bottom',
+      labels: {
+        boxWidth: 15,
+        padding: 20
+      }
     }
   }
 }
@@ -86,158 +91,126 @@ const pieOptions = {
 
 <div class="p-6 bg-[#f3f4f6] min-h-screen space-y-6">
 
-  <h1 class="text-2xl font-bold text-gray-800">
+
+ <!-- CARD STATISTIK -->
+<div class="bg-white rounded-[2rem] p-6 shadow-md border border-gray-200">
+
+  <h2 class="text-xl font-extrabold text-gray-800 mb-5">
     Statistik & Laporan Sistem
-  </h1>
+  </h2>
 
-  <div class="bg-[#2f6f7e] p-4 rounded-xl flex flex-wrap gap-3 items-center shadow-md">
-
-    <div class="flex items-center bg-white px-3 py-2 rounded-lg text-sm flex-1">
-      <span class="text-gray-400 mr-2">🔍</span>
-      <input v-model="search" placeholder="Cari dokumen, nomor surat..." class="outline-none w-full"/>
-    </div>
-
-    <select v-model="kategori" class="bg-white px-3 py-2 rounded-lg text-sm">
-      <option value="">Semua Kategori</option>
-      <option>Dokumen</option>
-      <option>Foto</option>
-      <option>Video</option>
-    </select>
-
-    <input type="date" v-model="tanggal_awal" class="bg-white px-3 py-2 rounded-lg text-sm"/>
-    <input type="date" v-model="tanggal_akhir" class="bg-white px-3 py-2 rounded-lg text-sm"/>
-
-    <button class="bg-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-100 transition">
-      Cari
-    </button>
-  </div>
-
-  <!-- STATISTIK UTAMA -->
-  <div class="grid md:grid-cols-3 gap-4">
+  <div class="grid md:grid-cols-2 gap-4 items-center">
 
     <!-- CHART -->
-  <div class="bg-[#6f98a8] p-4 rounded-xl flex justify-center items-center">
-    <div class="w-72 bg-white p-4 rounded-xl">
-      <Pie :data="pieData" :options="pieOptions" />
-    </div>
-  </div>
+    <div class="flex flex-col items-center">
 
-    <!-- TOTAL -->
-    <div class="bg-[#6f98a8] p-4 rounded-xl space-y-3">
-      <div class="bg-white rounded px-3 py-2 text-sm">Dokumen : {{ statistik?.dokumen }}</div>
-      <div class="bg-white rounded px-3 py-2 text-sm">Foto : {{ statistik.foto }}</div>
-      <div class="bg-white rounded px-3 py-2 text-sm">Video : {{ statistik.video }}</div>
-      <div class="bg-white rounded px-3 py-2 text-sm">Audio : {{ statistik.audio }}</div>
-    </div>
-
-    <!-- PROGRESS -->
-    <div class="space-y-3 flex flex-col justify-between h-full">
-
-      <!-- DIUNDUH -->
-      <div class="bg-[#6f98a8] p-4 rounded-xl flex items-center justify-between min-h-[110px]">
-
-        <div class="flex flex-col justify-center">
-          <div class="text-xs bg-white px-2 py-1 rounded w-fit mb-2 font-semibold text-gray-700">
-            {{ statistik.download }}
-          </div>
-          <p class="text-white text-sm font-medium">Dokumen diunduh</p>
-        </div>
-
-        <!-- ICON -->
-        <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-md">
-          <Download class="w-5 h-5 text-[#2f4fa2]" />
-        </div>
-
+      <div class="self-start text-xs text-gray-500 mb-3">
+        Total Arsip:
+        <span class="font-bold text-gray-800">
+          {{
+            statistik.dokumen +
+            statistik.foto +
+            statistik.video +
+            statistik.audio
+          }}
+        </span>
       </div>
 
-      <!-- DILIHAT -->
-      <div class="bg-[#6f98a8] p-4 rounded-xl flex items-center justify-between min-h-[110px]">
-
-        <div class="flex flex-col justify-center">
-          <div class="text-xs bg-white px-2 py-1 rounded w-fit mb-2 font-semibold text-gray-700">
-            {{ statistik.dilihat }}
-          </div>
-          <p class="text-white text-sm font-medium">Dokumen dilihat</p>
-        </div>
-
-        <!-- ICON -->
-        <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-md">
-          <Eye class="w-5 h-5 text-[#2f4fa2]" />
-          </div>
-        </div>
-      </div>
-    </div>
-
-  <!-- AKSES CEPAT -->
-  <div>
-    <h2 class="bg-[#2f4fa2] text-white px-4 py-1 rounded-md w-fit text-sm mb-3">
-      Akses Cepat
-    </h2>
-
-    <div class="grid md:grid-cols-3 gap-4">
-
-      <div v-for="(item, i) in aksesCepat" :key="i" class="bg-[#6f98a8] p-4 rounded-xl space-y-2">
-        <div class="w-10 h-10 bg-gray-200 rounded"></div>
-        <div class="bg-white text-xs px-2 py-1 rounded w-fit">{{ item.nama }}</div>
-        <div class="h-2 bg-gray-300 rounded w-24"></div>
+      <div class="w-[220px]">
+        <Pie :data="pieData" :options="pieOptions" />
       </div>
 
     </div>
-  </div>
 
-  <!-- PENGGUNA TERAKTIF -->
-  <div>
-    <h2 class="bg-[#2f4fa2] text-white px-4 py-1 rounded-md w-fit text-sm mb-3">
-      Pengguna Teraktif
-    </h2>
+    <!-- LIST DATA -->
+    <div class="space-y-3">
 
-    <div class="bg-[#6f98a8] rounded-xl p-4 overflow-x-auto">
+      <div class="bg-gray-100 rounded-xl px-4 py-3 flex justify-between items-center">
+        <span class="text-sm text-gray-700 font-medium">
+          Dokumen
+        </span>
 
-      <table class="w-full text-xs text-white">
-        <thead>
-          <tr class="text-left border-b border-white/30">
-            <th class="py-2">Pengguna</th>
-            <th>Role</th>
-            <th>Status</th>
-            <th>Bergabung</th>
-            <th>Action</th>
-            <th>Dokumen</th>
-          </tr>
-        </thead>
+        <span class="text-lg font-black text-gray-900">
+          {{ statistik.dokumen }}
+        </span>
+      </div>
 
-        <tbody>
-          <tr v-for="(user, i) in users" :key="i" class="border-b border-white/20">
-            <td class="py-2">{{ user.nama }}</td>
-            <td>{{ user.role }}</td>
-            <td>{{ user.status }}</td>
-            <td>{{ user.tanggal }}</td>
+      <div class="bg-gray-100 rounded-xl px-4 py-3 flex justify-between items-center">
+        <span class="text-sm text-gray-700 font-medium">
+          Foto
+        </span>
 
-            <!-- ICON -->
-            <td>
-              <div class="flex gap-2">
-                <button 
-                  @click.stop="handleDelete(user)"
-                  class="p-1.5 rounded-lg hover:bg-red-100 hover:scale-110 transition"
-                >
-                  <Trash2 class="w-4 h-4 text-red-500" />
-                </button>
+        <span class="text-lg font-black text-gray-900">
+          {{ statistik.foto }}
+        </span>
+      </div>
 
-                <button 
-                  @click.stop="handleView(user)"
-                  class="p-1.5 rounded-lg hover:bg-blue-100 hover:scale-110 transition"
-                >
-                  <Eye class="w-4 h-4 text-blue-500" />
-                </button>
-              </div>
-            </td>
+      <div class="bg-gray-100 rounded-xl px-4 py-3 flex justify-between items-center">
+        <span class="text-sm text-gray-700 font-medium">
+          Video
+        </span>
 
-            <td>{{ user.dokumen }}</td>
-          </tr>
-        </tbody>
-      </table>
+        <span class="text-lg font-black text-gray-900">
+          {{ statistik.video }}
+        </span>
+      </div>
+
+      <div class="bg-gray-100 rounded-xl px-4 py-3 flex justify-between items-center">
+        <span class="text-sm text-gray-700 font-medium">
+          Audio
+        </span>
+
+        <span class="text-lg font-black text-gray-900">
+          {{ statistik.audio }}
+        </span>
+      </div>
 
     </div>
+
   </div>
 
+  <!-- GARIS -->
+  <div class="border-t border-gray-200 my-5"></div>
+
+  <!-- BOTTOM -->
+  <div class="grid md:grid-cols-2 gap-4">
+
+    <!-- DOWNLOAD -->
+    <div class="bg-[#eef3fb] rounded-xl px-4 py-3 flex justify-between items-center">
+
+      <div class="flex items-center gap-2">
+        <Download class="w-4 h-4 text-[#2f4fa2]" />
+
+        <span class="text-sm text-gray-700 font-medium">
+          Download
+        </span>
+      </div>
+
+      <span class="text-xl font-black text-gray-900">
+        {{ statistik.download }}
+      </span>
+
+    </div>
+
+    <!-- DILIHAT -->
+    <div class="bg-[#eef7ef] rounded-xl px-4 py-3 flex justify-between items-center">
+
+      <div class="flex items-center gap-2">
+        <Eye class="w-4 h-4 text-green-700" />
+
+        <span class="text-sm text-gray-700 font-medium">
+          Dilihat
+        </span>
+      </div>
+
+      <span class="text-xl font-black text-gray-900">
+        {{ statistik.dilihat }}
+      </span>
+
+    </div>
+
+  </div>
+
+</div>
 </div>
 </template>

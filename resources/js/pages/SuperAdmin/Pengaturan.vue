@@ -5,14 +5,22 @@ import { Settings, Database, Save, FileText, X } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 const breadcrumbs = [
-    { title: 'Pengaturan', href: '/super-admin/pengaturan' },
+    { title: '', href: '/super-admin/pengaturan' },
 ];
 
-const storageUsers = [
-    { id: 1, nama: 'Ahmad Yani', email: 'ahmad.yani@pemerintah.go.id', role: 'User', terpakai: 'xx GB', limit: 'xx GB' },
-    { id: 2, nama: 'Ahmad Yani', email: 'ahmad.yani@pemerintah.go.id', role: 'User', terpakai: 'xx GB', limit: 'xx GB' },
-    { id: 3, nama: 'Ahmad Yani', email: 'ahmad.yani@pemerintah.go.id', role: 'User', terpakai: 'xx GB', limit: 'xx GB' },
-];
+defineProps<{
+    stats: {
+        totalUsers: number
+        totalDokumen: number
+        storageTerpakai: string
+        storageTotal: string
+    }
+    storageUsers: {
+    data: any[],
+    links: any[]
+}
+}>()
+
 
 
 const fileExtensions = ['PDF', 'Images (PNG, JPG, JPEG)', 'DOC', 'Excel', 'ZIP'];
@@ -28,7 +36,6 @@ const toggleFile = (ext: string) => {
 </script>
 
 <template>
-    <Head title="Pengaturan" />
 
     <AppSidebarSuperAdminLayout :breadcrumbs="breadcrumbs">
         <div class="max-w-6xl mx-auto space-y-6 pb-10 px-4">
@@ -37,9 +44,9 @@ const toggleFile = (ext: string) => {
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-5 text-white">
                 <div v-for="stat in [
-                    { label: 'Total Pengguna', val: 'xx' },
-                    { label: 'Total Dokumen', val: 'xx' },
-                    { label: 'Storage Terpakai', val: 'xx GB' }
+                   { label: 'Total Pengguna', val: stats.totalUsers },
+                   { label: 'Total Dokumen', val: stats.totalDokumen },
+                   { label: 'Storage Terpakai', val: stats.storageTerpakai }
                 ]" :key="stat.label" class="bg-[#759fb1] p-4 rounded-2xl relative shadow-sm border border-white/10">
                     <div class="bg-white text-gray-800 px-3 py-0.5 rounded-full w-fit font-bold mb-2 text-[10px] shadow-inner">{{ stat.val }}</div>
                     <p class="font-bold text-xs">{{ stat.label }}</p>
@@ -112,7 +119,7 @@ const toggleFile = (ext: string) => {
                             </tr>
                         </thead>
                         <tbody class="bg-[#759fb1] text-white">
-                            <tr v-for="user in storageUsers" :key="user.id" class="border-t border-white/20 hover:bg-white/10 transition cursor-default">
+                            <tr v-for="user in storageUsers.data" :key="user.id" class="border-t border-white/20 hover:bg-white/10 transition cursor-default">
                                 <td class="px-6 py-3.5">
                                     <div class="font-bold text-sm leading-tight">{{ user.nama }}</div>
                                     <div class="text-[10px] text-white/70 italic mt-0.5">{{ user.email }}</div>
@@ -135,30 +142,76 @@ const toggleFile = (ext: string) => {
                     </table>
                 </div>
 
+                <div class="flex justify-center items-center gap-2 pt-4 flex-wrap">
+
+    <template
+        v-for="link in storageUsers.links"
+        :key="link.label"
+    >
+
+        <button
+            v-if="link.url"
+            v-html="link.label"
+            @click="$inertia.visit(link.url)"
+            class="px-3 py-2 rounded-xl text-xs font-bold border transition"
+            :class="[
+                link.active
+                    ? 'bg-[#2f4fa2] text-white border-[#2f4fa2]'
+                    : 'bg-white text-gray-700 border-gray-200 hover:bg-[#2f4fa2] hover:text-white'
+            ]"
+        />
+
+        <span
+            v-else
+            v-html="link.label"
+            class="px-3 py-2 rounded-xl text-xs font-bold text-gray-400 border border-gray-200 bg-gray-100 cursor-not-allowed"
+        />
+
+    </template>
+
+</div>
+
                 <div class="flex justify-between items-center px-1">
                     <div class="bg-[#2f4fa2] text-white px-5 py-2 rounded-xl text-[10px] font-bold shadow-sm uppercase tracking-wide">
                         Total Storage Terpakai
                     </div>
                     <div class="bg-[#2f4fa2] text-white px-5 py-2 rounded-xl text-[10px] font-bold shadow-sm font-mono">
-                        xx GB/ xx GB
+                        {{ stats.storageTerpakai }}/ {{ stats.storageTotal }}
                     </div>
                 </div>
             </div>
 
-            <div class="bg-[#759fb1] p-4 rounded-[2rem] shadow-lg text-white flex items-center gap-6 border border-white/10">
-                <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-inner shrink-0 ml-1">
-                    <FileText class="w-8 h-8 text-gray-700" />
-                </div>
-                <div class="flex-1 space-y-2">
-                    <div class="bg-white text-gray-800 px-4 py-1 rounded-lg w-fit text-[11px] font-extrabold shadow-sm">
-                        Cadangkan Database
-                    </div>
-                    <div class="bg-white w-full h-10 rounded-xl shadow-inner border border-gray-100/50"></div>
-                </div>
-                <button class="bg-[#1e40af] text-white px-8 py-3 rounded-2xl font-bold text-sm hover:bg-blue-900 transition-all shadow-lg flex items-center gap-2 mr-1 active:scale-95">
-                    <Database class="w-4 h-4" /> Cadangkan
-                </button>
-            </div>
+            <div class="bg-[#759fb1] p-5 rounded-[2rem] shadow-lg text-white flex items-center justify-between border border-white/10">
+
+    <!-- LEFT -->
+    <div class="flex items-center gap-5">
+
+        <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-inner shrink-0">
+            <Database class="w-8 h-8 text-[#2f4fa2]" />
+        </div>
+
+        <div>
+            <h2 class="text-lg font-extrabold">
+                Cadangkan Database
+            </h2>
+
+            <p class="text-xs text-white/80 mt-1">
+                Backup seluruh data arsip dan pengguna
+            </p>
+        </div>
+
+    </div>
+
+    <!-- BUTTON -->
+    <a
+        href="/super-admin/backup-database"
+        class="bg-[#1e40af] text-white px-7 py-3 rounded-2xl font-bold text-sm hover:bg-blue-900 transition-all shadow-lg flex items-center gap-2 active:scale-95"
+    >
+        <Database class="w-4 h-4" />
+        Backup Sekarang
+    </a>
+
+    </div>
 
         </div>
     </AppSidebarSuperAdminLayout>
