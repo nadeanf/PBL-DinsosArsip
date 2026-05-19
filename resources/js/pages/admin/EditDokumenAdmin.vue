@@ -11,27 +11,50 @@ defineOptions({ layout: AdminLayout })
 const isDragging = ref(false)
 
 const fileError = ref('')
-const MAX_SIZE = 2 * 1024 * 1024 // 2MB
 const setFiles = (files: File[]) => {
   fileError.value = ''
 
-  const validFiles = files.filter(file => {
-    if (file.size > MAX_SIZE) {
-      fileError.value = 'Ukuran file maksimal 2 MB!'
-      return false
+  const validFiles: File[] = []
+
+  const getLimit = (ext: string) => {
+    const dokumen = ['pdf','doc','docx','xls','xlsx','ppt','pptx','txt']
+    const audio = ['mp3','wav','ogg','flac','aac','wma','m4a','opus','alac','aiff','dsd','pcm']
+    const video = ['mp4','avi','mkv','mov','wmv','flv','mpeg']
+
+    if (dokumen.includes(ext)) return 2
+    if (audio.includes(ext)) return 25
+    if (video.includes(ext)) return 100
+
+    return 2
+  }
+
+  for (const file of files) {
+    const ext = file.name.split('.').pop()?.toLowerCase() || ''
+    const sizeMB = file.size / 1024 / 1024
+    const limit = getLimit(ext)
+
+    if (sizeMB > limit) {
+      fileError.value = `${file.name} melebihi batas ${limit}MB`
+      continue
     }
-    return true
-  })
+
+    validFiles.push(file)
+  }
+
+  if (validFiles.length === 0) {
+    form.files = null
+    filePreviews.value = []
+    return
+  }
 
   form.files = validFiles
 
-  filePreviews.value = validFiles.map((file: any) => ({
+  filePreviews.value = validFiles.map(file => ({
     name: file.name,
     type: file.type,
     url: URL.createObjectURL(file)
   }))
 }
-
 const handleDragOver = (e: DragEvent) => {
   e.preventDefault()
   isDragging.value = true
@@ -144,7 +167,7 @@ const submit = () => {
   v-if="fileError" 
   class="flex items-center gap-3 bg-red-100 border border-red-400 text-red-800 px-4 py-3 rounded-xl shadow-sm mt-2"
 >
-  <span class="text-xl">⚠️</span>
+  <span class="text-xl"></span>
   <p class="text-sm font-semibold">
     {{ fileError }}
   </p>
@@ -200,7 +223,7 @@ const submit = () => {
                 PDF, DOC, XLS, JPG, PNG, MP3, MP4
               </p>
               <p class="text-gray-400 text-xs mt-2">
-                (Max. 2 MB) 
+               Max: Dokumen 2 MB | Audio 25 MB | Video 100 MB
                 </p>
 
             </div>

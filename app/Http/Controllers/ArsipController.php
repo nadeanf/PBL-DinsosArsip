@@ -58,8 +58,34 @@ $request->validate([
     'tahun' => 'required',
     'id_kategori' => 'required|exists:kategori,id',
     'status_akses' => 'required',
+'files.*' => [
+        'file',
+        function ($attribute, $file, $fail) {
+            $ext = strtolower($file->getClientOriginalExtension());
+            $sizeMB = $file->getSize() / 1024 / 1024;
 
-    'files.*' => 'file|max:2048'
+            // dokumen 2MB
+            $dokumen = ['pdf','doc','docx','xls','xlsx','ppt','pptx','txt'];
+
+            // audio 25MB
+            $audio = ['mp3','wav','ogg','flac','aac','wma','m4a','opus','alac','aiff','dsd','pcm'];
+
+            // video 100MB
+            $video = ['mp4','avi','mkv','mov','wmv','flv','mpeg'];
+
+            if (in_array($ext, $dokumen) && $sizeMB > 2) {
+                $fail("Dokumen maksimal 2MB");
+            }
+
+            if (in_array($ext, $audio) && $sizeMB > 25) {
+                $fail("Audio maksimal 25MB");
+            }
+
+            if (in_array($ext, $video) && $sizeMB > 100) {
+                $fail("Video maksimal 100MB");
+            }
+        }
+    ]
 ]);
 
         $user = Auth::user();
@@ -155,7 +181,34 @@ $request->validate([
     'id_kategori' => 'required|exists:kategori,id',
     'status_akses' => 'required',
 
-    'files.*' => 'file|max:2048'
+    'files.*' => [
+        'file',
+        function ($attribute, $file, $fail) {
+            $ext = strtolower($file->getClientOriginalExtension());
+            $sizeMB = $file->getSize() / 1024 / 1024;
+
+            // dokumen 2MB
+            $dokumen = ['pdf','doc','docx','xls','xlsx','ppt','pptx','txt'];
+
+            // audio 25MB
+            $audio = ['mp3','wav','ogg','flac','aac','wma','m4a','opus','alac','aiff','dsd','pcm'];
+
+            // video 100MB
+            $video = ['mp4','avi','mkv','mov','wmv','flv','mpeg'];
+
+            if (in_array($ext, $dokumen) && $sizeMB > 2) {
+                $fail("Dokumen maksimal 2MB");
+            }
+
+            if (in_array($ext, $audio) && $sizeMB > 25) {
+                $fail("Audio maksimal 25MB");
+            }
+
+            if (in_array($ext, $video) && $sizeMB > 100) {
+                $fail("Video maksimal 100MB");
+            }
+        }
+    ]
 ]);
         $jenisArsip = (now()->year - (int)$request->tahun >= 5)
             ? 'inaktif'
@@ -175,8 +228,15 @@ $request->validate([
     : null,
         ]);
 
-       if ($request->hasFile('files')) {
+      if ($request->hasFile('files')) {
 
+    // 🔥 HAPUS FILE LAMA (DB + STORAGE)
+    foreach ($arsip->files as $oldFile) {
+        Storage::disk('public')->delete($oldFile->path_file);
+        $oldFile->delete();
+    }
+
+    // upload file baru
     $judul = Str::slug($request->judul);
     $kategori = Str::slug(Kategori::find($request->id_kategori)?->nama ?? 'umum');
     $tanggal = Carbon::now()->format('Y-m-d');
@@ -195,7 +255,7 @@ $request->validate([
         File::create([
             'arsip_id' => $arsip->id,
             'path_file' => $path,
-            'nama_file' => $namaFile, // 🔥 ini penting (bukan original lagi)
+            'nama_file' => $namaFile,
             'tipe_file' => strtolower($ext),
             'size' => $file->getSize()
         ]);
@@ -1265,7 +1325,34 @@ $request->validate([
     'id_kategori' => 'required|exists:kategori,id',
     'status_akses' => 'required',
 
-    'files.*' => 'file|max:2048'
+   'files.*' => [
+        'file',
+        function ($attribute, $file, $fail) {
+            $ext = strtolower($file->getClientOriginalExtension());
+            $sizeMB = $file->getSize() / 1024 / 1024;
+
+            // dokumen 2MB
+            $dokumen = ['pdf','doc','docx','xls','xlsx','ppt','pptx','txt'];
+
+            // audio 25MB
+            $audio = ['mp3','wav','ogg','flac','aac','wma','m4a','opus','alac','aiff','dsd','pcm'];
+
+            // video 100MB
+            $video = ['mp4','avi','mkv','mov','wmv','flv','mpeg'];
+
+            if (in_array($ext, $dokumen) && $sizeMB > 2) {
+                $fail("Dokumen maksimal 2MB");
+            }
+
+            if (in_array($ext, $audio) && $sizeMB > 25) {
+                $fail("Audio maksimal 25MB");
+            }
+
+            if (in_array($ext, $video) && $sizeMB > 100) {
+                $fail("Video maksimal 100MB");
+            }
+        }
+    ]
 ]);
 
     $user = Auth::user();
