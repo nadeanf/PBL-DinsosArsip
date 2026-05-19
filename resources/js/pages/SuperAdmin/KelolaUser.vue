@@ -379,12 +379,20 @@ defineOptions({
                 class="w-full border rounded-xl px-4 py-3"
             />
 
-            <input
-                v-model="form.bagian"
-                type="text"
-                placeholder="Bagian"
-                class="w-full border rounded-xl px-4 py-3"
-            />
+            <select
+            v-model="form.bagian"
+            class="w-full border rounded-xl px-4 py-3"
+                >
+            <option value="">Pilih Bagian</option>
+            <option value="Sekretariat">Sekretariat</option>
+            <option value="Bidang Rehabilitasi Sosial">Bidang Rehabilitasi Sosial</option>
+            <option value="Bidang Perlindungan dan Jaminan Sosial">
+            Bidang Perlindungan dan Jaminan Sosial
+            </option>
+            <option value="Bidang Pemberdayaan Sosial dan Penanganan Fakir Miskin">
+            Bidang Pemberdayaan Sosial dan Penanganan Fakir Miskin
+            </option>
+        </select>
 
             <select
                 v-model="form.role"

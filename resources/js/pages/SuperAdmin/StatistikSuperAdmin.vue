@@ -73,9 +73,14 @@ const pieData = computed(() => ({
 
 const pieOptions = {
   responsive: true,
+  cutout: '60%',
   plugins: {
     legend: {
-      position: 'bottom'
+      position: 'bottom',
+      labels: {
+        boxWidth: 15,
+        padding: 20
+      }
     }
   }
 }
@@ -86,65 +91,126 @@ const pieOptions = {
 
 <div class="p-6 bg-[#f3f4f6] min-h-screen space-y-6">
 
-  <h1 class="text-2xl font-bold text-gray-800">
-    Statistik & Laporan Sistem
-  </h1>
 
-  <!-- STATISTIK UTAMA -->
-  <div class="grid md:grid-cols-3 gap-4">
+ <!-- CARD STATISTIK -->
+<div class="bg-white rounded-[2rem] p-6 shadow-md border border-gray-200">
+
+  <h2 class="text-xl font-extrabold text-gray-800 mb-5">
+    Statistik & Laporan Sistem
+  </h2>
+
+  <div class="grid md:grid-cols-2 gap-4 items-center">
 
     <!-- CHART -->
-  <div class="bg-[#6f98a8] p-4 rounded-xl flex justify-center items-center">
-    <div class="w-72 bg-white p-4 rounded-xl">
-      <Pie :data="pieData" :options="pieOptions" />
+    <div class="flex flex-col items-center">
+
+      <div class="self-start text-xs text-gray-500 mb-3">
+        Total Arsip:
+        <span class="font-bold text-gray-800">
+          {{
+            statistik.dokumen +
+            statistik.foto +
+            statistik.video +
+            statistik.audio
+          }}
+        </span>
+      </div>
+
+      <div class="w-[220px]">
+        <Pie :data="pieData" :options="pieOptions" />
+      </div>
+
     </div>
+
+    <!-- LIST DATA -->
+    <div class="space-y-3">
+
+      <div class="bg-gray-100 rounded-xl px-4 py-3 flex justify-between items-center">
+        <span class="text-sm text-gray-700 font-medium">
+          Dokumen
+        </span>
+
+        <span class="text-lg font-black text-gray-900">
+          {{ statistik.dokumen }}
+        </span>
+      </div>
+
+      <div class="bg-gray-100 rounded-xl px-4 py-3 flex justify-between items-center">
+        <span class="text-sm text-gray-700 font-medium">
+          Foto
+        </span>
+
+        <span class="text-lg font-black text-gray-900">
+          {{ statistik.foto }}
+        </span>
+      </div>
+
+      <div class="bg-gray-100 rounded-xl px-4 py-3 flex justify-between items-center">
+        <span class="text-sm text-gray-700 font-medium">
+          Video
+        </span>
+
+        <span class="text-lg font-black text-gray-900">
+          {{ statistik.video }}
+        </span>
+      </div>
+
+      <div class="bg-gray-100 rounded-xl px-4 py-3 flex justify-between items-center">
+        <span class="text-sm text-gray-700 font-medium">
+          Audio
+        </span>
+
+        <span class="text-lg font-black text-gray-900">
+          {{ statistik.audio }}
+        </span>
+      </div>
+
+    </div>
+
   </div>
 
-    <!-- TOTAL -->
-    <div class="bg-[#6f98a8] p-4 rounded-xl space-y-3">
-      <div class="bg-white rounded px-3 py-2 text-sm">Dokumen : {{ statistik?.dokumen }}</div>
-      <div class="bg-white rounded px-3 py-2 text-sm">Foto : {{ statistik.foto }}</div>
-      <div class="bg-white rounded px-3 py-2 text-sm">Video : {{ statistik.video }}</div>
-      <div class="bg-white rounded px-3 py-2 text-sm">Audio : {{ statistik.audio }}</div>
-    </div>
+  <!-- GARIS -->
+  <div class="border-t border-gray-200 my-5"></div>
 
-    <!-- PROGRESS -->
-    <div class="space-y-3 flex flex-col justify-between h-full">
+  <!-- BOTTOM -->
+  <div class="grid md:grid-cols-2 gap-4">
 
-      <!-- DIUNDUH -->
-      <div class="bg-[#6f98a8] p-4 rounded-xl flex items-center justify-between min-h-[110px]">
+    <!-- DOWNLOAD -->
+    <div class="bg-[#eef3fb] rounded-xl px-4 py-3 flex justify-between items-center">
 
-        <div class="flex flex-col justify-center">
-          <div class="text-xs bg-white px-2 py-1 rounded w-fit mb-2 font-semibold text-gray-700">
-            {{ statistik.download }}
-          </div>
-          <p class="text-white text-sm font-medium">Dokumen diunduh</p>
-        </div>
+      <div class="flex items-center gap-2">
+        <Download class="w-4 h-4 text-[#2f4fa2]" />
 
-        <!-- ICON -->
-        <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-md">
-          <Download class="w-5 h-5 text-[#2f4fa2]" />
-        </div>
-
+        <span class="text-sm text-gray-700 font-medium">
+          Download
+        </span>
       </div>
 
-      <!-- DILIHAT -->
-      <div class="bg-[#6f98a8] p-4 rounded-xl flex items-center justify-between min-h-[110px]">
+      <span class="text-xl font-black text-gray-900">
+        {{ statistik.download }}
+      </span>
 
-        <div class="flex flex-col justify-center">
-          <div class="text-xs bg-white px-2 py-1 rounded w-fit mb-2 font-semibold text-gray-700">
-            {{ statistik.dilihat }}
-          </div>
-          <p class="text-white text-sm font-medium">Dokumen dilihat</p>
-        </div>
-
-        <!-- ICON -->
-        <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-md">
-          <Eye class="w-5 h-5 text-[#2f4fa2]" />
-          </div>
-        </div>
-      </div>
     </div>
 
+    <!-- DILIHAT -->
+    <div class="bg-[#eef7ef] rounded-xl px-4 py-3 flex justify-between items-center">
+
+      <div class="flex items-center gap-2">
+        <Eye class="w-4 h-4 text-green-700" />
+
+        <span class="text-sm text-gray-700 font-medium">
+          Dilihat
+        </span>
+      </div>
+
+      <span class="text-xl font-black text-gray-900">
+        {{ statistik.dilihat }}
+      </span>
+
+    </div>
+
+  </div>
+
+</div>
 </div>
 </template>

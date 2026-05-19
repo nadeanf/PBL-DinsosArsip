@@ -118,6 +118,13 @@ const handleDownload = (id) => {
   document.body.removeChild(form)
 
 }
+const exportPDF = () => {
+  window.location.href =
+    `/export/pdf?search=${search.value}` +
+    `&kategori=${kategori.value}` +
+    `&tanggal_awal=${tanggal_awal.value}` +
+    `&tanggal_akhir=${tanggal_akhir.value}`
+}
 </script>
 
 <template>
@@ -179,13 +186,31 @@ const handleDownload = (id) => {
     </div>
 
     <div class="flex items-center justify-between">
-      <h2 class="bg-[#2f4fa2] text-white px-4 py-1 rounded-md text-sm">
-        Aktivitas Terbaru
-      </h2>
-      <Link href="/super-admin/daftar-arsip" class="bg-red-700 text-white px-4 py-1 rounded text-xs hover:bg-red-800 transition">
-        Lihat Semua
-      </Link>
-    </div>
+
+  <h2 class="bg-[#2f4fa2] text-white px-4 py-1 rounded-md text-sm">
+    Aktivitas Terbaru
+  </h2>
+
+  <!-- GROUP BUTTON -->
+  <div class="flex items-center gap-2">
+
+    <button
+      @click="exportPDF"
+      class="bg-red-600 text-white px-4 py-1 rounded text-xs hover:bg-red-700 transition"
+    >
+      Export PDF
+    </button>
+
+    <Link
+      href="/super-admin/daftar-arsip"
+      class="bg-red-700 text-white px-4 py-1 rounded text-xs hover:bg-red-800 transition"
+    >
+      Lihat Semua
+    </Link>
+
+  </div>
+
+</div>
 
     <div class="space-y-4">
       <div
