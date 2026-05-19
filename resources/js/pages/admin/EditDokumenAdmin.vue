@@ -212,12 +212,16 @@ const submit = () => {
         <div class="space-y-4 mt-6">
 
           <div>
-            <label class="block font-black mb-1 text-sm uppercase">Judul Dokumen</label>
+            <label class="block font-black mb-1 text-sm uppercase">Judul Dokumen
+              <span class="text-red-600">*</span>
+            </label>
             <input v-model="form.judul" class="w-full p-4 bg-white rounded-2xl border" />
           </div>
 
           <div>
-            <label class="block font-black mb-1 text-sm uppercase">Nomor</label>
+            <label class="block font-black mb-1 text-sm uppercase">Nomor
+              <span class="text-red-600">*</span>
+            </label>
            <input v-model="form.nomor" class="w-full p-4 bg-white rounded-2xl border" />
 
 <div v-if="form.errors.nomor" class="text-red-500 text-sm">
@@ -226,13 +230,17 @@ const submit = () => {
           </div>
 
           <div>
-            <label class="block font-black mb-1 text-sm uppercase">Tahun</label>
+            <label class="block font-black mb-1 text-sm uppercase">Tahun
+              <span class="text-red-600">*</span>
+            </label>
             <input v-model="form.tahun" class="w-full p-4 bg-white rounded-2xl border" />
           </div>
 
           <!-- KATEGORI -->
           <div>
-            <label class="block font-black mb-1 text-sm uppercase">Kategori</label>
+            <label class="block font-black mb-1 text-sm uppercase">Kategori
+              <span class="text-red-600">*</span>
+            </label>
             <div class="relative">
 
               <!-- BUTTON -->
@@ -263,7 +271,9 @@ const submit = () => {
 
           <!-- STATUS -->
           <div>
-  <label class="block font-black mb-2 text-sm uppercase">Status Akses</label>
+          <label class="block font-black mb-2 text-sm uppercase">Status Akses
+            <span class="text-red-600">*</span>
+          </label>
 
   <div class="flex gap-6">
     <label class="flex items-center gap-2 cursor-pointer">
@@ -289,7 +299,9 @@ const submit = () => {
 </div>
           <!-- PRIVATE -->
           <div v-if="isPrivate">
-            <label class="block font-black mb-1 text-sm uppercase">Bidang</label>
+            <label class="block font-black mb-1 text-sm uppercase">Bidang
+              <span class="text-red-600">*</span>
+            </label>
            <select v-model="form.bagian" class="w-full p-4 bg-white rounded-2xl border">
 
               <option value="">-- Pilih Bidang --</option>
@@ -304,12 +316,16 @@ const submit = () => {
           </div>
 
           <div>
-            <label class="block font-black mb-1 text-sm uppercase">Lokasi</label>
+            <label class="block font-black mb-1 text-sm uppercase">Lokasi
+              <span class="text-red-600">*</span>
+            </label>
             <input v-model="form.lokasi" class="w-full p-4 bg-white rounded-2xl border" />
           </div>
 
           <div>
-            <label class="block font-black mb-1 text-sm uppercase">Deskripsi</label>
+            <label class="block font-black mb-1 text-sm uppercase">Deskripsi
+              <span class="text-red-600">*</span>
+            </label>
             <textarea v-model="form.deskripsi" class="w-full p-4 bg-white rounded-2xl border"></textarea>
           </div>
 

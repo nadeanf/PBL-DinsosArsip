@@ -37,7 +37,8 @@ const updateStatus = (id: number, status: string) => {
   router.post(`/admin/persetujuan/${id}`, {
     status: status
   }, {
-    preserveScroll: true
+    preserveScroll: true,
+    preserveState: false,
   })
 }
 </script>

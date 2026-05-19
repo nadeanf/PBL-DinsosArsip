@@ -1,7 +1,7 @@
 <script setup lang+="ts">
 
 import { usePage, router } from '@inertiajs/vue3'
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { Eye, FileText, FileImage, File } from 'lucide-vue-next'
 import { ChevronRight, ChevronDown } from 'lucide-vue-next'
 import TreeDropdown from '@/components/TreeDropdown.vue'
@@ -123,8 +123,20 @@ const selectedKategoriName = computed(() => {
 const tanggal_awal = ref('')
 const tanggal_akhir = ref('')
 
+const getTodayDate = () => {
+  return new Date().toISOString().slice(0, 10)
+}
+
+watch(tanggal_awal, (val) => {
+  if (val && !tanggal_akhir.value) tanggal_akhir.value = getTodayDate()
+}, { immediate: true })
+
 const exportPDF = () => {
-  window.location.href = `/export/pdf?search=${search.value}&kategori=${kategori.value}&tanggal_awal=${tanggal_awal.value}&tanggal_akhir=${tanggal_akhir.value}`
+  const akhir = tanggal_awal.value && !tanggal_akhir.value
+    ? getTodayDate()
+    : tanggal_akhir.value
+
+  window.location.href = `/export/pdf?search=${search.value}&kategori=${kategori.value}&tanggal_awal=${tanggal_awal.value}&tanggal_akhir=${akhir}`
 }
 
 /* HELPER FILE TYPE */
@@ -186,12 +198,20 @@ const limitedData = computed(() => {
 
 /* SEARCH REDIRECT */
 const handleSearch = () => {
-  router.get('/daftar-arsip', {
+  const params = {
     search: search.value,
     kategori: kategori.value,
-    tanggal_awal: tanggal_awal.value,
-    tanggal_akhir: tanggal_akhir.value
-  })
+    tanggal_awal: tanggal_awal.value
+  }
+
+  if (tanggal_akhir.value) {
+    params.tanggal_akhir = tanggal_akhir.value
+  }
+
+  // mark this visit as coming from dashboard so list view can decide
+  params.from_dashboard = 1
+
+  router.get('/daftar-arsip', params)
 }
 
 /* PREVIEW MODAL */

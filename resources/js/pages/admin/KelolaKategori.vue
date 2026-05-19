@@ -2,7 +2,7 @@
 import { Head, router } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 import AdminLayout from '@/layouts/AdminLayout.vue'
-import { Plus, Trash2 } from 'lucide-vue-next'
+import { Plus, Pencil, Trash2 } from 'lucide-vue-next'
 
 defineOptions({ layout: AdminLayout })
 
@@ -19,6 +19,9 @@ const props = defineProps({
 const showModal = ref(false)
 const newItem = ref('')
 const selectedParent = ref<number | null>(null)
+const showRenameModal = ref(false)
+const renameItemId = ref<number | null>(null)
+const renameItemName = ref('')
 
 const kategoriList = computed(() => {
   const list: any[] = []
@@ -81,6 +84,26 @@ const tambahKategori = () => {
 const hapusItem = (id: number) => {
   router.delete(`/kategori/${id}`)
 }
+
+const openRenameModal = (item: any) => {
+  renameItemId.value = item.id
+  renameItemName.value = item.nama
+  showRenameModal.value = true
+}
+
+const renameKategori = () => {
+  if (!renameItemId.value || !renameItemName.value.trim()) return
+
+  router.patch(`/kategori/${renameItemId.value}`, {
+    nama: renameItemName.value
+  }, {
+    onSuccess: () => {
+      showRenameModal.value = false
+      renameItemId.value = null
+      renameItemName.value = ''
+    }
+  })
+}
 </script>
 
 <template>
@@ -115,12 +138,23 @@ const hapusItem = (id: number) => {
           {{ item.nama }}
         </div>
 
-        <button
-          @click="hapusItem(item.id)"
-          class="ml-2 p-2 bg-gray-200 hover:bg-red-500 hover:text-white rounded"
-        >
-          <Trash2 class="w-4 h-4" />
-        </button>
+        <div class="flex items-center gap-2">
+          <button
+            @click="openRenameModal(item)"
+            class="p-2 bg-gray-200 hover:bg-blue-500 hover:text-white rounded"
+            title="Rename kategori"
+          >
+            <Pencil class="w-4 h-4" />
+          </button>
+
+          <button
+            @click="hapusItem(item.id)"
+            class="p-2 bg-gray-200 hover:bg-red-500 hover:text-white rounded"
+            title="Hapus kategori"
+          >
+            <Trash2 class="w-4 h-4" />
+          </button>
+        </div>
       </div>
     </div>
 
@@ -175,6 +209,37 @@ const hapusItem = (id: number) => {
         </button>
       </div>
 
+    </div>
+  </div>
+
+  <div
+    v-if="showRenameModal"
+    class="fixed inset-0 bg-black/40 flex items-center justify-center"
+  >
+    <div class="bg-white p-6 rounded-xl w-[400px]">
+      <h2 class="text-lg font-bold mb-4">Rename Kategori</h2>
+
+      <input
+        v-model="renameItemName"
+        class="w-full border p-2 mb-4 rounded"
+        placeholder="Nama baru kategori"
+      />
+
+      <div class="flex justify-end gap-2">
+        <button
+          @click="showRenameModal = false"
+          class="px-4 py-2 bg-gray-300 rounded"
+        >
+          Batal
+        </button>
+
+        <button
+          @click="renameKategori"
+          class="px-4 py-2 bg-blue-600 text-white rounded"
+        >
+          Simpan
+        </button>
+      </div>
     </div>
   </div>
 

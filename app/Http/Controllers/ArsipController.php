@@ -260,12 +260,12 @@ $request->validate([
             $query->where('id_kategori', $request->kategori);
         }
 
-        if ($request->tanggal_awal) {
-            $query->where('tahun', '>=', date('Y', strtotime($request->tanggal_awal)));
+        if ($request->filled('tanggal_awal')) {
+            $query->whereDate('created_at', '>=', $request->tanggal_awal);
         }
 
-        if ($request->tanggal_akhir) {
-            $query->where('tahun', '<=', date('Y', strtotime($request->tanggal_akhir)));
+        if ($request->filled('tanggal_akhir')) {
+            $query->whereDate('created_at', '<=', $request->tanggal_akhir);
         }
 
         $arsip = $query->latest()->get()->map(function ($item) {
@@ -311,6 +311,14 @@ $request->validate([
             $query->where('id_kategori', $request->kategori);
         }
 
+        if ($request->filled('tanggal_awal')) {
+            $query->whereDate('created_at', '>=', $request->tanggal_awal);
+        }
+
+        if ($request->filled('tanggal_akhir')) {
+            $query->whereDate('created_at', '<=', $request->tanggal_akhir);
+        }
+
         if (auth()->user()->role !== 'admin') {
             abort(403);
         }
@@ -318,6 +326,13 @@ $request->validate([
         return Inertia::render('admin/ListArsipAdmin', [
             'arsip' => $query->latest()->get(),
             'kategori' => $this->kategoriTree(),
+        
+        'filters' => $request->only([
+            'search',
+            'kategori',
+            'tanggal_awal',
+            'tanggal_akhir'
+        ]),
         ]);
     }
 

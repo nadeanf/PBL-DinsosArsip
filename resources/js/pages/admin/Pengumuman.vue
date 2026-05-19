@@ -189,7 +189,9 @@ const submit = () => {
         <div class="space-y-3 px-2">
 
           <div>
-            <label class="block text-sm font-bold text-black mb-0.5 ml-1">Judul Pengumuman</label>
+            <label class="block text-sm font-bold text-black mb-0.5 ml-1">Judul Pengumuman
+              <span class="text-red-600">*</span>
+            </label>
             <input 
               v-model="form.judul"
               type="text"
@@ -198,7 +200,9 @@ const submit = () => {
           </div>
 
           <div>
-            <label class="block text-sm font-bold text-black mb-0.5 ml-1">Deskripsi</label>
+            <label class="block text-sm font-bold text-black mb-0.5 ml-1">Deskripsi
+              <span class="text-red-600">*</span>
+            </label>
             <input 
               v-model="form.deskripsi"
               type="text"
@@ -207,7 +211,9 @@ const submit = () => {
           </div>
 
           <div>
-            <label class="block text-sm font-bold text-black mb-0.5 ml-1">Tanggal</label>
+            <label class="block text-sm font-bold text-black mb-0.5 ml-1">Tanggal
+              <span class="text-red-600">*</span>
+            </label>
             <input 
               v-model="form.tanggal"
               type="date"
