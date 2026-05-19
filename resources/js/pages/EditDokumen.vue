@@ -252,9 +252,9 @@ const submit = () => {
 
           <!-- STATUS -->
          <div>
-  <label class="block font-black mb-2 text-sm uppercase">Status Akses 
-    <span class="text-red-600">*</span>
-  </label>
+        <label class="block font-black mb-2 text-sm uppercase">Status Akses 
+          <span class="text-red-600">*</span>
+        </label>
 
   <div class="flex gap-6">
     <label class="flex items-center gap-2 cursor-pointer">
