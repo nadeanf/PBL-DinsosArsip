@@ -64,6 +64,8 @@ $request->validate([
             // dokumen 2MB
             $dokumen = ['pdf','doc','docx','xls','xlsx','ppt','pptx','txt'];
 
+            $gambar = ['jpg','jpeg','png','gif','webp','bmp'];
+
             // audio 25MB
             $audio = ['mp3','wav','ogg','flac','aac','wma','m4a','opus','alac','aiff','dsd','pcm'];
 
@@ -72,6 +74,10 @@ $request->validate([
 
             if (in_array($ext, $dokumen) && $sizeMB > 2) {
                 $fail("Dokumen maksimal 2MB");
+            }
+
+            if (in_array($ext, $gambar) && $sizeMB > 5) {
+                $fail("Gambar maksimal 5MB");
             }
 
             if (in_array($ext, $audio) && $sizeMB > 25) {
@@ -180,6 +186,8 @@ $request->validate([
             // dokumen 2MB
             $dokumen = ['pdf','doc','docx','xls','xlsx','ppt','pptx','txt'];
 
+            $gambar = ['jpg','jpeg','png','gif','webp','bmp'];
+
             // audio 25MB
             $audio = ['mp3','wav','ogg','flac','aac','wma','m4a','opus','alac','aiff','dsd','pcm'];
 
@@ -188,6 +196,10 @@ $request->validate([
 
             if (in_array($ext, $dokumen) && $sizeMB > 2) {
                 $fail("Dokumen maksimal 2MB");
+            }
+
+            if (in_array($ext, $gambar) && $sizeMB > 5) {
+                $fail("Gambar maksimal 5MB");
             }
 
             if (in_array($ext, $audio) && $sizeMB > 25) {
@@ -1259,6 +1271,9 @@ $request->validate([
             // dokumen 2MB
             $dokumen = ['pdf','doc','docx','xls','xlsx','ppt','pptx','txt'];
 
+            // gambar 5MB
+            $gambar = ['jpg','jpeg','png','gif','webp','bmp'];
+
             // audio 25MB
             $audio = ['mp3','wav','ogg','flac','aac','wma','m4a','opus','alac','aiff','dsd','pcm'];
 
@@ -1267,6 +1282,10 @@ $request->validate([
 
             if (in_array($ext, $dokumen) && $sizeMB > 2) {
                 $fail("Dokumen maksimal 2MB");
+            }
+
+            if (in_array($ext, $gambar) && $sizeMB > 5) {
+                $fail("Gambar maksimal 5MB");
             }
 
             if (in_array($ext, $audio) && $sizeMB > 25) {

@@ -111,6 +111,14 @@ const canAccessFull = (doc) => {
     return true
   }
 
+  // USER SATU BIDANG
+  if (
+    normalizeText(doc.status_akses) === 'private' &&
+    normalizeText(user.bagian) === normalizeText(doc.bidang)
+  ) {
+    return true
+  }
+
   // SUDAH DI-APPROVE
   if (
     doc.request_status === 'approved' &&
