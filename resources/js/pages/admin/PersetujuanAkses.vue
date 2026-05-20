@@ -11,6 +11,7 @@ defineOptions({
 
 const page = usePage()
 const search = ref(page.props.filters?.search || '')
+const loading = ref(false)
 
 const doSearch = () => {
   router.get('/admin/persetujuan', {
@@ -22,8 +23,8 @@ const doSearch = () => {
 }
 
 // ambil data dari controller
-const data = computed(() => page.props.requests.data)
-const links = computed(() => page.props.requests.links)
+const data = computed(() => page.props.requests?.data || [])
+const links = computed(() => page.props.requests?.links || [])
 
 // helper warna
 const statusClass = (status: string) => {
@@ -34,11 +35,15 @@ const statusClass = (status: string) => {
 
 // update status
 const updateStatus = (id: number, status: string) => {
+  loading.value = true
   router.post(`/admin/persetujuan/${id}`, {
     status: status
   }, {
     preserveScroll: true,
     preserveState: false,
+    onFinish: () => {
+      loading.value = false
+    }
   })
 }
 </script>
@@ -85,55 +90,66 @@ const updateStatus = (id: number, status: string) => {
         <div>Divisi</div>
         <div>Persetujuan</div>
       </div>
-<!-- DATA -->
-<div
-  v-for="(item, index) in data"
-  :key="item.id"
-  class="grid grid-cols-5 px-6 py-4 border-b text-gray-700 text-sm items-center"
->
-  <div>{{ item.arsip?.judul }}</div>
-  <div>{{ item.user?.name }}</div>
-  <div>{{ item.created_at }}</div>
-  <div>{{ item.user?.bagian }}</div>
 
-  <div class="flex gap-2 items-center">
-    <template v-if="item.status === 'pending'">
-      <button
-        @click="updateStatus(item.id, 'approved')"
-        class="bg-green-500 text-white px-3 py-1 rounded text-xs"
-      >
-        Approve
-      </button>
+      <!-- EMPTY STATE -->
+      <div v-if="data.length === 0" class="px-6 py-12 text-center text-gray-500">
+        <p class="text-lg">Tidak ada permintaan akses</p>
+      </div>
 
-      <button
-        @click="updateStatus(item.id, 'rejected')"
-        class="bg-red-500 text-white px-3 py-1 rounded text-xs"
-      >
-        Tolak
-      </button>
-    </template>
+      <!-- DATA -->
+      <template v-else>
+        <div
+          v-for="(item, index) in data"
+          :key="item.id"
+          class="grid grid-cols-5 px-6 py-4 border-b text-gray-700 text-sm items-center"
+        >
+          <div>{{ item.arsip?.judul }}</div>
+          <div>{{ item.user?.name }}</div>
+          <div>{{ item.created_at }}</div>
+          <div>{{ item.user?.bagian }}</div>
 
-    <span
-      v-else
-      class="px-3 py-1 rounded-full text-xs font-bold"
-      :class="statusClass(item.status)"
-    >
-      {{ item.status === 'approved' ? 'Disetujui' : 'Ditolak' }}
-    </span>
-  </div>
-</div>
+          <div class="flex gap-2 items-center">
+            <template v-if="item.status === 'pending'">
+              <button
+                @click="updateStatus(item.id, 'approved')"
+                :disabled="loading"
+                class="bg-green-500 hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed text-white px-3 py-1 rounded text-xs transition"
+              >
+                {{ loading ? 'Proses...' : 'Approve' }}
+              </button>
 
-<!-- PAGINATION (DI LUAR LOOP!) -->
-<div class="flex justify-center mt-6 gap-2 flex-wrap pb-4">
-  <button
-    v-for="link in links"
-    :key="link.label"
-    v-html="link.label"
-    :disabled="!link.url"
-    @click="router.visit(link.url)"
-    class="px-3 py-1 border rounded text-sm"
-  />
-</div>
-</div>
+              <button
+                @click="updateStatus(item.id, 'rejected')"
+                :disabled="loading"
+                class="bg-red-500 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-white px-3 py-1 rounded text-xs transition"
+              >
+                {{ loading ? 'Proses...' : 'Tolak' }}
+              </button>
+            </template>
+
+            <span
+              v-else
+              class="px-3 py-1 rounded-full text-xs font-bold"
+              :class="statusClass(item.status)"
+            >
+              {{ item.status === 'approved' ? 'Disetujui' : 'Ditolak' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- PAGINATION (DI LUAR LOOP!) -->
+        <div class="flex justify-center mt-6 gap-2 flex-wrap pb-4">
+          <button
+            v-for="link in links"
+            :key="link.label"
+            v-html="link.label"
+            :disabled="!link.url"
+            @click="router.visit(link.url)"
+            class="px-3 py-1 border rounded text-sm"
+          />
+        </div>
+      </template>
+    </div>
+
   </div>
 </template>

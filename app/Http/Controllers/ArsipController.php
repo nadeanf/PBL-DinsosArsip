@@ -249,12 +249,18 @@ $request->validate([
     $tanggal = Carbon::now()->format('Y-m-d');
 
             foreach ($request->file('files') as $file) {
-                $path = $file->store('arsip', 'public');
+                $ext = $file->getClientOriginalExtension();
+                
+                $namaFile = "{$judul}-{$kategori}-{$tanggal}.{$ext}";
+                $namaFile = uniqid() . '-' . $namaFile;
+                
+                $folder = 'arsip/' . $kategori;
+                $path = $file->storeAs($folder, $namaFile, 'public');
 
         File::create([
             'arsip_id' => $arsip->id,
             'path_file' => $path,
-            'nama_file' => $namaFile,
+            'nama_file' => $file->getClientOriginalName(),
             'tipe_file' => strtolower($ext),
             'size' => $file->getSize()
         ]);
@@ -859,12 +865,19 @@ $request->validate([
 
     public function riwayat()
     {
+        $user = Auth::user();
+        
         $data = RiwayatAkses::with('arsip.files', 'arsip.kategori', 'arsip.user')
             ->where('user_id', Auth::id())
-            ->whereHas('arsip') //ops
+            ->whereHas('arsip')
             ->orderBy('updated_at', 'desc')
             ->get()
-            ->map(function ($item) {
+            ->map(function ($item) use ($user) {
+                // Check request status
+                $req = RequestAkses::where('user_id', $user->id)
+                    ->where('arsip_id', $item->arsip->id)
+                    ->first();
+                
                 return [
                     'id' => $item->arsip->id,
                     'user_id' => $item->arsip->user_id,
@@ -878,6 +891,8 @@ $request->validate([
                     'tahun' => $item->arsip->tahun,
                     'lokasi' => $item->arsip->lokasi,
                     'status' => $item->arsip->status_akses,
+                    'status_akses' => $item->arsip->status_akses,
+                    'request_status' => $req?->status,
                     'files' => $item->arsip->files ?? [],
                     'waktu' => $item->updated_at
                 ];
@@ -890,12 +905,19 @@ $request->validate([
 
     public function riwayatAdmin()
     {
+        $user = Auth::user();
+        
         $data = RiwayatAkses::with('arsip.files', 'arsip.kategori', 'arsip.user')
             ->where('user_id', Auth::id())
-            ->whereHas('arsip') //ops
+            ->whereHas('arsip')
             ->orderBy('updated_at', 'desc')
             ->get()
-            ->map(function ($item) {
+            ->map(function ($item) use ($user) {
+                // Check request status
+                $req = RequestAkses::where('user_id', $user->id)
+                    ->where('arsip_id', $item->arsip->id)
+                    ->first();
+                
                 return [
                     'id' => $item->arsip->id,
                     'user_id' => $item->arsip->user_id,
@@ -909,6 +931,8 @@ $request->validate([
                     'tahun' => $item->arsip->tahun,
                     'lokasi' => $item->arsip->lokasi,
                     'status' => $item->arsip->status_akses,
+                    'status_akses' => $item->arsip->status_akses,
+                    'request_status' => $req?->status,
                     'files' => $item->arsip->files ?? [],
                     'waktu' => $item->updated_at
                 ];
@@ -921,12 +945,19 @@ $request->validate([
 
     public function riwayatPimpinan()
     {
+        $user = Auth::user();
+        
         $data = RiwayatAkses::with('arsip.files', 'arsip.kategori', 'arsip.user')
             ->where('user_id', Auth::id())
-            ->whereHas('arsip') //ops
+            ->whereHas('arsip')
             ->orderBy('updated_at', 'desc')
             ->get()
-            ->map(function ($item) {
+            ->map(function ($item) use ($user) {
+                // Check request status
+                $req = RequestAkses::where('user_id', $user->id)
+                    ->where('arsip_id', $item->arsip->id)
+                    ->first();
+                
                 return [
                     'id' => $item->arsip->id,
                     'user_id' => $item->arsip->user_id,
@@ -940,6 +971,8 @@ $request->validate([
                     'tahun' => $item->arsip->tahun,
                     'lokasi' => $item->arsip->lokasi,
                     'status' => $item->arsip->status_akses,
+                    'status_akses' => $item->arsip->status_akses,
+                    'request_status' => $req?->status,
                     'files' => $item->arsip->files ?? [],
                     'waktu' => $item->updated_at
                 ];
@@ -1045,7 +1078,7 @@ $request->validate([
         ]);
     }
 
-    public function persetujuan()
+    public function persetujuan(Request $request)
     {
         if (auth()->user()->role !== 'admin') abort(403);
 
@@ -1054,8 +1087,8 @@ $request->validate([
             'arsip:id,judul,nomor,bagian'
         ])
             ->latest()
-            ->get()
-            ->map(function ($item) {
+            ->paginate(10)
+            ->through(function ($item) {
                 return [
                     'id' => $item->id,
                     'status' => $item->status,
@@ -1080,7 +1113,8 @@ $request->validate([
         $item->status = $request->status;
         $item->save();
 
-        return back();
+        $statusText = $request->status === 'approved' ? 'Disetujui' : 'Ditolak';
+        return back()->with('success', "Request akses telah {$statusText}");
     }
 
     public function kelolaArsipUser()

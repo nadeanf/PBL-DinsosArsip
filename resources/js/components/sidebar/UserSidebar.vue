@@ -14,8 +14,7 @@ function getPhoto() {
 </script>
 
 <template>
-  <aside class="w-64 min-h-screen bg-gradient-to-b from-[#dbe3e7] to-[#2f6f7e] p-4 flex flex-col justify-between">
-
+  <aside class="h-full overflow-x-hidden bg-gradient-to-b from-[#dbe3e7] to-[#2f6f7e] p-4 flex flex-col">
     <div>
       <!-- PROFILE -->
       <Link href="/edit-profile" class="flex items-center gap-3 mb-6 group">
@@ -115,10 +114,7 @@ function getPhoto() {
         <p class="mt-2.5 text-[10px] text-gray-700">xx GB / xx GB (xx%)</p>
       </div>
 
-      </div>
-    </div>
-
-    <!-- LOGOUT -->
+      <!-- LOGOUT -->
     <Link href="/logout" method="post" as="button"
       class="flex items-center gap-3 bg-gray-200 px-3 py-2 rounded-lg w-full text-left hover:bg-gray-300 transition-all">
       <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-white">
@@ -126,6 +122,9 @@ function getPhoto() {
       </span>
       <span class="text-sm font-semibold text-red-700">Keluar</span>
     </Link>
+
+      </div>
+    </div>
 
   </aside>
 </template>
