@@ -187,11 +187,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/admin/riwayat', [ArsipController::class, 'riwayatAdmin']);
 
-    Route::get('/admin/pengumuman', function () {
-        if (auth()->user()->role !== 'admin') abort(403);
-        return Inertia::render('admin/Pengumuman');
-    });
+    Route::get('/admin/pengumuman', [PengumumanController::class, 'index']);
+
     Route::post('/admin/pengumuman', [PengumumanController::class, 'store']);
+
+    Route::put('/admin/pengumuman/{pengumuman}', [PengumumanController::class, 'update']);
+
+    Route::delete('/admin/pengumuman/{pengumuman}', [PengumumanController::class, 'destroy']);
+
+    Route::post('/admin/pengumuman/{pengumuman}/restore', [PengumumanController::class, 'restore']);
+
+    Route::delete('/admin/pengumuman/{pengumuman}/permanent', [PengumumanController::class, 'permanentDelete']);
 
     Route::get('/admin/kelola-kategori', [ArsipController::class, 'kelolaKategori'])
     ->middleware('auth');
