@@ -110,6 +110,7 @@ Route::middleware('auth')->group(function () {
     
     Route::patch('/super-admin/user/{id}/toggle', [UserController::class, 'toggleStatus']);
     Route::post('/super-admin/tambah-user', [UserController::class, 'store']);
+    Route::put('/super-admin/user/{id}', [UserController::class, 'update']);
     Route::get('/super-admin/daftar-arsip', [ArsipController::class, 'listAdmin']);
     Route::get('/super-admin/backup-database', [ArsipController::class, 'backupDatabase']);
 });

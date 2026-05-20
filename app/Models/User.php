@@ -13,8 +13,16 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 
 use App\Models\Arsip;
 
-#[Fillable(['name', 'email', 'nip', 'bagian', 'password', 'role', 'photo'])]
-#[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
+#[Fillable([
+    'name',
+    'email',
+    'nip',
+    'bagian',
+    'password',
+    'role',
+    'photo',
+    'is_active'
+])]#[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 
 class User extends Authenticatable
 {

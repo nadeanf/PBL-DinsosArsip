@@ -203,7 +203,7 @@ const exportPDF = () => {
 
     <Link
       href="/super-admin/daftar-arsip"
-      class="bg-red-700 text-white px-4 py-1 rounded text-xs hover:bg-red-800 transition"
+      class="bg-[#2f4fa2] text-white px-4 py-1 rounded text-xs hover:bg-red-800 transition"
     >
       Lihat Semua
     </Link>

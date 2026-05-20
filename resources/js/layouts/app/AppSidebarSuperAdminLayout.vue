@@ -1,11 +1,6 @@
 <script setup lang="ts">
-import AppContent from '@/components/AppContent.vue';
-import AppShell from '@/components/AppShell.vue';
-import AppSidebar from '@/components/AppSidebarSuperAdmin.vue'; 
-import AppSidebarHeader from '@/components/AppSidebarHeader.vue';
-
 import Header from '@/components/header.vue';
-import Footer from '@/components/footer.vue';
+import Sidebar from '@/components/AppSidebarSuperAdmin.vue';
 
 import type { BreadcrumbItem } from '@/types';
 
@@ -19,25 +14,33 @@ withDefaults(defineProps<Props>(), {
 </script>
 
 <template>
-    <div class="flex flex-col min-h-screen">
-        
-        <Header />
+    <div class="h-screen flex flex-col bg-gray-100 overflow-hidden">
 
-        <div class="flex flex-1">
-            <AppShell variant="sidebar" class="flex-1">
-                <AppSidebar />
+        <!-- NAVBAR -->
+        <header class="h-16 shrink-0">
+            <Header />
+        </header>
 
-                <AppContent variant="sidebar" class="overflow-x-hidden flex flex-col">
-                    <AppSidebarHeader :breadcrumbs="breadcrumbs" />
+        <!-- BODY -->
+        <div class="flex flex-1 overflow-hidden">
 
-                    <div class="p-6 flex-1">
-                        <slot />
-                    </div>
-                </AppContent>
-            </AppShell>
+            <!-- SIDEBAR -->
+            <aside class="w-67 h-full overflow-y-auto overflow-x-hidden shrink-0">
+                <Sidebar />
+            </aside>
+
+            <!-- CONTENT -->
+            <main class="flex-1 min-w-0 h-full overflow-y-auto overflow-x-hidden p-6 bg-gray-100">
+                <slot />
+            </main>
+
         </div>
 
-        <Footer />
-        
     </div>
 </template>
+
+<style scoped>
+main {
+    transition: all 0.3s ease-in-out;
+}
+</style>

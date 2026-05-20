@@ -28,8 +28,5 @@ const user = computed(() => page.props.auth?.user)
 
     </div>
 
-    <!-- FOOTER -->
-    <Footer />
-
   </div>
 </template>
