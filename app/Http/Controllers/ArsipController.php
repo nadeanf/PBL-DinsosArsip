@@ -1356,11 +1356,22 @@ public function statistikPimpinan()
     ->groupBy('kategori.nama')
     ->get();
 
+    $users = User::withCount('arsip')
+            ->orderByDesc('arsip_count')
+            ->paginate(5);
+    $totalUser = User::count();
+    $totalAktif = User::where('is_active', true)->count();
+    $totalAdmin = User::where('role', 'admin')->count();
+
     return Inertia::render('Pimpinan/StatistikPimpinan', [
         'tipeDokumen' => $tipeDokumen,
         'totalArsip' => $totalArsip,
         'totalDownload' => $totalDownload,
-        'kategoriStat' => $kategoriStat
+        'kategoriStat' => $kategoriStat,
+        'users' => $users,
+        'totalUser' => $totalUser,
+        'totalAktif' => $totalAktif,
+        'totalAdmin' => $totalAdmin
     ]);
 }
 
