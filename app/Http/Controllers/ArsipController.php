@@ -511,6 +511,8 @@ $request->validate([
         ]);
     }
 
+    //hai
+
     public function dashboardAdmin(Request $request)
     {
         $query = Arsip::with(['kategori', 'user', 'files']);
@@ -1567,4 +1569,8 @@ public function backupDatabase()
 
     return response()->download($path)->deleteFileAfterSend(true);
 }
+
+
+
+
 }
