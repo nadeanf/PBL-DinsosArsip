@@ -9,24 +9,24 @@ defineOptions({ layout: AdminLayout })
 
 
 const isDragging = ref(false)
-
 const fileError = ref('')
+
+const getLimit = (ext: string) => {
+  const dokumen = ['pdf','doc','docx','xls','xlsx','ppt','pptx','txt']
+  const audio = ['mp3','wav','ogg','flac','aac','wma','m4a','opus','alac','aiff','dsd','pcm']
+  const video = ['mp4','avi','mkv','mov','wmv','flv','mpeg']
+
+  if (dokumen.includes(ext)) return 2
+  if (audio.includes(ext)) return 25
+  if (video.includes(ext)) return 100
+
+  return 2
+}
+
 const setFiles = (files: File[]) => {
   fileError.value = ''
 
   const validFiles: File[] = []
-
-  const getLimit = (ext: string) => {
-    const dokumen = ['pdf','doc','docx','xls','xlsx','ppt','pptx','txt']
-    const audio = ['mp3','wav','ogg','flac','aac','wma','m4a','opus','alac','aiff','dsd','pcm']
-    const video = ['mp4','avi','mkv','mov','wmv','flv','mpeg']
-
-    if (dokumen.includes(ext)) return 2
-    if (audio.includes(ext)) return 25
-    if (video.includes(ext)) return 100
-
-    return 2
-  }
 
   for (const file of files) {
     const ext = file.name.split('.').pop()?.toLowerCase() || ''
@@ -55,6 +55,7 @@ const setFiles = (files: File[]) => {
     url: URL.createObjectURL(file)
   }))
 }
+
 const handleDragOver = (e: DragEvent) => {
   e.preventDefault()
   isDragging.value = true
@@ -240,17 +241,24 @@ const submit = () => {
             </label>
             <input v-model="form.judul" class="w-full p-4 bg-white rounded-2xl border" />
           </div>
+<div>
+  <label class="block font-black mb-1 text-sm uppercase">
+    Nomor
+    <span class="text-red-600">*</span>
+  </label>
 
-          <div>
-            <label class="block font-black mb-1 text-sm uppercase">Nomor
-              <span class="text-red-600">*</span>
-            </label>
-           <input v-model="form.nomor" class="w-full p-4 bg-white rounded-2xl border" />
+  <input
+    v-model="form.nomor"
+    :class="[
+      'w-full p-4 bg-white rounded-2xl border',
+      form.errors.nomor ? 'border-red-500' : 'border-gray-300'
+    ]"
+  />
 
-<div v-if="form.errors.nomor" class="text-red-500 text-sm">
-  {{ form.errors.nomor }}
+  <p v-if="form.errors.nomor" class="text-red-500 text-sm mt-1">
+    {{ form.errors.nomor }}
+  </p>
 </div>
-          </div>
 
           <div>
             <label class="block font-black mb-1 text-sm uppercase">Tahun
@@ -354,16 +362,26 @@ const submit = () => {
 
         </div>
 
-        <!-- BUTTON -->
-        <div class="flex justify-end gap-4 mt-10">
-          <button type="submit" class="bg-blue-700 text-white px-8 py-3 rounded-xl font-bold">
-            Simpan
-          </button>
+        <!-- BUTTON --><!-- BUTTON -->
+<div class="flex justify-end gap-4 mt-10">
 
-          <button type="button" @click="goBack" class="bg-red-600 text-white px-8 py-3 rounded-xl font-bold">
-            Batal
-          </button>
-        </div>
+  <button
+    type="submit"
+    :disabled="form.processing"
+    class="bg-blue-700 text-white px-8 py-3 rounded-xl font-bold disabled:opacity-50"
+  >
+    Simpan
+  </button>
+
+  <button
+    type="button"
+    @click="goBack"
+    class="bg-red-600 text-white px-8 py-3 rounded-xl font-bold"
+  >
+    Batal
+  </button>
+
+</div>
 
       </form>
     </div>

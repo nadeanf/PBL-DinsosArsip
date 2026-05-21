@@ -11,11 +11,35 @@ defineOptions({ layout: UserLayout })
 const fileError = ref('')
 const isDragging = ref(false)
 const getLimit = (ext: string) => {
-  const dokumen = ['pdf','doc','docx','xls','xlsx','ppt','pptx','txt']
-  const audio = ['mp3','wav','ogg','flac','aac','wma','m4a','opus','alac','aiff','dsd','pcm']
-  const video = ['mp4','avi','mkv','mov','wmv','flv','mpeg']
+  const dokumen = [
+    'pdf','doc','docx',
+    'xls','xlsx',
+    'ppt','pptx',
+    'txt'
+  ]
+
+  const gambar = [
+    'jpg',
+    'jpeg',
+    'png',
+    'gif',
+    'webp',
+    'bmp'
+  ]
+
+  const audio = [
+    'mp3','wav','ogg','flac',
+    'aac','wma','m4a','opus',
+    'alac','aiff','dsd','pcm'
+  ]
+
+  const video = [
+    'mp4','avi','mkv',
+    'mov','wmv','flv','mpeg'
+  ]
 
   if (dokumen.includes(ext)) return 2
+  if (gambar.includes(ext)) return 5
   if (audio.includes(ext)) return 25
   if (video.includes(ext)) return 100
 
@@ -220,7 +244,7 @@ const submit = () => {
                 PDF, DOC, XLS, JPG, PNG, MP3, MP4
               </p>
               <p class="text-gray-400 text-xs mt-2">
-                (Max: Dokumen 2 MB | Audio 25 MB | Video 100 MB)
+                 (Max: Dokumen 2 MB | Gambar 5 MB | Audio 25 MB | Video 100 MB)
                 </p>
 
             </div>
