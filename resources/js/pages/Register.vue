@@ -2,6 +2,7 @@
 import { Head, router } from '@inertiajs/vue3'
 import { ref } from 'vue'
 import GuestLayout from '@/layouts/GuestLayout.vue'
+import { Eye, EyeOff } from 'lucide-vue-next' // <-- IMPORT IKON MATA
 
 defineOptions({ layout: GuestLayout })
 
@@ -31,9 +32,9 @@ function handleSubmit() {
             router.visit('/login')
         },
         onError: (errors) => {
-    console.log(errors)
-    alert(JSON.stringify(errors))
-}
+            console.log(errors)
+            alert(JSON.stringify(errors))
+        }
     })
 }
 
@@ -101,36 +102,40 @@ function goToLogin() {
 
                 <div>
                     <label class="label">Password</label>
-                    <div class="relative">
+                    <div class="relative w-full flex items-center">
                         <input
                             v-model="form.password"
                             :type="showPassword ? 'text' : 'password'"
-                            class="field-input"
+                            class="field-input pr-10"
                         />
                         <button
                             type="button"
                             @click="showPassword = !showPassword"
-                            class="absolute inset-y-0 right-2 flex items-center text-xs text-gray-600"
+                            class="absolute right-3 text-gray-500 hover:text-gray-700 focus:outline-none flex items-center justify-center"
+                            style="background: none; border: none; padding: 0;"
                         >
-                            {{ showPassword ? 'Sembunyikan' : 'Lihat' }}
+                            <EyeOff v-if="showPassword" class="w-4 h-4" />
+                            <Eye v-else class="w-4 h-4" />
                         </button>
                     </div>
                 </div>
 
                 <div>
                     <label class="label">Ulangi Password</label>
-                    <div class="relative">
+                    <div class="relative w-full flex items-center">
                         <input
                             v-model="form.password_confirmation"
                             :type="showPasswordConfirmation ? 'text' : 'password'"
-                            class="field-input"
+                            class="field-input pr-10"
                         />
                         <button
                             type="button"
                             @click="showPasswordConfirmation = !showPasswordConfirmation"
-                            class="absolute inset-y-0 right-2 flex items-center text-xs text-gray-600"
+                            class="absolute right-3 text-gray-500 hover:text-gray-700 focus:outline-none flex items-center justify-center"
+                            style="background: none; border: none; padding: 0;"
                         >
-                            {{ showPasswordConfirmation ? 'Sembunyikan' : 'Lihat' }}
+                            <EyeOff v-if="showPasswordConfirmation" class="w-4 h-4" />
+                            <Eye v-else class="w-4 h-4" />
                         </button>
                     </div>
                 </div>

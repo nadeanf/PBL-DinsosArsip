@@ -2,6 +2,7 @@
 import { Head, router, useForm } from '@inertiajs/vue3'
 import { ref } from 'vue'
 import GuestLayout from '@/layouts/GuestLayout.vue'
+import { Eye, EyeOff } from 'lucide-vue-next'
 
 defineOptions({ layout: GuestLayout })
 
@@ -95,20 +96,22 @@ function goToForgotPassword() {
 
                 <div>
                     <label class="block text-xs text-gray-700 mb-1">Password</label>
-                    <div class="relative">
+                    <div class="relative w-full flex items-center">
                         <input
                             v-model="form.password"
                             :type="showPassword ? 'text' : 'password'"
                             required
-                            class="field-input"
+                            class="field-input pr-10"
                             placeholder="Password"
                         />
                         <button
                             type="button"
                             @click="showPassword = !showPassword"
-                            class="absolute inset-y-0 right-2 flex items-center text-xs text-gray-600"
+                            class="absolute right-3 text-gray-500 hover:text-gray-700 focus:outline-none flex items-center justify-center"
+                            style="background: none; border: none; padding: 0;"
                         >
-                            {{ showPassword ? 'Sembunyikan' : 'Lihat' }}
+                            <EyeOff v-if="showPassword" class="w-4 h-4" />
+                            <Eye v-else class="w-4 h-4" />
                         </button>
                     </div>
                     <span v-if="form.errors.password" class="text-xs text-red-600">

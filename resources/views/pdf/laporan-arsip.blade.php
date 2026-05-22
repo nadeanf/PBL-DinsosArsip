@@ -69,9 +69,9 @@
 
         /* Warna Judul Tabel Hitam Pekat dengan Text Putih */
         th {
-            background-color: #000000 !important;
+            background-color: #050387 !important;
             color: #ffffff !important;
-            border: 1px solid #000000;
+            border: 1px solid #5964dc;
             padding: 8px;
             font-size: 11px;
             text-align: center;
