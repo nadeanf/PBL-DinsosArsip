@@ -40,4 +40,26 @@ class UserController extends Controller
 
     return back()->with('success', 'User berhasil ditambahkan');
 }
+public function update(Request $request, $id)
+{
+    $user = User::findOrFail($id);
+
+    $request->validate([
+        'name' => 'required',
+        'email' => 'required|email|unique:users,email,' . $user->id,
+        'nip' => 'required',
+        'bagian' => 'required',
+        'role' => 'required',
+    ]);
+
+    $user->update([
+        'name' => $request->name,
+        'email' => $request->email,
+        'nip' => $request->nip,
+        'bagian' => $request->bagian,
+        'role' => $request->role,
+    ]);
+
+    return back()->with('success', 'User berhasil diupdate');
+}
 }

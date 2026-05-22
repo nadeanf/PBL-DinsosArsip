@@ -7,6 +7,7 @@
         body {
             font-family: sans-serif;
             margin: 30px;
+            color: #000000;
         }
 
         .kop-container {
@@ -36,6 +37,7 @@
         .judul-dinas h3,
         .judul-dinas p {
             margin: 2px;
+            color: #000000;
         }
 
         .garis {
@@ -50,9 +52,14 @@
             margin-bottom: 20px;
         }
 
+        .judul-laporan h3 {
+            color: #000000;
+        }
+
         .tanggal {
             margin-bottom: 15px;
             font-size: 12px;
+            color: #000000;
         }
 
         table {
@@ -60,24 +67,30 @@
             border-collapse: collapse;
         }
 
-        /* FIX: Warna Judul Tabel & Border Samping Menjadi Hitam Pekat */
+        /* Warna Judul Tabel Hitam Pekat dengan Text Putih */
         th {
-            background-color: #00067c !important;
+            background-color: #000000 !important;
             color: #ffffff !important;
-            border: 1px solid #4366c5;
+            border: 1px solid #000000;
             padding: 8px;
             font-size: 11px;
             text-align: center;
+            font-weight: bold;
         }
 
         td {
             border: 1px solid #000000;
             padding: 8px;
             font-size: 11px;
+            color: #000000;
         }
 
         a {
-            color: blue;
+            color: #000000;
+            text-decoration: none;
+        }
+
+        a:hover {
             text-decoration: underline;
         }
     </style>
@@ -85,6 +98,7 @@
 
 <body>
 
+    <!-- KOP SURAT -->
     <div class="kop-container">
         <table class="kop-table">
             <tr>
@@ -102,14 +116,17 @@
         <div class="garis"></div>
     </div>
 
+    <!-- JUDUL -->
     <div class="judul-laporan">
         <h3>LAPORAN DATA ARSIP</h3>
     </div>
 
+    <!-- TANGGAL -->
     <div class="tanggal">
         Tanggal Export: {{ \Carbon\Carbon::now('Asia/Jakarta')->translatedFormat('d F Y H:i') }} WIB
     </div>
 
+    <!-- TABEL -->
     <table>
         <thead>
             <tr>
@@ -119,18 +136,19 @@
                 <th>Tahun</th>
                 <th>Kategori</th>
                 <th>Akses</th>
-                <th>Status Keaktifan</th> <th>Masa Aktif</th>       </tr>
+                <th>Masa Aktif</th>
+            </tr>
         </thead>
+
         <tbody>
             @foreach ($data as $index => $item)
             <tr>
                 <td style="text-align: center;">{{ $index + 1 }}</td>
                 <td>{{ $item['judul'] }}</td>
-                <td>{{ $item['nomor'] }}</td>
+                <td style="text-align: center;">{{ $item['nomor'] }}</td>
                 <td style="text-align: center;">{{ $item['tahun'] }}</td>
                 <td>{{ $item['kategori'] }}</td>
                 <td style="text-align: center;">{{ $item['status'] }}</td>
-                <td style="text-align: center;">{{ $item['status_keaktifan'] ?? 'Aktif' }}</td> 
                 <td style="text-align: center;">{{ $item['masa_aktif'] ?? '-' }}</td>
             </tr>
             @endforeach

@@ -12,6 +12,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\PengumumanController;
 use App\Http\Controllers\LandingController;
 use App\Models\Kategori;
+use App\Http\Controllers\SuperAdmin\PengaturanController;
 
 /* PUBLIC ROUTES */
 
@@ -87,10 +88,7 @@ Route::middleware('auth')->group(function () {
     // PIMPINAN
     Route::get('/pimpinan/dashboard', [ArsipController::class, 'dashboardPimpinan']);
 
-    Route::get('/pimpinan/statistik', function () {
-        if (auth()->user()->role !== 'pimpinan') abort(403);
-        return Inertia::render('Pimpinan/StatistikPimpinan', ['title' => 'Statistik']);
-    });
+    Route::get('/pimpinan/statistik', [ArsipController::class, 'statistikPimpinan']);   
 
     Route::get('/pimpinan/riwayat', [ArsipController::class, 'riwayatPimpinan']);
 
@@ -104,23 +102,17 @@ Route::middleware('auth')->group(function () {
     Route::get('/super-admin/kelolauser', [ArsipController::class, 'kelolaUserSuperAdmin'])
     ->name('superadmin.kelolauser');
 
-    Route::get('/super-admin/pengaturan', function () {
-        if (auth()->user()->role !== 'superadmin') abort(403);
-        return Inertia::render('SuperAdmin/Pengaturan');
-    });
+    Route::get('/super-admin/pengaturan', [ArsipController::class, 'pengaturanSuperAdmin']);
 
-    Route::get('/super-admin/editstoragelimit', function () {
-    if (auth()->user()->role !== 'superadmin') abort(403);
-    return Inertia::render('SuperAdmin/EditStorageLimit');
-    });
+    Route::get('/super-admin/editstoragelimit', [ArsipController::class, 'editStorage']);
     
-    Route::get('/super-admin/riwayat', function () {
-    if (auth()->user()->role !== 'superadmin') abort(403);
-    return Inertia::render('SuperAdmin/RiwayatSuperAdmin');
-    });
+    Route::get('/super-admin/riwayat', [ArsipController::class, 'riwayatSuperAdmin']);
+    
     Route::patch('/super-admin/user/{id}/toggle', [UserController::class, 'toggleStatus']);
     Route::post('/super-admin/tambah-user', [UserController::class, 'store']);
+    Route::put('/super-admin/user/{id}', [UserController::class, 'update']);
     Route::get('/super-admin/daftar-arsip', [ArsipController::class, 'listAdmin']);
+    Route::get('/super-admin/backup-database', [ArsipController::class, 'backupDatabase']);
 });
 /* AUTH + FITUR */
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -195,11 +187,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/admin/riwayat', [ArsipController::class, 'riwayatAdmin']);
 
-    Route::get('/admin/pengumuman', function () {
-        if (auth()->user()->role !== 'admin') abort(403);
-        return Inertia::render('admin/Pengumuman');
-    });
+    Route::get('/admin/pengumuman', [PengumumanController::class, 'index']);
+
     Route::post('/admin/pengumuman', [PengumumanController::class, 'store']);
+
+    Route::put('/admin/pengumuman/{pengumuman}', [PengumumanController::class, 'update']);
+
+    Route::delete('/admin/pengumuman/{pengumuman}', [PengumumanController::class, 'destroy']);
+
+    Route::post('/admin/pengumuman/{pengumuman}/restore', [PengumumanController::class, 'restore']);
+
+    Route::delete('/admin/pengumuman/{pengumuman}/permanent', [PengumumanController::class, 'permanentDelete']);
 
     Route::get('/admin/kelola-kategori', [ArsipController::class, 'kelolaKategori'])
     ->middleware('auth');
@@ -226,6 +224,20 @@ Route::delete('/kategori/{id}', function ($id) {
     if (auth()->user()->role !== 'admin') abort(403);
 
     \App\Models\Kategori::findOrFail($id)->delete();
+
+    return back();
+});
+
+Route::patch('/kategori/{id}', function (Illuminate\Http\Request $request, $id) {
+
+    if (auth()->user()->role !== 'admin') abort(403);
+
+    $request->validate([
+        'nama' => 'required|string',
+    ]);
+
+    $kategori = \App\Models\Kategori::findOrFail($id);
+    $kategori->update(['nama' => $request->nama]);
 
     return back();
 });

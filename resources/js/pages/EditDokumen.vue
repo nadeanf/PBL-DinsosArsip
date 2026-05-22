@@ -8,13 +8,64 @@ import TreeDropdown from '@/components/TreeDropdown.vue'
 
 defineOptions({ layout: UserLayout })
 
-
+const fileError = ref('')
 const isDragging = ref(false)
+const getLimit = (ext: string) => {
+  const dokumen = [
+    'pdf','doc','docx',
+    'xls','xlsx',
+    'ppt','pptx',
+    'txt'
+  ]
+
+  const gambar = [
+    'jpg',
+    'jpeg',
+    'png',
+    'gif',
+    'webp',
+    'bmp'
+  ]
+
+  const audio = [
+    'mp3','wav','ogg','flac',
+    'aac','wma','m4a','opus',
+    'alac','aiff','dsd','pcm'
+  ]
+
+  const video = [
+    'mp4','avi','mkv',
+    'mov','wmv','flv','mpeg'
+  ]
+
+  if (dokumen.includes(ext)) return 2
+  if (gambar.includes(ext)) return 5
+  if (audio.includes(ext)) return 25
+  if (video.includes(ext)) return 100
+
+  return 2
+}
 
 const setFiles = (files: File[]) => {
-  form.files = files
+  fileError.value = ''
+  const validFiles: File[] = []
 
-  filePreviews.value = files.map((file: any) => ({
+  for (const file of files) {
+    const ext = file.name.split('.').pop()?.toLowerCase() || ''
+    const sizeMB = file.size / 1024 / 1024
+    const limit = getLimit(ext)
+
+    if (sizeMB > limit) {
+      fileError.value = `${file.name} melebihi batas ${limit}MB`
+      continue
+    }
+
+    validFiles.push(file)
+  }
+
+  form.files = validFiles
+
+  filePreviews.value = validFiles.map(file => ({
     name: file.name,
     type: file.type,
     url: URL.createObjectURL(file)
@@ -133,6 +184,16 @@ const submit = () => {
             File Dokumen
           </span>
 
+          <div 
+  v-if="fileError" 
+  class="flex items-center gap-3 bg-red-100 border border-red-400 text-red-800 px-4 py-3 rounded-xl shadow-sm mt-2"
+>
+  <span class="text-xl"></span>
+  <p class="text-sm font-semibold">
+    {{ fileError }}
+  </p>
+</div>
+
           <div
             @click="triggerUpload"
             @dragover.prevent="handleDragOver"
@@ -182,6 +243,9 @@ const submit = () => {
               <p class="text-gray-400 text-xs mt-2">
                 PDF, DOC, XLS, JPG, PNG, MP3, MP4
               </p>
+              <p class="text-gray-400 text-xs mt-2">
+                 (Max: Dokumen 2 MB | Gambar 5 MB | Audio 25 MB | Video 100 MB)
+                </p>
 
             </div>
 
@@ -192,13 +256,17 @@ const submit = () => {
         <div class="space-y-4 mt-6">
 
           <div>
-            <label class="block font-black mb-1 text-sm uppercase">Judul Dokumen</label>
+            <label class="block font-black mb-1 text-sm uppercase">Judul Dokumen 
+              <span class="text-red-600">*</span>
+            </label>
             <input v-model="form.judul" class="w-full p-4 bg-white rounded-2xl border" />
           </div>
 
         
             <div>
-            <label class="block font-black mb-1 text-sm uppercase">Nomor</label>
+            <label class="block font-black mb-1 text-sm uppercase">Nomor
+              <span class="text-red-600">*</span>
+            </label>
            <input v-model="form.nomor" class="w-full p-4 bg-white rounded-2xl border" />
 
 <div v-if="form.errors.nomor" class="text-red-500 text-sm">
@@ -207,13 +275,17 @@ const submit = () => {
           </div>
 
           <div>
-            <label class="block font-black mb-1 text-sm uppercase">Tahun</label>
+            <label class="block font-black mb-1 text-sm uppercase">Tahun
+              <span class="text-red-600">*</span>
+            </label>
             <input v-model="form.tahun" class="w-full p-4 bg-white rounded-2xl border" />
           </div>
 
           <!-- KATEGORI -->
           <div>
-            <label class="block font-black mb-1 text-sm uppercase">Kategori</label>
+            <label class="block font-black mb-1 text-sm uppercase">Kategori
+              <span class="text-red-600">*</span>
+            </label>
             <div class="relative">
 
               <!-- BUTTON -->
@@ -244,7 +316,9 @@ const submit = () => {
 
           <!-- STATUS -->
          <div>
-  <label class="block font-black mb-2 text-sm uppercase">Status Akses</label>
+        <label class="block font-black mb-2 text-sm uppercase">Status Akses 
+          <span class="text-red-600">*</span>
+        </label>
 
   <div class="flex gap-6">
     <label class="flex items-center gap-2 cursor-pointer">
@@ -261,7 +335,9 @@ const submit = () => {
 
           <!-- PRIVATE -->
           <div v-if="isPrivate">
-            <label class="block font-black mb-1 text-sm uppercase">Bidang</label>
+            <label class="block font-black mb-1 text-sm uppercase">Bidang 
+              <span class="text-red-600">*</span>
+            </label>
            <select v-model="form.bagian" class="w-full p-4 bg-white rounded-2xl border">
 
               <option value="">-- Pilih Bidang --</option>
@@ -276,12 +352,16 @@ const submit = () => {
           </div>
 
           <div>
-            <label class="block font-black mb-1 text-sm uppercase">Lokasi</label>
+            <label class="block font-black mb-1 text-sm uppercase">Lokasi 
+              <span class="text-red-600">*</span>
+            </label>
             <input v-model="form.lokasi" class="w-full p-4 bg-white rounded-2xl border" />
           </div>
 
           <div>
-            <label class="block font-black mb-1 text-sm uppercase">Deskripsi</label>
+            <label class="block font-black mb-1 text-sm uppercase">Deskripsi 
+              <span class="text-red-600">*</span>
+            </label>
             <textarea v-model="form.deskripsi" class="w-full p-4 bg-white rounded-2xl border"></textarea>
           </div>
 

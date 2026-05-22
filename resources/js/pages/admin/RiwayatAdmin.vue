@@ -22,8 +22,13 @@ const itemsPerPage = 5
 
 const filteredHistory = computed(() => {
     return mappedHistory.value.filter(item =>
-        item.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        item.aksi.toLowerCase().includes(searchQuery.value.toLowerCase())
+        String(item.title || '')
+            .toLowerCase()
+            .includes(searchQuery.value.toLowerCase()) ||
+
+        String(item.aksi || '')
+            .toLowerCase()
+            .includes(searchQuery.value.toLowerCase())
     )
 })
 
@@ -65,14 +70,14 @@ const formatWaktu = (dateString) => {
     return 'pukul ' + date.toLocaleTimeString('id-ID', {
         hour: '2-digit',
         minute: '2-digit'
-    }).replace('.', ':') // Mengubah format bawaan ID (17.59) menjadi (17:59) jika diperlukan, atau hapus .replace jika ingin tetap titik.
+    }).replace('.', ':')
 }
 
 const openPreview = (item) => {
-    // 🔥 buka modal dulu, lalu set selectedDoc
+    // buka modal dulu, lalu set selectedDoc
     previewModal.value = true
     
-    // 🔥 gunakan nextTick untuk memastikan modal sudah render
+    // gunakan nextTick untuk memastikan modal sudah render
     nextTick(() => {
         selectedDoc.value = item
     })
@@ -96,22 +101,41 @@ const downloadFile = (item) => {
     window.location.href = `/download/${item.id}`
 }
 
+const normalizeText = (value) =>
+    String(value || '').toLowerCase().trim()
+
 const canAccessFull = (doc) => {
     const user = page.props.auth?.user
 
-    if (!user) return false
+    if (!doc || !user) return false
 
-    // approved
-    if (doc.request_status === 'approved') return true
+    // ADMIN & SUPERADMIN
+    if (['admin', 'superadmin'].includes(user.role)) {
+        return true
+    }
 
-    // publik
-    if (doc.status === 'publik') return true
+    // PUBLIK
+    if (normalizeText(doc.status) === 'publik') {
+        return true
+    }
 
-    // pemilik
-    if (doc.user_id === user.id) return true
+    // OWNER
+    if (doc.user_id === user.id) {
+        return true
+    }
 
-    // private tapi bagian sama
-    if (doc.status === 'private' && doc.bidang === user.bagian) return true
+    // APPROVED
+    if (doc.request_status === 'approved') {
+        return true
+    }
+
+    // BIDANG SAMA
+    if (
+        normalizeText(doc.status) === 'private' &&
+        normalizeText(doc.bidang) === normalizeText(user.bagian)
+    ) {
+        return true
+    }
 
     return false
 }
@@ -137,6 +161,7 @@ const getFileType = (path) => {
 
     if (['jpg','jpeg','png','gif','webp'].includes(ext)) return 'IMAGE'
     if (ext === 'pdf') return 'PDF'
+    if (['xls', 'xlsx', 'csv'].includes(ext)) return 'EXCEL'
 
     return 'FILE'
 }
@@ -145,7 +170,7 @@ const mappedHistory = computed(() => {
     return (props.riwayat || []).map(item => ({
         ...item,
         format: item.files?.length
-            ? getFileType(item.files[0].path_file)
+            ? getFileType(item.files?.[0]?.path_file)
             : 'FILE'
     }))
 })
@@ -160,7 +185,6 @@ const mappedHistory = computed(() => {
             Riwayat Aktivitas
         </h1>
 
-        <!-- SEARCH -->
         <input 
             v-model="searchQuery"
             type="text"
@@ -168,42 +192,37 @@ const mappedHistory = computed(() => {
             class="w-full p-4 border rounded-xl mb-6"
         />
 
-        <!-- LIST -->
         <div 
             v-for="item in paginatedData"
             :key="item.id"
             @click="openPreview(item)"
-            class="cursor-pointer bg-[#7fa1b1] p-5 rounded-xl mb-4 text-white shadow-md"
+            class="cursor-pointer bg-[#7fa1b1] p-5 rounded-xl mb-4 text-white shadow-md transition hover:bg-[#6c8f9f]"
         >
-
-            <div class="flex justify-between">
-
+            <div class="flex justify-between items-center">
                 <div>
                     <p class="font-bold text-lg">
                         {{ item.title }}
                     </p>
-
-                    <p class="text-sm">
-                        {{ item.aksi }}
-                    </p>
                 </div>
 
-                <div class="text-right text-xs bg-white/20 px-2 py-1 rounded flex flex-col justify-center items-end">
-                <span class="font-medium">{{ formatTanggal(item.waktu) }}</span>
-                    <span class="opacity-80">{{ formatWaktu(item.waktu) }}</span>
+                <div class="text-right flex flex-col items-end gap-1">
+                    <span class="text-xs font-semibold bg-white/20 px-2 py-0.5 rounded">
+                        Status: {{ item.aksi || 'Lihat' }}
+                    </span>
+                    <span class="text-xs font-medium mt-1">
+                        {{ formatTanggal(item.waktu) }}
+                    </span>
+                    <span class="text-[10px] opacity-80">
+                        {{ formatWaktu(item.waktu) }}
+                    </span>
                 </div>
-
             </div>
-
         </div>
 
-        <!-- PAGINATION -->
         <div
             v-if="totalPages > 1"
             class="flex justify-center items-center gap-2 mt-6"
         >
-
-            <!-- PREV -->
             <button
                 @click="setPage(currentPage - 1)"
                 :disabled="currentPage === 1"
@@ -212,7 +231,6 @@ const mappedHistory = computed(() => {
                 Prev
             </button>
 
-            <!-- ANGKA -->
             <button
                 v-for="p in totalPages"
                 :key="p"
@@ -227,7 +245,6 @@ const mappedHistory = computed(() => {
                 {{ p }}
             </button>
 
-            <!-- NEXT -->
             <button
                 @click="setPage(currentPage + 1)"
                 :disabled="currentPage === totalPages"
@@ -235,10 +252,8 @@ const mappedHistory = computed(() => {
             >
                 Next
             </button>
-
         </div>
 
-        <!-- EMPTY -->
         <div
             v-if="filteredHistory.length === 0"
             class="text-center py-10 text-gray-400"
@@ -248,26 +263,20 @@ const mappedHistory = computed(() => {
 
     </div>
 
-    <!-- PREVIEW MODAL -->
     <div
         v-if="previewModal && selectedDoc"
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-6"
         @click.self="previewModal = false"
     >
-
         <div class="bg-white w-full max-w-5xl rounded-[30px] shadow-2xl overflow-hidden flex flex-col md:flex-row">
-
-            <!-- LEFT -->
+            
             <div class="w-full md:w-1/2 bg-gray-100 flex items-center justify-center p-6">
-
-                <!-- IMAGE -->
                 <img 
                     v-if="selectedDoc?.format === 'IMAGE' && canAccessFull(selectedDoc)"
                     :src="`/storage/${selectedDoc?.files?.[0]?.path_file}`"
                     class="max-h-[400px] object-contain rounded-xl shadow"
                 />
 
-                <!-- PDF -->
                 <iframe 
                     v-else-if="selectedDoc?.format === 'PDF' && canAccessFull(selectedDoc)"
                     :src="`/storage/${selectedDoc?.files?.[0]?.path_file}`"
@@ -275,18 +284,25 @@ const mappedHistory = computed(() => {
                 >
                 </iframe>
 
-                <!-- NO ACCESS -->
+                <div
+                    v-else-if="canAccessFull(selectedDoc)"
+                    class="text-center space-y-4"
+                >
+                    <div class="text-6xl">📄</div>
+                    <p class="font-semibold text-gray-700">
+                        Preview tidak tersedia
+                    </p>
+                </div>
+
                 <div
                     v-else
                     class="text-gray-500 text-center space-y-3"
                 >
-
                     <div>
                         🔒 Dokumen ini bersifat privat <br />
                         Anda tidak memiliki akses
                     </div>
 
-                    <!-- pending -->
                     <div
                         v-if="selectedDoc?.request_status === 'pending'"
                         class="text-yellow-500 font-semibold text-sm"
@@ -294,7 +310,6 @@ const mappedHistory = computed(() => {
                         ⏳ Menunggu persetujuan
                     </div>
 
-                    <!-- rejected -->
                     <div
                         v-else-if="selectedDoc?.request_status === 'ditolak'"
                         class="text-red-500 font-semibold text-sm"
@@ -302,108 +317,79 @@ const mappedHistory = computed(() => {
                         ❌ Akses ditolak
                     </div>
 
-                    <!-- request -->
                     <button
-                    v-else
+                        v-else
                         @click.stop.prevent="requestAkses(selectedDoc.id)"
                         class="bg-yellow-500 text-white px-4 py-2 rounded-lg text-sm font-semibold"
                     >
                         Minta Akses
                     </button>
-
                 </div>
-
             </div>
 
-            <!-- RIGHT -->
             <div class="w-full md:w-1/2 p-8 flex flex-col justify-between">
-
                 <div>
-
                     <div class="flex justify-between items-start mb-4">
-
                         <h2 class="text-2xl font-black text-gray-800">
                             {{ selectedDoc?.title }}
                         </h2>
-
-                        <button @click="previewModal = false">
+                        <button @click="previewModal = false" class="text-gray-500 hover:text-gray-700">
                             ✕
                         </button>
-
                     </div>
 
                     <div class="flex flex-wrap gap-2 mb-4">
-
                         <span class="bg-gray-200 px-3 py-1 rounded-full text-xs font-bold">
                             No: {{ selectedDoc?.nomor }}
                         </span>
-
                         <span class="bg-blue-100 px-3 py-1 rounded-full text-xs font-bold">
                             {{ selectedDoc?.kategori }}
                         </span>
-
                         <span class="bg-green-100 px-3 py-1 rounded-full text-xs font-bold uppercase">
                             {{ selectedDoc?.jenis }}
                         </span>
-
                     </div>
 
                     <div class="grid grid-cols-2 gap-4 text-sm">
-
                         <div>
                             <p class="font-bold">Tahun</p>
                             <p>{{ selectedDoc?.tahun }}</p>
                         </div>
-
                         <div>
                             <p class="font-bold">Status</p>
                             <p>{{ selectedDoc?.status }}</p>
                         </div>
-
                         <div class="col-span-2">
                             <p class="font-bold">Lokasi</p>
                             <p>{{ selectedDoc?.lokasi }}</p>
                         </div>
-
                     </div>
 
                     <div class="mt-6">
-
-                        <p class="font-bold">
-                            Deskripsi
-                        </p>
-
-                        <p>
+                        <p class="font-bold">Deskripsi</p>
+                        <p class="text-gray-600">
                             {{ selectedDoc?.deskripsi || '-' }}
                         </p>
-
                     </div>
-
                 </div>
 
                 <div class="flex justify-end gap-3 mt-6">
-
                     <a
                         v-if="selectedDoc?.files?.length && canAccessFull(selectedDoc)"
                         :href="`/download/${selectedDoc?.id}`"
-                        class="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold"
+                        class="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold text-center hover:bg-blue-700"
                     >
                         Download
                     </a>
-
                     <button
                         @click="previewModal = false"
-                        class="bg-gray-300 px-4 py-2 rounded-xl font-bold"
+                        class="bg-gray-300 px-4 py-2 rounded-xl font-bold hover:bg-gray-400"
                     >
                         Tutup
                     </button>
-
                 </div>
-
             </div>
 
         </div>
-
     </div>
-
 </template>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AppSidebarSuperAdminLayout from '@/layouts/app/AppSidebarSuperAdminLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
-import { Search, Trash2, Eye, UserPlus, RotateCcw, X } from 'lucide-vue-next';
+import { Search, Eye, UserPlus, RotateCcw, X, Pencil, UserX } from 'lucide-vue-next';
 
 import { router } from '@inertiajs/vue3';
 import { ref } from 'vue';
@@ -42,7 +42,29 @@ const closePreview = () => {
     selectedUser.value = null;
 };
 
+const openEdit = (user: User) => {
+    editForm.id = user.id;
+    editForm.name = user.name;
+    editForm.email = user.email;
+    editForm.nip = user.nip;
+    editForm.bagian = user.bagian;
+    editForm.role = user.role;
+
+    showEditModal.value = true;
+};
+
 const showTambahModal = ref(false);
+
+const showEditModal = ref(false);
+
+const editForm = useForm({
+    id: null as number | null,
+    name: '',
+    email: '',
+    nip: '',
+    bagian: '',
+    role: '',
+});
 
 const form = useForm({
     name: '',
@@ -59,6 +81,14 @@ const submitTambahUser = () => {
         onSuccess: () => {
             showTambahModal.value = false;
             form.reset();
+        }
+    });
+};
+
+const submitEditUser = () => {
+    editForm.put(`/super-admin/user/${editForm.id}`, {
+        onSuccess: () => {
+            showEditModal.value = false;
         }
     });
 };
@@ -194,12 +224,12 @@ defineOptions({
                                 <div class="flex justify-center gap-5">
 
                             <!-- NONAKTIFKAN -->
-                             <button
-                             v-if="user.is_active"
-                              @click="router.patch(`/super-admin/user/${user.id}/toggle`)"
-                              class="text-red-600 hover:scale-125 transition"
+                            <button
+                                v-if="user.is_active"
+                                @click="router.patch(`/super-admin/user/${user.id}/toggle`)"
+                                class="text-orange-500 hover:scale-125 transition"
                             >
-                              <Trash2 class="w-5 h-5" />
+                                <UserX class="w-5 h-5" />
                             </button>
 
                          <!-- AKTIFKAN -->
@@ -211,6 +241,14 @@ defineOptions({
                                 <RotateCcw class="w-5 h-5" />
                             </button>
 
+
+                            <!-- EDIT -->
+                            <button
+                                @click="openEdit(user)"
+                                class="text-yellow-400 hover:scale-125 transition"
+                            >
+                                <Pencil class="w-5 h-5" />
+                            </button>
                         <!-- DETAIL -->
                         <button
                         @click="openPreview(user)"
@@ -379,12 +417,20 @@ defineOptions({
                 class="w-full border rounded-xl px-4 py-3"
             />
 
-            <input
-                v-model="form.bagian"
-                type="text"
-                placeholder="Bagian"
-                class="w-full border rounded-xl px-4 py-3"
-            />
+            <select
+            v-model="form.bagian"
+            class="w-full border rounded-xl px-4 py-3"
+                >
+            <option value="">Pilih Bagian</option>
+            <option value="Sekretariat">Sekretariat</option>
+            <option value="Bidang Rehabilitasi Sosial">Bidang Rehabilitasi Sosial</option>
+            <option value="Bidang Perlindungan dan Jaminan Sosial">
+            Bidang Perlindungan dan Jaminan Sosial
+            </option>
+            <option value="Bidang Pemberdayaan Sosial dan Penanganan Fakir Miskin">
+            Bidang Pemberdayaan Sosial dan Penanganan Fakir Miskin
+            </option>
+        </select>
 
             <select
                 v-model="form.role"
@@ -414,6 +460,80 @@ defineOptions({
                 class="w-full bg-[#2f4fa2] text-white py-3 rounded-xl font-bold hover:bg-blue-900 transition"
             >
                 Tambah User
+            </button>
+
+        </form>
+    </div>
+</div>
+<!-- MODAL EDIT USER -->
+<div
+    v-if="showEditModal"
+    class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4"
+>
+    <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden">
+
+        <!-- HEADER -->
+        <div class="bg-yellow-500 text-white px-6 py-4 flex justify-between items-center">
+            <h2 class="font-bold text-lg">Edit User</h2>
+
+            <button @click="showEditModal = false">
+                <X class="w-5 h-5" />
+            </button>
+        </div>
+
+        <!-- FORM -->
+        <form @submit.prevent="submitEditUser" class="p-6 space-y-4">
+
+            <input
+                v-model="editForm.name"
+                type="text"
+                placeholder="Nama"
+                class="w-full border rounded-xl px-4 py-3"
+            />
+
+            <input
+                v-model="editForm.email"
+                type="email"
+                placeholder="Email"
+                class="w-full border rounded-xl px-4 py-3"
+            />
+
+            <input
+                v-model="editForm.nip"
+                type="text"
+                placeholder="NIP"
+                class="w-full border rounded-xl px-4 py-3"
+            />
+
+            <select
+                v-model="editForm.bagian"
+                class="w-full border rounded-xl px-4 py-3"
+            >
+                <option value="">Pilih Bagian</option>
+                <option value="Sekretariat">Sekretariat</option>
+                <option value="Bidang Rehabilitasi Sosial">Bidang Rehabilitasi Sosial</option>
+                <option value="Bidang Perlindungan dan Jaminan Sosial">
+                    Bidang Perlindungan dan Jaminan Sosial
+                </option>
+                <option value="Bidang Pemberdayaan Sosial dan Penanganan Fakir Miskin">
+                    Bidang Pemberdayaan Sosial dan Penanganan Fakir Miskin
+                </option>
+            </select>
+
+            <select
+                v-model="editForm.role"
+                class="w-full border rounded-xl px-4 py-3"
+            >
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+                <option value="pimpinan">Pimpinan</option>
+            </select>
+
+            <button
+                type="submit"
+                class="w-full bg-yellow-500 text-white py-3 rounded-xl font-bold hover:bg-yellow-600 transition"
+            >
+                Simpan Perubahan
             </button>
 
         </form>

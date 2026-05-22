@@ -1,227 +1,370 @@
 <script setup>
 import AuthLayoutPimpinan from '@/layouts/AuthLayoutPimpinan.vue'
-import { ref } from 'vue'
-import { Trash2, Eye, Download } from 'lucide-vue-next' 
+import { ref, computed } from 'vue'
+import { Head, usePage } from '@inertiajs/vue3'
+import { Eye, Download } from 'lucide-vue-next'
+import { Pie, Bar } from 'vue-chartjs'
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend,
+  CategoryScale,
+  LinearScale,
+  BarElement
+} from 'chart.js'
+
+ChartJS.register(
+  ArcElement, 
+  Tooltip, 
+  Legend,
+  CategoryScale,
+  LinearScale,
+  BarElement
+)
 
 defineOptions({
   layout: AuthLayoutPimpinan
 })
 
-// state filter
+const page = usePage()
+
+const tipeDokumen = computed(() => page.props?.tipeDokumen ?? [])
+const totalDownload = computed(() => page.props?.totalDownload ?? 0)
+const totalArsip = computed(() => page.props?.totalArsip ?? 0)
+
+const users = computed(() => page.props?.users?.data ?? [])
+const links = computed(() => page.props?.users?.links ?? [])
+
+const totalUser = computed(() => page.props?.totalUser ?? 0)
+const totalAktif = computed(() => page.props?.totalAktif ?? 0)
+const totalAdmin = computed(() => page.props?.totalAdmin ?? 0)
+
+const normalizeNama = (nama) => {
+  if (!nama) return ''
+  nama = nama.toLowerCase()
+
+  if (nama.includes('foto')) return 'Foto'
+  if (nama.includes('dokumen')) return 'Dokumen'
+  if (nama.includes('video')) return 'Video'
+  if (nama.includes('audio')) return 'Audio'
+
+  return nama
+}
+
+const getTipeCount = (nama) => {
+  return tipeDokumen.value.find(i => normalizeNama(i.nama) === nama)?.total ?? 0
+}
+
+const statistik = computed(() => ({
+  dokumen: getTipeCount('Dokumen'),
+  foto: getTipeCount('Foto'),
+  video: getTipeCount('Video'),
+  audio: getTipeCount('Audio'),
+  download: totalDownload.value ?? 0,
+  dilihat: totalArsip.value ?? 0
+}))
+
 const search = ref('')
 const kategori = ref('')
 const tanggal_awal = ref('')
 const tanggal_akhir = ref('')
 
-// DUMMY
-const statistik = ref({
-  dokumen: 68,
-  foto: 20,
-  video: 10,
-  audio: 2,
-  download: 45,
-  dilihat: 120
-})
-
-// DATA AKSES CEPAT
 const aksesCepat = ref([
   { nama: 'Peraturan Daerah' },
   { nama: 'Galeri Foto' },
   { nama: 'Galeri Video' }
 ])
 
-// DUMMY USER
-const users = ref([
-  {
-    nama: 'Admin Arsip',
-    role: 'Admin',
-    status: 'Aktif',
-    tanggal: '04 Sep 2025',
-    dokumen: 12
-  },
-  {
-    nama: 'User Dinas',
-    role: 'User',
-    status: 'Aktif',
-    tanggal: '10 Okt 2025',
-    dokumen: 8
-  },
-  {
-    nama: 'Super Admin',
-    role: 'Superadmin',
-    status: 'Aktif',
-    tanggal: '01 Jan 2025',
-    dokumen: 25
+// ================= CHART =================
+const chartData = computed(() => ({
+  labels: ['Dokumen', 'Foto', 'Video', 'Audio'],
+  datasets: [
+    {
+      data: [
+        statistik.value.dokumen,
+        statistik.value.foto,
+        statistik.value.video,
+        statistik.value.audio
+      ],
+      backgroundColor: [
+        '#4f46e5',
+        '#22c55e',
+        '#f59e0b',
+        '#ef4444'
+      ],
+      cutout: '60%' // biar donut
+    }
+  ]
+}))
+
+const chartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      position: 'bottom'
+    }
   }
-])
-
-
-const handleDelete = (user) => {
-  console.log('Hapus user:', user)
 }
 
-const handleView = (user) => {
-  console.log('Lihat user:', user)
+  const kategoriData = computed(() => page.props?.kategoriStat ?? [])
+
+const barChartData = computed(() => ({
+  labels: kategoriData.value.map(i => i.nama),
+  datasets: [
+    {
+      label: 'Jumlah Arsip',
+      data: kategoriData.value.map(i => i.total),
+      backgroundColor: '#3b82f6'
+    }
+  ]
+}))
+
+const barChartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      display: false
+    }
+  }
 }
 </script>
-
 <template>
+<div>
+<Head title="Statistik & Laporan - Pimpinan" />
+
 <div class="p-6 bg-[#f3f4f6] min-h-screen space-y-6">
 
-  <!-- TITLE -->
   <h1 class="text-2xl font-bold text-gray-800">
-    Statistik & Laporan
+    Statistik & Laporan Sistem
   </h1>
 
-  <!-- SEARCH -->
-  <div class="bg-[#2f6f7e] p-4 rounded-xl flex flex-wrap gap-3 items-center">
+  
 
-    <div class="flex items-center bg-white px-3 py-2 rounded-lg text-sm flex-1">
-      <span class="text-gray-400 mr-2">🔍</span>
-      <input v-model="search" placeholder="Cari dokumen, nomor surat..." class="outline-none w-full"/>
-    </div>
+ <!-- STATISTIK BARU (1 CARD SAJA) -->
+<div class="bg-white rounded-2xl shadow p-6 space-y-6">
 
-    <select v-model="kategori" class="bg-white px-3 py-2 rounded-lg text-sm">
-      <option value="">Semua Kategori</option>
-      <option>Dokumen</option>
-      <option>Foto</option>
-      <option>Video</option>
-    </select>
+  <div class="flex justify-between items-center">
 
-    <input type="date" v-model="tanggal_awal" class="bg-white px-3 py-2 rounded-lg text-sm"/>
-    <input type="date" v-model="tanggal_akhir" class="bg-white px-3 py-2 rounded-lg text-sm"/>
-
-    <button class="bg-white px-4 py-2 rounded-lg text-sm font-semibold">
-      Cari
-    </button>
-  </div>
-
-  <!-- STATISTIK UTAMA -->
-  <div class="grid md:grid-cols-3 gap-4">
-
-    <!-- CHART -->
-    <div class="bg-[#6f98a8] p-4 rounded-xl flex justify-center items-center">
-      <div class="w-52 h-52 bg-white rounded-full flex items-center justify-center">
-        <span class="text-gray-400 text-sm">Pie Chart</span>
-      </div>
-    </div>
-
-    <!-- TOTAL -->
-    <div class="bg-[#6f98a8] p-4 rounded-xl space-y-3">
-      <div class="bg-white rounded px-3 py-2 text-sm">Dokumen : {{ statistik.dokumen }}</div>
-      <div class="bg-white rounded px-3 py-2 text-sm">Foto : {{ statistik.foto }}</div>
-      <div class="bg-white rounded px-3 py-2 text-sm">Video : {{ statistik.video }}</div>
-      <div class="bg-white rounded px-3 py-2 text-sm">Audio : {{ statistik.audio }}</div>
-    </div>
-
-    <!-- PROGRESS -->
-    <div class="space-y-3 flex flex-col justify-between h-full">
-
-      <!-- DIUNDUH -->
-      <div class="bg-[#6f98a8] p-4 rounded-xl flex items-center justify-between min-h-[110px]">
-
-        <div class="flex flex-col justify-center">
-          <div class="text-xs bg-white px-2 py-1 rounded w-fit mb-2 font-semibold text-gray-700">
-            {{ statistik.download }}
-          </div>
-          <p class="text-white text-sm font-medium">Dokumen diunduh</p>
-        </div>
-
-        <!-- ICON -->
-        <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-md">
-          <Download class="w-5 h-5 text-[#2f4fa2]" />
-        </div>
-
-      </div>
-
-      <!-- DILIHAT -->
-      <div class="bg-[#6f98a8] p-4 rounded-xl flex items-center justify-between min-h-[110px]">
-
-        <div class="flex flex-col justify-center">
-          <div class="text-xs bg-white px-2 py-1 rounded w-fit mb-2 font-semibold text-gray-700">
-            {{ statistik.dilihat }}
-          </div>
-          <p class="text-white text-sm font-medium">Dokumen dilihat</p>
-        </div>
-
-        <!-- ICON -->
-        <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-md">
-          <Eye class="w-5 h-5 text-[#2f4fa2]" />
-          </div>
-        </div>
-      </div>
-    </div>
-
-  <!-- AKSES CEPAT -->
-  <div>
-    <h2 class="bg-[#2f4fa2] text-white px-4 py-1 rounded-md w-fit text-sm mb-3">
-      Akses Cepat
-    </h2>
-
-    <div class="grid md:grid-cols-3 gap-4">
-
-      <div v-for="(item, i) in aksesCepat" :key="i" class="bg-[#6f98a8] p-4 rounded-xl space-y-2">
-        <div class="w-10 h-10 bg-gray-200 rounded"></div>
-        <div class="bg-white text-xs px-2 py-1 rounded w-fit">{{ item.nama }}</div>
-        <div class="h-2 bg-gray-300 rounded w-24"></div>
-      </div>
-
+    <div class="text-xs text-gray-500">
+      Total Arsip: {{ totalArsip }}
     </div>
   </div>
 
-  <!-- PENGGUNA TERAKTIF -->
-  <div>
-    <h2 class="bg-[#2f4fa2] text-white px-4 py-1 rounded-md w-fit text-sm mb-3">
-      Pengguna Teraktif
+  <div class="grid md:grid-cols-2 gap-6 items-center">
+
+    <div class="h-[240px]">
+      <Pie :data="chartData" :options="chartOptions" />
+    </div>
+
+    <div class="space-y-3">
+      <div class="flex justify-between bg-gray-50 p-3 rounded-xl">
+        <span>Dokumen</span>
+        <b>{{ statistik.dokumen }}</b>
+      </div>
+
+      <div class="flex justify-between bg-gray-50 p-3 rounded-xl">
+        <span>Foto</span>
+        <b>{{ statistik.foto }}</b>
+      </div>
+
+      <div class="flex justify-between bg-gray-50 p-3 rounded-xl">
+        <span>Video</span>
+        <b>{{ statistik.video }}</b>
+      </div>
+
+      <div class="flex justify-between bg-gray-50 p-3 rounded-xl">
+        <span>Audio</span>
+        <b>{{ statistik.audio }}</b>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="grid grid-cols-2 gap-4 pt-4 border-t">
+
+    <div class="flex justify-between bg-blue-50 p-3 rounded-xl">
+      <span>Download</span>
+      <b>{{ statistik.download }}</b>
+    </div>
+
+    <div class="flex justify-between bg-green-50 p-3 rounded-xl">
+      <span>Dilihat</span>
+      <b>{{ statistik.dilihat }}</b>
+    </div>
+    </div>
+  </div>
+
+  <!-- CARD 2 (BAR CHART) -->
+  <div class="bg-white rounded-2xl shadow p-6 space-y-4">
+    <h2 class="font-semibold text-gray-700">
+      Statistik Per Kategori
     </h2>
 
-    <div class="bg-[#6f98a8] rounded-xl p-4 overflow-x-auto">
+    <div class="h-[300px]">
+      <Bar :data="barChartData" :options="barChartOptions" />
+    </div>
+  </div>
 
-      <table class="w-full text-xs text-white">
-        <thead>
-          <tr class="text-left border-b border-white/30">
-            <th class="py-2">Pengguna</th>
-            <th>Role</th>
-            <th>Status</th>
-            <th>Bergabung</th>
-            <th>Action</th>
-            <th>Dokumen</th>
-          </tr>
-        </thead>
+  
+  <!-- TOTAL PENGGUNA AKTIF -->
+<div class="space-y-5">
 
-        <tbody>
-          <tr v-for="(user, i) in users" :key="i" class="border-b border-white/20">
-            <td class="py-2">{{ user.nama }}</td>
-            <td>{{ user.role }}</td>
-            <td>{{ user.status }}</td>
-            <td>{{ user.tanggal }}</td>
+  <h2 class="bg-[#2f4fa2] text-white px-4 py-2 rounded-lg w-fit text-sm font-semibold">
+    Total Pengguna Aktif
+  </h2>
 
-            <!-- ICON -->
-            <td>
-              <div class="flex gap-2">
-                <button 
-                  @click.stop="handleDelete(user)"
-                  class="p-1.5 rounded-lg hover:bg-red-100 hover:scale-110 transition"
-                >
-                  <Trash2 class="w-4 h-4 text-red-500" />
-                </button>
+  <!-- CARD USER -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
 
-                <button 
-                  @click.stop="handleView(user)"
-                  class="p-1.5 rounded-lg hover:bg-blue-100 hover:scale-110 transition"
-                >
-                  <Eye class="w-4 h-4 text-blue-500" />
-                </button>
-              </div>
-            </td>
+    <!-- TOTAL USER -->
+    <div class="bg-[#759fb1] p-4 rounded-2xl relative text-white shadow-sm border border-white/10">
 
-            <td>{{ user.dokumen }}</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="bg-white text-gray-800 px-3 py-0.5 rounded-full w-fit font-bold mb-2 text-[10px] shadow-inner">
+        {{ totalUser }}
+      </div>
+
+      <p class="font-bold text-xs">Total Pengguna</p>
+
+      <div class="absolute right-5 top-1/2 -translate-y-1/2 w-11 h-11 bg-white/90 rounded-xl shadow-sm"></div>
+
+      <div class="mt-3 h-1.5 w-24 bg-white rounded-full opacity-80"></div>
 
     </div>
+
+    <!-- USER AKTIF -->
+    <div class="bg-[#759fb1] p-4 rounded-2xl relative text-white shadow-sm border border-white/10">
+
+      <div class="bg-white text-gray-800 px-3 py-0.5 rounded-full w-fit font-bold mb-2 text-[10px] shadow-inner">
+        {{ totalAktif }}
+      </div>
+
+      <p class="font-bold text-xs">Pengguna Aktif</p>
+
+      <div class="absolute right-5 top-1/2 -translate-y-1/2 w-11 h-11 bg-white/90 rounded-xl shadow-sm"></div>
+
+      <div class="mt-3 h-1.5 w-24 bg-white rounded-full opacity-80"></div>
+
+    </div>
+
+    <!-- ADMIN -->
+    <div class="bg-[#759fb1] p-4 rounded-2xl relative text-white shadow-sm border border-white/10">
+
+      <div class="bg-white text-gray-800 px-3 py-0.5 rounded-full w-fit font-bold mb-2 text-[10px] shadow-inner">
+        {{ totalAdmin }}
+      </div>
+
+      <p class="font-bold text-xs">Administrator</p>
+
+      <div class="absolute right-5 top-1/2 -translate-y-1/2 w-11 h-11 bg-white/90 rounded-xl shadow-sm"></div>
+
+      <div class="mt-3 h-1.5 w-24 bg-white rounded-full opacity-80"></div>
+
+    </div>
+
+  </div>
+
+  <!-- TABEL USER -->
+  <div class="overflow-hidden rounded-[2rem] shadow-xl border border-gray-100 space-y-4">
+
+    <h2 class="bg-[#2f4fa2] text-white px-4 py-2 rounded-lg w-fit text-sm font-semibold mb-2">
+    Pengguna & Bagian Teraktif
+  </h2>
+
+    <table class="w-full text-left border-collapse">
+
+      <thead>
+        <tr class="bg-[#2f4fa2] text-white uppercase text-[10px] tracking-[0.15em]">
+          <th class="px-6 py-5 font-bold text-center">Pengguna</th>
+          <th class="px-6 py-5 font-bold text-center">Role</th>
+          <th class="px-6 py-5 font-bold text-center">Status</th>
+          <th class="px-6 py-5 font-bold text-center">Bagian</th>
+          <th class="px-6 py-5 font-bold text-center">Total Dokumen</th>
+        </tr>
+      </thead>
+
+      <tbody class="bg-[#759fb1] text-white">
+
+        <tr
+          v-for="user in users"
+        :key="user.id"
+        class="border-t border-white/20 hover:bg-white/10 transition"
+      >
+
+      <td class="px-6 py-4 text-center">
+      <div class="font-bold text-sm leading-tight">
+        {{ user.name }}
+      </div>
+
+      <div class="text-[10px] text-white/70 italic mt-0.5">
+        {{ user.email }}
+      </div>
+      </td>
+
+      <td class="px-6 py-4 text-center text-xs font-medium">
+        {{ user.role }}
+      </td>
+
+      <td class="px-6 py-4 text-center">
+        <span
+          :class="user.is_active
+            ? 'bg-green-100 text-green-700'
+            : 'bg-red-100 text-red-700'"
+          class="px-3 py-1 rounded-full text-[10px] font-bold"
+        >
+          {{ user.is_active ? 'Aktif' : 'Nonaktif' }}
+        </span>
+      </td>
+
+      <td class="px-6 py-4 text-center text-[10px] italic leading-relaxed max-w-[200px] truncate">
+        {{ user.bagian }}
+      </td>
+
+      <td class="px-6 py-4 text-center text-xs font-bold">
+        {{ user.arsip_count }}
+      </td>
+
+    </tr>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+     <!-- PAGINATION -->
+  <div class="flex justify-center items-center gap-2 pt-4 flex-wrap">
+
+    <template v-for="link in links" :key="link.label">
+
+      <button
+        v-if="link.url"
+        v-html="link.label"
+        @click="$inertia.visit(link.url)"
+        class="px-3 py-2 rounded-xl text-xs font-bold border transition"
+        :class="[
+          link.active
+            ? 'bg-[#2f4fa2] text-white border-[#2f4fa2]'
+            : 'bg-white text-gray-700 border-gray-200 hover:bg-[#2f4fa2] hover:text-white'
+        ]"
+      />
+
+      <span
+        v-else
+        v-html="link.label"
+        class="px-3 py-2 rounded-xl text-xs font-bold text-gray-400 border border-gray-200 bg-gray-100 cursor-not-allowed"
+      />
+
+    </template>
+
   </div>
 
 </div>
+
+</div>
+
+</div>
+
 </template>

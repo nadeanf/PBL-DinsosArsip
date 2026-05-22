@@ -1,6 +1,6 @@
 <script setup>
 import { usePage, router } from '@inertiajs/vue3'
-import { ref, computed, nextTick } from 'vue'
+import { ref, computed, nextTick, watch, onMounted } from 'vue'
 import { FileText, FileImage, File } from 'lucide-vue-next'
 import TreeDropdown from '@/components/TreeDropdown.vue'
 
@@ -74,24 +74,61 @@ const getFileType = (path) => {
   return 'FILE'
 }
 
+const getTodayDate = () => {
+  return new Date().toISOString().slice(0, 10)
+}
+
+watch(tanggal_awal, (val) => {
+  if (val && !tanggal_akhir.value) tanggal_akhir.value = getTodayDate()
+}, { immediate: true })
+
+onMounted(() => {
+  if (filters.from_dashboard) {
+    tanggal_awal.value = ''
+    tanggal_akhir.value = ''
+  }
+})
+
 const normalizeText = (value) =>
   String(value || '').toLowerCase().trim()
-
 const canAccessFull = (doc) => {
   const user = page.props.auth?.user
+
   if (!doc || !user) return false
 
-  if (doc.status_akses === 'publik') return true
-  if (doc.user_id === user.id) return true
-  if (doc.request_status === 'approved') return true
+  // ADMIN
+  if (['admin', 'superadmin'].includes(user.role)) {
+    return true
+  }
 
-  if (doc.status_akses === 'private') {
-    return normalizeText(user.bagian) === normalizeText(doc.bidang)
+  // PUBLIK
+  if (normalizeText(doc.status_akses) === 'publik') {
+    return true
+  }
+
+  // PEMILIK DOKUMEN
+  if (doc.user_id === user.id) {
+    return true
+  }
+
+  // USER SATU BIDANG
+  if (
+    normalizeText(doc.status_akses) === 'private' &&
+    normalizeText(user.bagian) === normalizeText(doc.bidang)
+  ) {
+    return true
+  }
+
+  // SUDAH DI-APPROVE
+  if (
+    doc.request_status === 'approved' &&
+    doc.request_user_id === user.id
+  ) {
+    return true
   }
 
   return false
 }
-
 /* MAPPING FULL DATA */
 const mappedDocuments = computed(() => {
   return dataArsip.value.map(item => ({
@@ -108,6 +145,7 @@ const mappedDocuments = computed(() => {
     status_akses: item.status_akses,
     user_id: item.user_id,
     request_status: item.request_status ?? null,
+    request_user_id: item.request_user_id ?? null,
     files: item.files || [],
     format: item.files?.length
       ? getFileType(item.files[0].path_file)

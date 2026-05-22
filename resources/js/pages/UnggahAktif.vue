@@ -26,7 +26,7 @@ const form = useForm({
   bagian: '',
   folder: props.folder
 })
-
+const fileError = ref('')
 /* STATE */
 const isPrivate = computed(() => form.status_akses === 'private')
 watch(() => form.status_akses, (val) => {
@@ -64,17 +64,61 @@ const fileInput = ref<HTMLInputElement | null>(null)
 const filePreviews = ref<any[]>([])
 
 const triggerUpload = () => fileInput.value?.click()
+const getLimit = (ext: string) => {
+  const dokumen = ['pdf','doc','docx','xls','xlsx','ppt','pptx','txt']
 
+  const gambar = [
+    'jpg',
+    'jpeg',
+    'png',
+    'gif',
+    'webp',
+    'bmp'
+  ]
+
+  const audio = [
+    'mp3','wav','ogg','flac','aac',
+    'wma','m4a','opus','alac',
+    'aiff','dsd','pcm'
+  ]
+
+  const video = [
+    'mp4','avi','mkv',
+    'mov','wmv','flv','mpeg'
+  ]
+
+  if (dokumen.includes(ext)) return 2
+  if (gambar.includes(ext)) return 5
+  if (audio.includes(ext)) return 25
+  if (video.includes(ext)) return 100
+
+  return 2
+}
 const setFiles = (files: File[]) => {
-  form.files = files
+  fileError.value = ''
+  const validFiles: File[] = []
 
-  filePreviews.value = files.map((file: any) => ({
+  for (const file of files) {
+    const ext = file.name.split('.').pop()?.toLowerCase() || ''
+    const sizeMB = file.size / 1024 / 1024
+    const limit = getLimit(ext)
+
+    if (sizeMB > limit) {
+      fileError.value = `${file.name} melebihi batas ${limit}MB`
+      continue
+    }
+
+    validFiles.push(file)
+  }
+
+  form.files = validFiles
+
+  filePreviews.value = validFiles.map(file => ({
     name: file.name,
     type: file.type,
     url: URL.createObjectURL(file)
   }))
 }
-
 const handleFileChange = (e: any) => {
   const files = Array.from(e.target.files || [])
   setFiles(files)
@@ -129,6 +173,15 @@ const submit = () => {
           <span class="inline-block bg-[#b8ccd5] text-gray-700 px-4 py-1 rounded-full text-sm font-bold shadow-sm ml-2">
             File Dokumen
           </span>
+<div 
+  v-if="fileError" 
+  class="flex items-center gap-3 bg-red-100 border border-red-400 text-red-800 px-4 py-3 rounded-xl shadow-sm mt-2"
+>
+  <span class="text-xl"></span>
+  <p class="text-sm font-semibold">
+    {{ fileError }}
+  </p>
+</div>
 
           <div
             @click="triggerUpload"
@@ -197,7 +250,11 @@ const submit = () => {
               </p>
 
               <p class="text-gray-400 text-xs mt-2">
-                PDF, DOC, XLS, JPG, PNG, MP3, MP4
+                PDF, DOC, XLS, JPG, PNG, MP3, MP4 
+              </p>
+
+              <p class="text-gray-400 text-xs mt-2">
+               (Max: Dokumen 2 MB | Gambar 5 MB | Audio 25 MB | Video 100 MB)
               </p>
             </div>
 
@@ -209,7 +266,8 @@ const submit = () => {
 
           <div>
             <label class="block font-black mb-1 text-sm uppercase text-gray-800">
-              Judul Dokumen
+              Judul Dokumen 
+              <span class="text-red-600">*</span>
             </label>
             <input v-model="form.judul"
               class="w-full p-4 bg-white text-black rounded-2xl border border-gray-300" />
@@ -217,7 +275,8 @@ const submit = () => {
 
           <div>
             <label class="block font-black mb-1 text-sm uppercase text-gray-800">
-              Nomor
+              Nomor 
+              <span class="text-red-600">*</span>
             </label>
 
   <input v-model="form.nomor"
@@ -231,7 +290,8 @@ const submit = () => {
 
           <div>
             <label class="block font-black mb-1 text-sm uppercase text-gray-800">
-              Tahun
+              Tahun 
+              <span class="text-red-600">*</span>
             </label>
             <input v-model="form.tahun"
               class="w-full p-4 bg-white text-black rounded-2xl border border-gray-300" />
@@ -240,7 +300,8 @@ const submit = () => {
           <!-- kategori -->
           <div>
             <label class="block font-black mb-1 text-sm uppercase text-gray-800">
-              Kategori
+              Kategori 
+              <span class="text-red-600">*</span>
             </label>
 
             <div class="relative">
@@ -274,7 +335,9 @@ const submit = () => {
 
           <!-- status -->
           <div>
-  <label class="block font-black mb-2 text-sm uppercase">Status Akses</label>
+          <label class="block font-black mb-2 text-sm uppercase">Status Akses 
+            <span class="text-red-600">*</span>
+          </label>
 
   <div class="flex gap-6">
     <label class="flex items-center gap-2 cursor-pointer">
@@ -302,7 +365,8 @@ const submit = () => {
           <!-- bidang -->
           <div v-if="isPrivate">
             <label class="block font-black mb-1 text-sm uppercase text-gray-800">
-              Bidang
+              Bidang 
+              <span class="text-red-600">*</span>
             </label>
 
             <select v-model="form.bagian"
@@ -321,7 +385,8 @@ const submit = () => {
 
           <div>
             <label class="block font-black mb-1 text-sm uppercase text-gray-800">
-              Lokasi
+              Lokasi 
+              <span class="text-red-600">*</span>
             </label>
             <input v-model="form.lokasi"
               class="w-full p-4 bg-white text-black rounded-2xl border border-gray-300" />
@@ -329,7 +394,8 @@ const submit = () => {
 
           <div>
             <label class="block font-black mb-1 text-sm uppercase text-gray-800">
-              Deskripsi
+              Deskripsi 
+              <span class="text-red-600">*</span>
             </label>
             <textarea v-model="form.deskripsi"
               class="w-full p-4 bg-white text-black rounded-2xl border border-gray-300"></textarea>

@@ -1,29 +1,34 @@
 <script setup>
 import Navbar from '@/components/Navbar.vue'
 import UserSidebar from '@/components/sidebar/UserSidebar.vue'
-import Footer from '@/components/footer.vue'
 </script>
 
 <template>
-  <div class="flex flex-col min-h-screen">
+  <div class="h-screen flex flex-col bg-gray-100 overflow-hidden">
 
     <!-- NAVBAR -->
-    <Navbar />
+    <header class="h-16 shrink-0">
+      <Navbar />
+    </header>
 
-    <div class="flex flex-1">
+    <!-- BODY -->
+    <div class="flex flex-1 overflow-hidden">
 
-      <!-- SIDEBAR USER -->
-      <UserSidebar />
+      <!-- SIDEBAR -->
+      <aside
+        class="w-64 shrink-0 h-full overflow-y-auto overflow-x-hidden"
+      >
+        <UserSidebar />
+      </aside>
 
       <!-- CONTENT -->
-      <main class="flex-1 bg-gray-100">
+      <main
+        class="flex-1 min-w-0 h-full overflow-y-auto overflow-x-hidden bg-gray-100"
+      >
         <slot />
       </main>
 
     </div>
-
-    <!-- FOOTER -->
-    <Footer />
 
   </div>
 </template>

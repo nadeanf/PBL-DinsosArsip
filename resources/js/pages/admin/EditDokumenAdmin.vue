@@ -9,11 +9,47 @@ defineOptions({ layout: AdminLayout })
 
 
 const isDragging = ref(false)
+const fileError = ref('')
+
+const getLimit = (ext: string) => {
+  const dokumen = ['pdf','doc','docx','xls','xlsx','ppt','pptx','txt']
+  const audio = ['mp3','wav','ogg','flac','aac','wma','m4a','opus','alac','aiff','dsd','pcm']
+  const video = ['mp4','avi','mkv','mov','wmv','flv','mpeg']
+
+  if (dokumen.includes(ext)) return 2
+  if (audio.includes(ext)) return 25
+  if (video.includes(ext)) return 100
+
+  return 2
+}
 
 const setFiles = (files: File[]) => {
-  form.files = files
+  fileError.value = ''
 
-  filePreviews.value = files.map((file: any) => ({
+  const validFiles: File[] = []
+
+  for (const file of files) {
+    const ext = file.name.split('.').pop()?.toLowerCase() || ''
+    const sizeMB = file.size / 1024 / 1024
+    const limit = getLimit(ext)
+
+    if (sizeMB > limit) {
+      fileError.value = `${file.name} melebihi batas ${limit}MB`
+      continue
+    }
+
+    validFiles.push(file)
+  }
+
+  if (validFiles.length === 0) {
+    form.files = null
+    filePreviews.value = []
+    return
+  }
+
+  form.files = validFiles
+
+  filePreviews.value = validFiles.map(file => ({
     name: file.name,
     type: file.type,
     url: URL.createObjectURL(file)
@@ -128,6 +164,16 @@ const submit = () => {
             File Dokumen
           </span>
 
+          <div 
+  v-if="fileError" 
+  class="flex items-center gap-3 bg-red-100 border border-red-400 text-red-800 px-4 py-3 rounded-xl shadow-sm mt-2"
+>
+  <span class="text-xl"></span>
+  <p class="text-sm font-semibold">
+    {{ fileError }}
+  </p>
+</div>
+
           <div
             @click="triggerUpload"
             @dragover.prevent="handleDragOver"
@@ -177,6 +223,9 @@ const submit = () => {
               <p class="text-gray-400 text-xs mt-2">
                 PDF, DOC, XLS, JPG, PNG, MP3, MP4
               </p>
+              <p class="text-gray-400 text-xs mt-2">
+               Max: Dokumen 2 MB | Audio 25 MB | Video 100 MB
+                </p>
 
             </div>
 
@@ -187,27 +236,42 @@ const submit = () => {
         <div class="space-y-4 mt-6">
 
           <div>
-            <label class="block font-black mb-1 text-sm uppercase">Judul Dokumen</label>
+            <label class="block font-black mb-1 text-sm uppercase">Judul Dokumen
+              <span class="text-red-600">*</span>
+            </label>
             <input v-model="form.judul" class="w-full p-4 bg-white rounded-2xl border" />
           </div>
+<div>
+  <label class="block font-black mb-1 text-sm uppercase">
+    Nomor
+    <span class="text-red-600">*</span>
+  </label>
 
-          <div>
-            <label class="block font-black mb-1 text-sm uppercase">Nomor</label>
-           <input v-model="form.nomor" class="w-full p-4 bg-white rounded-2xl border" />
+  <input
+    v-model="form.nomor"
+    :class="[
+      'w-full p-4 bg-white rounded-2xl border',
+      form.errors.nomor ? 'border-red-500' : 'border-gray-300'
+    ]"
+  />
 
-<div v-if="form.errors.nomor" class="text-red-500 text-sm">
-  {{ form.errors.nomor }}
+  <p v-if="form.errors.nomor" class="text-red-500 text-sm mt-1">
+    {{ form.errors.nomor }}
+  </p>
 </div>
-          </div>
 
           <div>
-            <label class="block font-black mb-1 text-sm uppercase">Tahun</label>
+            <label class="block font-black mb-1 text-sm uppercase">Tahun
+              <span class="text-red-600">*</span>
+            </label>
             <input v-model="form.tahun" class="w-full p-4 bg-white rounded-2xl border" />
           </div>
 
           <!-- KATEGORI -->
           <div>
-            <label class="block font-black mb-1 text-sm uppercase">Kategori</label>
+            <label class="block font-black mb-1 text-sm uppercase">Kategori
+              <span class="text-red-600">*</span>
+            </label>
             <div class="relative">
 
               <!-- BUTTON -->
@@ -238,7 +302,9 @@ const submit = () => {
 
           <!-- STATUS -->
           <div>
-  <label class="block font-black mb-2 text-sm uppercase">Status Akses</label>
+          <label class="block font-black mb-2 text-sm uppercase">Status Akses
+            <span class="text-red-600">*</span>
+          </label>
 
   <div class="flex gap-6">
     <label class="flex items-center gap-2 cursor-pointer">
@@ -264,7 +330,9 @@ const submit = () => {
 </div>
           <!-- PRIVATE -->
           <div v-if="isPrivate">
-            <label class="block font-black mb-1 text-sm uppercase">Bidang</label>
+            <label class="block font-black mb-1 text-sm uppercase">Bidang
+              <span class="text-red-600">*</span>
+            </label>
            <select v-model="form.bagian" class="w-full p-4 bg-white rounded-2xl border">
 
               <option value="">-- Pilih Bidang --</option>
@@ -279,27 +347,41 @@ const submit = () => {
           </div>
 
           <div>
-            <label class="block font-black mb-1 text-sm uppercase">Lokasi</label>
+            <label class="block font-black mb-1 text-sm uppercase">Lokasi
+              <span class="text-red-600">*</span>
+            </label>
             <input v-model="form.lokasi" class="w-full p-4 bg-white rounded-2xl border" />
           </div>
 
           <div>
-            <label class="block font-black mb-1 text-sm uppercase">Deskripsi</label>
+            <label class="block font-black mb-1 text-sm uppercase">Deskripsi
+              <span class="text-red-600">*</span>
+            </label>
             <textarea v-model="form.deskripsi" class="w-full p-4 bg-white rounded-2xl border"></textarea>
           </div>
 
         </div>
 
-        <!-- BUTTON -->
-        <div class="flex justify-end gap-4 mt-10">
-          <button type="submit" class="bg-blue-700 text-white px-8 py-3 rounded-xl font-bold">
-            Simpan
-          </button>
+        <!-- BUTTON --><!-- BUTTON -->
+<div class="flex justify-end gap-4 mt-10">
 
-          <button type="button" @click="goBack" class="bg-red-600 text-white px-8 py-3 rounded-xl font-bold">
-            Batal
-          </button>
-        </div>
+  <button
+    type="submit"
+    :disabled="form.processing"
+    class="bg-blue-700 text-white px-8 py-3 rounded-xl font-bold disabled:opacity-50"
+  >
+    Simpan
+  </button>
+
+  <button
+    type="button"
+    @click="goBack"
+    class="bg-red-600 text-white px-8 py-3 rounded-xl font-bold"
+  >
+    Batal
+  </button>
+
+</div>
 
       </form>
     </div>

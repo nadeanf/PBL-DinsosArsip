@@ -7,9 +7,9 @@ const user = page.props.auth?.user
 </script>
 
 <template>
-  <aside class="w-64 min-h-screen bg-gradient-to-b from-[#dbe3e7] to-[#2f6f7e] p-4 flex flex-col justify-between">
+  <aside class="w-67 h-full overflow-x-hidden bg-gradient-to-b from-[#dbe3e7] to-[#2f6f7e] p-4 flex flex-col">
 
-    <div>
+    <div class="flex-1 overflow-y-auto pr-4 flex flex-col">
       <Link href="/edit-profile" class="flex items-center gap-3 mb-6">
         <div class="w-12 h-12 flex items-center justify-center rounded-full bg-[#b7d3d8] overflow-hidden border-2 border-white shadow-sm">
         <img
@@ -32,7 +32,7 @@ const user = page.props.auth?.user
 
       <hr class="mb-4 border-gray-400" />
 
-      <div class="space-y-3">
+      <div class="space-y-4 flex-1">
 
         <Link href="/super-admin/dashboard"
           :class="page.url === '/super-admin/dashboard'
@@ -92,22 +92,22 @@ const user = page.props.auth?.user
 
       </div>
 
-      <div class="mt-8 bg-white/70 p-4 rounded-xl text-xs shadow-inner">
+      <div class="bg-white/70 p-4 rounded-xl text-xs shadow-inner mt-6 mb-5">
         <p class="mb-3 font-semibold text-gray-800">Penyimpanan</p>
         <div class="w-full bg-gray-300 h-2.5 rounded-full overflow-hidden">
           <div class="bg-[#2f4fa2] h-full w-1/3 rounded-full"></div>
         </div>
         <p class="mt-2.5 text-[10px] text-gray-700">xx GB / xx GB (xx%)</p>
       </div>
-    </div>
 
-    <Link href="/logout" method="post" as="button"
-      class="flex items-center gap-3 bg-gray-200 px-3 py-2 rounded-lg w-full text-left hover:bg-gray-300 transition-all group">
-      <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-white shadow-sm group-hover:bg-red-50">
-        <LogOut class="w-5 h-5 text-red-600" />
-      </span>
-      <span class="text-sm font-semibold text-gray-800">Keluar</span>
-    </Link>
+      <Link href="/logout" method="post" as="button"
+        class="flex items-center gap-3 bg-gray-200 px-3 py-3 rounded-xl w-full text-left hover:bg-gray-300 transition-all group mt-2">
+        <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-white shadow-sm group-hover:bg-red-50">
+          <LogOut class="w-5 h-5 text-red-600" />
+        </span>
+        <span class="text-sm font-semibold text-gray-800">Keluar</span>
+      </Link>
+    </div>
 
   </aside>
 </template>
