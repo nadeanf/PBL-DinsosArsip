@@ -1001,13 +1001,38 @@ public function exportPDF(Request $request)
         $query->whereDate('created_at', '<=', $request->tanggal_akhir);
     }
 
-    $arsip = $query->latest()->get()->map(function ($item) {
+    // Urutkan berdasarkan `tahun` secara numerik (jika tersedia), lalu `created_at`
+    $arsip = $query->orderByRaw("CAST(tahun AS UNSIGNED) ASC, created_at ASC")->get()->map(function ($item) {
+        $jenis = $item->jenis_arsip ? ucfirst($item->jenis_arsip) : '-';
+
+        // Hitung umur arsip berdasarkan kolom `tahun` jika tersedia
+        $masaAktif = '-';
+        $age = null;
+        if (!empty($item->tahun) && is_numeric($item->tahun)) {
+            $age = now()->year - (int) $item->tahun;
+        }
+
+        if ($item->jenis_arsip === 'vital') {
+            $masaAktif = 'Vital';
+        } elseif ($age === null) {
+            $masaAktif = 'Tahun ' . ($item->tahun ?? '-');
+        } else {
+            // Jika usia < 3 tahun -> Aktif, sebaliknya Inaktif
+            if ($age < 3) {
+                $masaAktif = 'Aktif (usia ' . $age . ' tahun)';
+            } else {
+                $masaAktif = 'Inaktif (usia ' . $age . ' tahun)';
+            }
+        }
+
         return [
             'judul' => $item->judul,
             'nomor' => $item->nomor,
             'tahun' => $item->tahun,
-            'kategori' => $item->kategori?->nama ?? '-',
-            'status' => $item->status_akses,
+            'kategori' => $item->kategori ?? '-',
+            'jenis' => $jenis,
+            'masa_aktif' => $masaAktif,
+            'status' => ucfirst($item->status_akses),
             'download_url' => url('/download/' . $item->id),
         ];
     });

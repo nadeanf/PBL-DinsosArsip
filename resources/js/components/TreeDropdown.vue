@@ -71,7 +71,7 @@ const selectNode = (item) => {
 </script>
 
 <template>
-  <div class="bg-white rounded-lg p-2 max-h-[300px] overflow-y-auto">
+  <div class="bg-white text-black rounded-lg p-2 overflow-y-auto">
 
     <!-- AKTIF -->
     <div class="text-xs text-gray-400 px-2 py-1">

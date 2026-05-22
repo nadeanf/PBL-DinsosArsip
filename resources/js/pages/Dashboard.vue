@@ -255,7 +255,7 @@ const handleDownload = (id) => {
   <!-- BUTTON -->
   <div 
     @click="showDropdown = !showDropdown"
-    class="bg-white px-4 py-3 rounded-lg text-sm cursor-pointer flex justify-between items-center"
+    class="bg-white text-black px-4 py-3 rounded-lg text-sm cursor-pointer flex justify-between items-center"
   >
     <span>
       {{ selectedKategoriName || 'Pilih Kategori' }}
@@ -293,7 +293,7 @@ const handleDownload = (id) => {
   <!-- Akumulasi Arsip -->
   <div class="bg-[#7fa6b3] rounded-xl p-4 shadow-md flex justify-between items-center">
     <div>
-      <div class="bg-white text-xs px-2 py-1 rounded w-fit mb-1">
+      <div class="bg-white text-black text-xs px-2 py-1 rounded w-fit mb-1">
         {{ filteredData.length }}
       </div>
       <p class="text-sm text-white">Akumulasi Arsip</p>
@@ -304,7 +304,7 @@ const handleDownload = (id) => {
   <!-- Dokumen Diunduh -->
   <div class="bg-[#7fa6b3] rounded-xl p-4 shadow-md flex justify-between items-center">
     <div>
-      <div class="bg-white text-xs px-2 py-1 rounded w-fit mb-1">
+      <div class="bg-white text-black text-xs px-2 py-1 rounded w-fit mb-1">
         {{ totalDownload }}
       </div>
       <p class="text-sm text-white">Dokumen diunduh</p>

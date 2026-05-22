@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Pengumuman;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class PengumumanController extends Controller
 {
@@ -11,9 +12,16 @@ class PengumumanController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-    {
-        //
+{
+    if (auth()->user()->role !== 'admin') {
+        abort(403);
     }
+
+    return inertia('admin/Pengumuman', [
+        'pengumuman' => Pengumuman::latest()->paginate(4),
+        'trashed' => Pengumuman::onlyTrashed()->latest()->paginate(4)
+    ]);
+}
 
     /**
      * Show the form for creating a new resource.
@@ -45,6 +53,12 @@ class PengumumanController extends Controller
     ]);
 
     return back()->with('success', 'Pengumuman berhasil disimpan');
+
+    $request->validate([
+    'judul' => 'required|string',
+    'deskripsi' => 'required|string',
+    'tanggal' => 'required|date',
+]);
 }
 
     /**
@@ -68,14 +82,68 @@ class PengumumanController extends Controller
      */
     public function update(Request $request, Pengumuman $pengumuman)
     {
-        //
+        $data = [
+            'judul' => $request->judul,
+            'deskripsi' => $request->deskripsi,
+            'tanggal' => $request->tanggal,
+        ];
+
+        // Update file jika ada file baru
+        if ($request->hasFile('file')) {
+            // Hapus file lama
+            if ($pengumuman->file) {
+                Storage::disk('public')->delete($pengumuman->file);
+            }
+            $data['file'] = $request->file('file')->store('pengumuman', 'public');
+        }
+
+        // Update data
+        $pengumuman->update($data);
+
+        return back()->with('success', 'Pengumuman berhasil diperbarui');
+
+        $request->validate([
+    'judul' => 'required|string',
+    'deskripsi' => 'required|string',
+    'tanggal' => 'required|date',
+]);
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Soft delete the resource (move to trash).
      */
     public function destroy(Pengumuman $pengumuman)
     {
-        //
+        $pengumuman->delete();
+
+        return back()->with('success', 'Pengumuman berhasil dipindahkan ke sampah');
+    }
+
+    /**
+     * Restore from trash.
+     */
+   public function restore($pengumuman)
+{
+    $pengumuman = Pengumuman::withTrashed()->findOrFail($pengumuman);
+        $pengumuman->restore();
+
+        return back()->with('success', 'Pengumuman berhasil dipulihkan dari sampah');
+    }
+
+    /**
+     * Permanently delete from trash.
+     */
+    public function permanentDelete($pengumuman)
+{
+    $pengumuman = Pengumuman::withTrashed()->findOrFail($pengumuman);
+
+        // Hapus file jika ada
+        if ($pengumuman->file) {
+            Storage::disk('public')->delete($pengumuman->file);
+        }
+
+        $pengumuman->forceDelete();
+
+        return back()->with('success', 'Pengumuman berhasil dihapus permanent');
     }
 }

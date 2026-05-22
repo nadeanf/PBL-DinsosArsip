@@ -219,7 +219,7 @@ const handleDownload = (id) => {
   <!-- BUTTON -->
   <div 
     @click="showDropdown = !showDropdown"
-    class="bg-white px-4 py-3 rounded-lg text-sm cursor-pointer flex justify-between items-center"
+    class="bg-white text-black px-4 py-3 rounded-lg text-sm cursor-pointer flex justify-between items-center"
   >
     <span>
       {{ selectedKategoriName || 'Pilih Kategori' }}

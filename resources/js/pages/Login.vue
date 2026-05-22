@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head, router, useForm } from '@inertiajs/vue3'
+import { ref } from 'vue'
 import GuestLayout from '@/layouts/GuestLayout.vue'
 
 defineOptions({ layout: GuestLayout })
@@ -13,6 +14,8 @@ const form = useForm({
     password: '',
     remember: false,
 })
+
+const showPassword = ref(false)
 
 function handleSubmit() {
     form.post('/login', {
@@ -92,13 +95,22 @@ function goToForgotPassword() {
 
                 <div>
                     <label class="block text-xs text-gray-700 mb-1">Password</label>
-                    <input
-                        v-model="form.password"
-                        type="password"
-                        required
-                        class="field-input"
-                        placeholder="Password"
-                    />
+                    <div class="relative">
+                        <input
+                            v-model="form.password"
+                            :type="showPassword ? 'text' : 'password'"
+                            required
+                            class="field-input"
+                            placeholder="Password"
+                        />
+                        <button
+                            type="button"
+                            @click="showPassword = !showPassword"
+                            class="absolute inset-y-0 right-2 flex items-center text-xs text-gray-600"
+                        >
+                            {{ showPassword ? 'Sembunyikan' : 'Lihat' }}
+                        </button>
+                    </div>
                     <span v-if="form.errors.password" class="text-xs text-red-600">
                         {{ form.errors.password }}
                     </span>

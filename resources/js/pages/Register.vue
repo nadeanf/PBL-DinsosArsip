@@ -14,6 +14,9 @@ const form = ref({
     password_confirmation: '',
 })
 
+const showPassword = ref(false)
+const showPasswordConfirmation = ref(false)
+
 const bagianOptions = [
     'Sekretariat',
     'Bidang Rehabilitasi Sosial',
@@ -98,12 +101,38 @@ function goToLogin() {
 
                 <div>
                     <label class="label">Password</label>
-                    <input v-model="form.password" type="password" class="field-input" />
+                    <div class="relative">
+                        <input
+                            v-model="form.password"
+                            :type="showPassword ? 'text' : 'password'"
+                            class="field-input"
+                        />
+                        <button
+                            type="button"
+                            @click="showPassword = !showPassword"
+                            class="absolute inset-y-0 right-2 flex items-center text-xs text-gray-600"
+                        >
+                            {{ showPassword ? 'Sembunyikan' : 'Lihat' }}
+                        </button>
+                    </div>
                 </div>
 
                 <div>
                     <label class="label">Ulangi Password</label>
-                    <input v-model="form.password_confirmation" type="password" class="field-input" />
+                    <div class="relative">
+                        <input
+                            v-model="form.password_confirmation"
+                            :type="showPasswordConfirmation ? 'text' : 'password'"
+                            class="field-input"
+                        />
+                        <button
+                            type="button"
+                            @click="showPasswordConfirmation = !showPasswordConfirmation"
+                            class="absolute inset-y-0 right-2 flex items-center text-xs text-gray-600"
+                        >
+                            {{ showPasswordConfirmation ? 'Sembunyikan' : 'Lihat' }}
+                        </button>
+                    </div>
                 </div>
             </div>
 
