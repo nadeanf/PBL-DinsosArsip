@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3'
 import { ref } from 'vue'
+import { Eye, EyeOff } from 'lucide-vue-next'
 import GuestLayout from '@/layouts/GuestLayout.vue'
 
 defineOptions({ layout: GuestLayout })
@@ -13,6 +14,9 @@ const form = ref({
     password: '',
     password_confirmation: '',
 })
+
+const showPassword = ref(false)
+const showPasswordConfirmation = ref(false)
 
 const bagianOptions = [
     'Sekretariat',
@@ -97,13 +101,43 @@ function goToLogin() {
                 </div>
 
                 <div>
-                    <label class="label">Password</label>
-                    <input v-model="form.password" type="password" class="field-input" />
-                </div>
+    <label class="label">Password</label>
+
+    <div class="relative">
+        <input
+            v-model="form.password"
+            :type="showPassword ? 'text' : 'password'"
+            class="field-input pr-10"
+        />
+
+        <button
+            type="button"
+            @click="showPassword = !showPassword"
+            class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500"
+        >
+            <EyeOff v-if="!showPassword" class="w-4 h-4" />
+            <Eye v-else class="w-4 h-4" />
+        </button>
+    </div>
+</div>
 
                 <div>
                     <label class="label">Ulangi Password</label>
-                    <input v-model="form.password_confirmation" type="password" class="field-input" />
+                    <div class="relative">
+                        <input
+                            v-model="form.password_confirmation"
+                            :type="showPasswordConfirmation ? 'text' : 'password'"
+                            class="field-input pr-10"
+                        />
+                        <button
+                            type="button"
+                            @click="showPasswordConfirmation = !showPasswordConfirmation"
+                            class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500"
+                        >
+                            <EyeOff v-if="!showPasswordConfirmation " class="w-4 h-4" />
+                            <Eye v-else class="w-4 h-4" />
+                        </button>
+                    </div>
                 </div>
             </div>
 

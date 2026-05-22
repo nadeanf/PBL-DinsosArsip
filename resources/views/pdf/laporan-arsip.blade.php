@@ -3,10 +3,6 @@
 <head>
     <meta charset="utf-8">
     <title>Laporan Arsip</title>
-    <p>
-    Tanggal Export :
-    {{ now()->format('d M Y H:i') }}
-</p>
     <style>
         th {
     background: #2f6f7e;
@@ -74,13 +70,25 @@
             font-size: 11px;
         }
 
-        th {
-            background-color: #e5e7eb;
-        }
-
         a {
             color: blue;
             text-decoration: underline;
+        }
+
+        th {
+            background-color: #000000 !important;
+            color: white !important;
+        }
+
+        .year-header {
+            background-color: #f3f4f6;
+            font-weight: bold;
+            font-size: 12px;
+            padding: 10px;
+            text-align: center;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            border: 1px solid #d1d5db;
         }
     </style>
 </head>
@@ -120,11 +128,6 @@
         <h3>LAPORAN DATA ARSIP</h3>
     </div>
 
-    <!-- TANGGAL -->
-    <div class="tanggal">
-        Tanggal Export: {{ date('d M Y') }}
-    </div>
-
     <!-- TABEL -->
     <table>
         <thead>
@@ -134,21 +137,37 @@
                 <th>Nomor</th>
                 <th>Tahun</th>
                 <th>Kategori</th>
-                <th>Status</th>
+                <th>Jenis</th>
             </tr>
         </thead>
 
         <tbody>
-            @foreach ($data as $index => $item)
-            <tr>
-                <td>{{ $index + 1 }}</td>
-                <td>{{ $item['judul'] }}</td>
-                <td>{{ $item['nomor'] }}</td>
-                <td>{{ $item['tahun'] }}</td>
-                <td>{{ $item['kategori'] }}</td>
-                <td>{{ $item['status'] }}</td>
-            </tr>
-            @endforeach
+            @php
+                $no = 1;
+                $yearGroups = $data instanceof \Illuminate\Support\Collection ? $data : collect($data);
+            @endphp
+
+            @forelse ($yearGroups as $tahun => $items)
+                <tr>
+                    <td colspan="6" class="year-header">Tahun {{ $tahun }}</td>
+                </tr>
+
+                @foreach ($items as $item)
+                    <tr>
+                        <td>{{ $no }}</td>
+                        <td>{{ $item['judul'] }}</td>
+                        <td>{{ $item['nomor'] }}</td>
+                        <td>{{ $item['tahun'] }}</td>
+                        <td>{{ $item['kategori'] }}</td>
+                        <td>{{ $item['jenis_arsip'] }}</td>
+                    </tr>
+                    @php $no++; @endphp
+                @endforeach
+            @empty
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 20px;">Tidak ada data arsip</td>
+                </tr>
+            @endforelse
         </tbody>
     </table>
 

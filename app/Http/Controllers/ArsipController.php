@@ -773,6 +773,45 @@ $request->validate([
     ]);
 }
 
+public function listSuperAdmin(Request $request)
+    {
+        $query = Arsip::with(['kategori', 'user', 'files']);
+
+        if ($request->search) {
+            $query->where(function ($q) use ($request) {
+                $q->where('judul', 'like', '%' . $request->search . '%')
+                    ->orWhere('nomor', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        if ($request->kategori) {
+            $query->where('id_kategori', $request->kategori);
+        }
+
+        if ($request->filled('tanggal_awal')) {
+            $query->whereDate('created_at', '>=', $request->tanggal_awal);
+        }
+
+        if ($request->filled('tanggal_akhir')) {
+            $query->whereDate('created_at', '<=', $request->tanggal_akhir);
+        }
+
+        if (auth()->user()->role !== 'superadmin') {
+            abort(403);
+        }
+
+        return Inertia::render('SuperAdmin/ListArsipSuperAdmin', [
+            'arsip' => $query->latest()->get(),
+            'kategori' => $this->kategoriTree(),
+        
+        'filters' => $request->only([
+            'search',
+            'kategori',
+            'tanggal_awal',
+            'tanggal_akhir'
+        ]),
+        ]);
+    }
     public function show($id)
     {
         $arsip = Arsip::with(['kategori', 'user', 'files'])->findOrFail($id);
@@ -1037,14 +1076,15 @@ $request->validate([
     {
         $user = Auth::user();
 
-    // 🔥 ADMIN & SUPERADMIN AKSES SEMUA
-    if (in_array($user->role, ['admin', 'superadmin'])) {
+    
+    if (in_array($user->role, ['admin', 'superadmin', 'pimpinan'])) {
         return true;
     }
 
     // publik bebas
         if ($user->role === 'superadmin') return true;
     if ($arsip->status_akses === 'publik') return true;
+    
 
     // pemilik arsip
     if ($arsip->user_id === $user->id) return true;
@@ -1197,16 +1237,16 @@ public function exportPDF(Request $request)
         $query->whereDate('created_at', '<=', $request->tanggal_akhir);
     }
 
-    $arsip = $query->latest()->get()->map(function ($item) {
+    $arsip = $query->orderBy('tahun', 'desc')->orderBy('created_at', 'asc')->get()->map(function ($item) {
         return [
             'judul' => $item->judul,
             'nomor' => $item->nomor,
             'tahun' => $item->tahun,
             'kategori' => $item->kategori?->nama ?? '-',
-            'status' => $item->status_akses,
+            'jenis_arsip' => $item->jenis_arsip ?? '-',
             'download_url' => url('/download/' . $item->id),
         ];
-    });
+    })->groupBy('tahun');
 
     $pdf = Pdf::loadView('pdf.laporan-arsip', [
         'data' => $arsip,

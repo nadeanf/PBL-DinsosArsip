@@ -165,7 +165,7 @@ const exportPDF = () => {
       <div class="bg-[#6f98a8] p-4 rounded-xl flex justify-between items-center shadow-sm">
         <div>
           <div class="bg-white text-[#6f98a8] text-xs px-2 py-1 rounded w-fit mb-1 font-bold">{{ totalView }}</div>
-          <p class="text-white text-sm">Dokumen terlihat</p>
+          <p class="text-white text-sm">Akumulasi arsip</p>
           <div class="h-2 bg-gray-300/30 rounded mt-2 w-40"></div>
         </div>
         <div class="bg-white p-3 rounded-lg shadow-inner">

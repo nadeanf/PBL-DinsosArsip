@@ -96,8 +96,8 @@ const canAccessFull = (doc) => {
 
   if (!doc || !user) return false
 
-  // ADMIN
-  if (['admin', 'superadmin'].includes(user.role)) {
+  // PIMPINAN / ADMIN / SUPERADMIN
+  if (['pimpinan', 'admin', 'superadmin'].includes(user.role)) {
     return true
   }
 

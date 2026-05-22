@@ -129,6 +129,10 @@ const updateStatus = (id: number, value: string) => {
     }
   })
 }
+
+const goToPage = (page: number) => {
+  currentPage.value = page
+}
 </script>
 
 <template>
@@ -233,6 +237,50 @@ const updateStatus = (id: number, value: string) => {
         </div>
 
       </div>
+    </div>
+
+    <!-- EMPTY -->
+    <div v-if="filteredDocuments.length === 0" class="text-center py-10">
+      Tidak ada arsip
+    </div>
+
+    <!-- PAGINATION -->
+    <div
+      v-if="totalPages > 1"
+      class="flex justify-center items-center gap-2 mb-10"
+    >
+      <!-- PREV -->
+      <button
+        @click="currentPage--"
+        :disabled="currentPage === 1"
+        class="px-3 py-1 rounded-lg bg-gray-200 disabled:opacity-50"
+      >
+        Prev
+      </button>
+
+      <!-- ANGKA -->
+      <button
+        v-for="page in totalPages"
+        :key="page"
+        @click="goToPage(page)"
+        :class="[
+          'px-3 py-1 rounded-lg',
+          currentPage === page
+            ? 'bg-blue-600 text-white'
+            : 'bg-gray-200'
+        ]"
+      >
+        {{ page }}
+      </button>
+
+      <!-- NEXT -->
+      <button
+        @click="currentPage++"
+        :disabled="currentPage === totalPages"
+        class="px-3 py-1 rounded-lg bg-gray-200 disabled:opacity-50"
+      >
+        Next
+      </button>
     </div>
   </div>
 
