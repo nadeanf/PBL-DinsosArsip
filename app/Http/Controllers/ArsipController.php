@@ -66,6 +66,7 @@ $request->validate([
     'tahun' => 'required',
     'id_kategori' => 'required|exists:kategori,id',
     'status_akses' => 'required',
+    'files' => 'required|array|min:1',
 'files.*' => [
         'file',
         function ($attribute, $file, $fail) {

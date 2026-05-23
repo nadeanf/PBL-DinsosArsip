@@ -151,6 +151,12 @@ const kategoriTree = computed(() => props.kategoriData)
 const goBack = () => window.history.back()
 
 const submit = () => {
+
+  if (!form.files || form.files.length === 0) {
+    fileError.value = 'File wajib diunggah'
+    return
+  }
+
   form.post('/admin/arsip', {
     forceFormData: true
   })
