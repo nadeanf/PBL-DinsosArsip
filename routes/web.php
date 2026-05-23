@@ -234,10 +234,26 @@ Route::patch('/kategori/{id}', function (Illuminate\Http\Request $request, $id) 
 
     $request->validate([
         'nama' => 'required|string',
+        'masa_aktif' => 'required|integer|min:1'
     ]);
 
     $kategori = \App\Models\Kategori::findOrFail($id);
-    $kategori->update(['nama' => $request->nama]);
+    $kategori->update([
+        'nama' => $request->nama,
+        'masa_aktif' => $request->masa_aktif // 🔥 INI YANG KURANG
+    ]);
+
+    \App\Models\Arsip::where('id_kategori', $kategori->id)
+        ->update([
+            'jenis_arsip' => \DB::raw("
+                CASE 
+                    WHEN YEAR(NOW()) - tahun >= {$request->masa_aktif} 
+                    THEN 'inaktif'
+                    ELSE 'aktif'
+                END
+            ")
+        ]);
+
 
     return back();
 });

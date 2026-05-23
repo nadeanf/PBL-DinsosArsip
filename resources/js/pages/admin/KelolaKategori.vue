@@ -22,6 +22,8 @@ const selectedParent = ref<number | null>(null)
 const showRenameModal = ref(false)
 const renameItemId = ref<number | null>(null)
 const renameItemName = ref('')
+const masaAktif = ref(3)
+const renameMasaAktif = ref(3)
 
 const kategoriList = computed(() => {
   const list: any[] = []
@@ -68,11 +70,13 @@ const tambahKategori = () => {
 
   router.post('/kategori', {
     nama: newItem.value,
-    parent_id: selectedParent.value
+    parent_id: selectedParent.value,
+    masa_aktif: masaAktif.value // 🔥 INI WAJIB
   }, {
     onSuccess: () => {
       newItem.value = ''
       selectedParent.value = null
+      masaAktif.value = 3 // reset
       showModal.value = false
     }
   })
@@ -88,6 +92,7 @@ const hapusItem = (id: number) => {
 const openRenameModal = (item: any) => {
   renameItemId.value = item.id
   renameItemName.value = item.nama
+  renameMasaAktif.value = item.masa_aktif || 3 
   showRenameModal.value = true
 }
 
@@ -95,7 +100,8 @@ const renameKategori = () => {
   if (!renameItemId.value || !renameItemName.value.trim()) return
 
   router.patch(`/kategori/${renameItemId.value}`, {
-    nama: renameItemName.value
+    nama: renameItemName.value,
+    masa_aktif: renameMasaAktif.value // 🔥 WAJIB
   }, {
     onSuccess: () => {
       showRenameModal.value = false
@@ -134,9 +140,13 @@ const renameKategori = () => {
         :class="categoryBgClass(item.level)"
         :style="{ marginLeft: `${item.level * 1.5}rem` }"
       >
-        <div class="px-4 py-3 w-full">
-          {{ item.nama }}
-        </div>
+        <div class="px-4 py-3 w-full flex justify-between">
+  <span>{{ item.nama }}</span>
+
+  <span class="text-xs bg-black/10 px-2 py-1 rounded">
+    {{ item.masa_aktif }} th
+  </span>
+</div>
 
         <div class="flex items-center gap-2">
           <button
@@ -191,6 +201,12 @@ const renameKategori = () => {
         class="w-full border p-2 mb-4 rounded"
         placeholder="Nama kategori"
       />
+      <input
+  type="number"
+  v-model="masaAktif"
+  class="w-full border p-2 mb-4 rounded"
+  placeholder="Masa aktif (tahun)"
+/>
 
       <!-- BUTTON -->
       <div class="flex justify-end gap-2">
@@ -224,6 +240,12 @@ const renameKategori = () => {
         class="w-full border p-2 mb-4 rounded"
         placeholder="Nama baru kategori"
       />
+      <input
+  type="number"
+  v-model="renameMasaAktif"
+  class="w-full border p-2 mb-4 rounded"
+  placeholder="Masa aktif (tahun)"
+/>
 
       <div class="flex justify-end gap-2">
         <button

@@ -52,6 +52,8 @@ class ArsipController extends Controller
             'judul' => 'required|string',
             'tahun' => 'required',
             'id_kategori' => 'required|exists:kategori,id',
+            'lokasi' => 'required',
+            'deskripsi' => 'required',
             'status_akses' => 'required'
         ]);
        $request->merge([
@@ -105,10 +107,15 @@ $request->validate([
         if ($request->folder === 'vital') {
             $jenisArsip = 'vital';
         } else {
-            $currentYear = now()->year;
-            $jenisArsip = ($currentYear - (int)$request->tahun >= 3)
-                ? 'inaktif'
-                : 'aktif';
+            $kategori = Kategori::find($request->id_kategori);
+
+$masaAktif = $kategori?->masa_aktif ?? 3; // default 3 kalau kosong
+
+$currentYear = now()->year;
+
+$jenisArsip = ($currentYear - (int)$request->tahun >= $masaAktif)
+    ? 'inaktif'
+    : 'aktif';
         }
 
         $arsip = Arsip::create([
@@ -179,6 +186,8 @@ $request->validate([
             'nomor' => 'nullable|string',
             'tahun' => 'required|integer',
             'id_kategori' => 'required|exists:kategori,id',
+            'lokasi' => 'required',
+            'deskripsi' => 'required',
             'status_akses' => 'required',
             'files.*' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png,mp4|max:20480'
         ]);
@@ -229,9 +238,13 @@ $request->validate([
         }
     ]
 ]);
-        $jenisArsip = (now()->year - (int)$request->tahun >= 5)
-            ? 'inaktif'
-            : 'aktif';
+        $kategori = Kategori::find($request->id_kategori);
+
+$masaAktif = $kategori?->masa_aktif ?? 3;
+
+$jenisArsip = (now()->year - (int)$request->tahun >= $masaAktif)
+    ? 'inaktif'
+    : 'aktif';
 
         $arsip->update([
             'judul' => $request->judul,
@@ -1446,6 +1459,8 @@ $request->validate([
     'nomor' => 'required|string|unique:arsip,nomor',
     'tahun' => 'required',
     'id_kategori' => 'required|exists:kategori,id',
+    'lokasi' => 'required',
+    'deskripsi' => 'required',
     'status_akses' => 'required',
 
    'files.*' => [
@@ -1490,10 +1505,12 @@ $request->validate([
     if ($request->folder === 'vital') {
         $jenisArsip = 'vital';
     } else {
-        $currentYear = now()->year;
-        $jenisArsip = ($currentYear - (int)$request->tahun >= 3)
-            ? 'inaktif'
-            : 'aktif';
+        $kategori = Kategori::find($request->id_kategori);
+$masaAktif = $kategori?->masa_aktif ?? 3;
+
+$jenisArsip = (now()->year - (int)$request->tahun >= $masaAktif)
+    ? 'inaktif'
+    : 'aktif';
     }
 
     $arsip = Arsip::create([
