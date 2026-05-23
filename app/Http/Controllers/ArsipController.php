@@ -538,6 +538,10 @@ $request->validate([
                 OR LOWER(nama_file) LIKE '%.png'
                 OR LOWER(nama_file) LIKE '%.gif'
                 OR LOWER(nama_file) LIKE '%.bmp'
+                OR LOWER(nama_file) LIKE '%.webp'
+                OR LOWER(nama_file) LIKE '%.svg'
+                OR LOWER(nama_file) LIKE '%.jfif'
+                OR LOWER(nama_file) LIKE '%.heic'
             THEN 'Foto / Gambar'
 
             WHEN LOWER(nama_file) LIKE '%.pdf'
@@ -548,6 +552,14 @@ $request->validate([
                 OR LOWER(nama_file) LIKE '%.xlsx'
                 OR LOWER(nama_file) LIKE '%.ppt'  
                 OR LOWER(nama_file) LIKE '%.pptx'
+                OR LOWER(nama_file) LIKE '%.sql'
+                OR LOWER(nama_file) LIKE '%.csv'
+                OR LOWER(nama_file) LIKE '%.zip'
+                OR LOWER(nama_file) LIKE '%.rar'
+                OR LOWER(nama_file) LIKE '%.7z'
+                OR LOWER(nama_file) LIKE '%.odt'
+                OR LOWER(nama_file) LIKE '%.ods'
+                OR LOWER(nama_file) LIKE '%.odp'
             THEN 'Dokumen'
 
             WHEN LOWER(nama_file) LIKE '%.mp4'
@@ -557,6 +569,9 @@ $request->validate([
                 OR LOWER(nama_file) LIKE '%.wmv'
                 OR LOWER(nama_file) LIKE '%.flv'
                 OR LOWER(nama_file) LIKE '%.mpeg'
+                OR LOWER(nama_file) LIKE '%.webm'
+                OR LOWER(nama_file) LIKE '%.3gp'
+                OR LOWER(nama_file) LIKE '%.m4v'
             THEN 'Video'
 
             WHEN LOWER(nama_file) LIKE '%.mp3'
@@ -571,6 +586,7 @@ $request->validate([
                 OR LOWER(nama_file) LIKE '%.aiff'
                 OR LOWER(nama_file) LIKE '%.dsd'
                 OR LOWER(nama_file) LIKE '%.pcm'
+                OR LOWER(nama_file) LIKE '%.amr'
             THEN 'Audio'
 
             ELSE 'Lainnya'
