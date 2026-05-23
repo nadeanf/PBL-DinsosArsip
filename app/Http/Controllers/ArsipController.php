@@ -133,12 +133,12 @@ $jenisArsip = ($currentYear - (int)$request->tahun >= $masaAktif)
             'status_approval' => 'pending'
         ]);
 
-        // Track arsip creation in RiwayatAkses
+        /*// Track arsip creation in RiwayatAkses
         RiwayatAkses::create([
             'user_id' => $user->id,
             'arsip_id' => $arsip->id,
             'aksi' => 'buat'
-        ]);
+        ]);*/
 
        if ($request->hasFile('files')) {
 
