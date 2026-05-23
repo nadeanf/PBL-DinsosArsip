@@ -729,79 +729,96 @@ $jenisArsip = (now()->year - (int)$request->tahun >= $masaAktif)
     }
 
     public function dashboardSuperAdmin(Request $request)
-{
-    if (auth()->user()->role !== 'superadmin') {
-        abort(403);
-    }
+    {
+        $query = Arsip::with(['kategori', 'user', 'files']);
 
-    $query = Arsip::with(['kategori', 'user', 'files']);
+        $arsip = $query->latest()->get()->map(function ($item) {
+            $user = Auth::user();
 
-    // SEARCH
-    if ($request->search) {
-        $query->where(function ($q) use ($request) {
-            $q->where('judul', 'like', '%' . $request->search . '%')
-              ->orWhere('nomor', 'like', '%' . $request->search . '%');
+            $req = RequestAkses::where('user_id', $user->id)
+                ->where('arsip_id', $item->id)
+                ->first();
+
+            $item->request_status = $req?->status;
+            return $item;
         });
-    }
 
-    // FILTER KATEGORI
-    if ($request->kategori) {
-        $query->where('jenis_arsip', $request->kategori);
-    }
+        $totalDownload = DownloadLog::where('user_id', Auth::id())->count();
+        $totalArsip = Arsip::count();
 
-    // FILTER TANGGAL
-    if ($request->tanggal_awal) {
-        $query->whereDate('created_at', '>=', $request->tanggal_awal);
-    }
-
-    if ($request->tanggal_akhir) {
-        $query->whereDate('created_at', '<=', $request->tanggal_akhir);
-    }
-
-    $arsip = $query->latest()->get();
-
-    // TOTAL VIEW
-    $totalView = RiwayatAkses::where('aksi', 'lihat')->count();
-
-    // TOTAL DOWNLOAD
-    $totalDownload = DownloadLog::count();
-
-    // TIPE DOKUMEN
-    $tipeDokumen = File::selectRaw("
+        $tipeDokumen = File::selectRaw("
         CASE
-            WHEN LOWER(nama_file) LIKE '%.jpg'
+            WHEN LOWER(nama_file) LIKE '%.jpg' 
                 OR LOWER(nama_file) LIKE '%.jpeg'
                 OR LOWER(nama_file) LIKE '%.png'
+                OR LOWER(nama_file) LIKE '%.gif'
+                OR LOWER(nama_file) LIKE '%.bmp'
+                OR LOWER(nama_file) LIKE '%.webp'
+                OR LOWER(nama_file) LIKE '%.svg'
+                OR LOWER(nama_file) LIKE '%.jfif'
+                OR LOWER(nama_file) LIKE '%.heic'
             THEN 'Foto / Gambar'
 
             WHEN LOWER(nama_file) LIKE '%.pdf'
+                OR LOWER(nama_file) LIKE '%.txt'
                 OR LOWER(nama_file) LIKE '%.doc'
                 OR LOWER(nama_file) LIKE '%.docx'
                 OR LOWER(nama_file) LIKE '%.xls'
                 OR LOWER(nama_file) LIKE '%.xlsx'
+                OR LOWER(nama_file) LIKE '%.ppt'  
+                OR LOWER(nama_file) LIKE '%.pptx'
+                OR LOWER(nama_file) LIKE '%.sql'
+                OR LOWER(nama_file) LIKE '%.csv'
+                OR LOWER(nama_file) LIKE '%.zip'
+                OR LOWER(nama_file) LIKE '%.rar'
+                OR LOWER(nama_file) LIKE '%.7z'
+                OR LOWER(nama_file) LIKE '%.odt'
+                OR LOWER(nama_file) LIKE '%.ods'
+                OR LOWER(nama_file) LIKE '%.odp'
             THEN 'Dokumen'
 
             WHEN LOWER(nama_file) LIKE '%.mp4'
+                OR LOWER(nama_file) LIKE '%.avi'
+                OR LOWER(nama_file) LIKE '%.mkv'
+                OR LOWER(nama_file) LIKE '%.mov'
+                OR LOWER(nama_file) LIKE '%.wmv'
+                OR LOWER(nama_file) LIKE '%.flv'
+                OR LOWER(nama_file) LIKE '%.mpeg'
+                OR LOWER(nama_file) LIKE '%.webm'
+                OR LOWER(nama_file) LIKE '%.3gp'
+                OR LOWER(nama_file) LIKE '%.m4v'
             THEN 'Video'
 
             WHEN LOWER(nama_file) LIKE '%.mp3'
+                OR LOWER(nama_file) LIKE '%.wav'
+                OR LOWER(nama_file) LIKE '%.ogg'
+                OR LOWER(nama_file) LIKE '%.flac'
+                OR LOWER(nama_file) LIKE '%.aac'
+                OR LOWER(nama_file) LIKE '%.wma'
+                OR LOWER(nama_file) LIKE '%.m4a'
+                OR LOWER(nama_file) LIKE '%.opus'
+                OR LOWER(nama_file) LIKE '%.alac'
+                OR LOWER(nama_file) LIKE '%.aiff'
+                OR LOWER(nama_file) LIKE '%.dsd'
+                OR LOWER(nama_file) LIKE '%.pcm'
+                OR LOWER(nama_file) LIKE '%.amr'
             THEN 'Audio'
 
             ELSE 'Lainnya'
         END as nama,
         COUNT(*) as total
-    ")
-    ->groupBy('nama')
-    ->get();
+        ")
+        ->groupBy('nama')
+        ->get();
 
-    return Inertia::render('SuperAdmin/DashboardSuperAdmin', [
-        'arsip' => $arsip,
-        'kategoriData' => $this->kategoriTree(),
-        'totalView' => $totalView,
-        'totalDownload' => $totalDownload,
-        'tipeDokumen' => $tipeDokumen,
-    ]);
-}
+        return Inertia::render('SuperAdmin/DashboardSuperAdmin', [
+            'arsip' => $arsip,
+            'kategori' => $this->kategoriTree(),
+            'totalDownload' => $totalDownload,
+            'tipeDokumen' => $tipeDokumen,
+            'totalArsip' => $totalArsip
+        ]);
+    }
 
 public function listSuperAdmin(Request $request)
     {
