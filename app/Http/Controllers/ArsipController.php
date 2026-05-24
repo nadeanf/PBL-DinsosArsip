@@ -361,6 +361,10 @@ $jenisArsip = (now()->year - (int)$request->tahun >= $masaAktif)
             $query->where('id_kategori', $request->kategori);
         }
 
+        if ($request->filled('tahun')) {
+        $query->where('tahun', $request->tahun);
+    }
+
         if ($request->filled('tanggal_awal')) {
             $query->whereDate('created_at', '>=', $request->tanggal_awal);
         }
@@ -385,7 +389,7 @@ $jenisArsip = (now()->year - (int)$request->tahun >= $masaAktif)
             return Inertia::render('Pimpinan/ListArsipPimpinan', [
                 'arsip' => $arsip,
                 'kategori' => $this->kategoriTree(),
-                'filters' => $request->only(['search', 'kategori', 'tanggal_awal', 'tanggal_akhir'])
+                'filters' => $request->only(['search', 'kategori', 'tahunl'])
             ]);
         }
 
@@ -1261,47 +1265,53 @@ public function listSuperAdmin(Request $request)
     ]);
 }
 
-public function exportPDF(Request $request)
+public function exportPdf(Request $request)
 {
-    $query = Arsip::with(['kategori', 'user', 'files']);
+    $query = Arsip::with('kategori');
 
-    if ($request->search) {
-        $query->where(function ($q) use ($request) {
-            $q->where('judul', 'like', '%' . $request->search . '%')
-              ->orWhere('nomor', 'like', '%' . $request->search . '%');
-        });
-    }
-
-    if ($request->kategori) {
+    // 🔍 Filter kategori
+    if ($request->filled('kategori')) {
         $query->where('id_kategori', $request->kategori);
     }
 
+    // 🔍 Filter tanggal awal
     if ($request->filled('tanggal_awal')) {
         $query->whereDate('created_at', '>=', $request->tanggal_awal);
     }
 
+    // 🔍 Filter tanggal akhir
     if ($request->filled('tanggal_akhir')) {
         $query->whereDate('created_at', '<=', $request->tanggal_akhir);
     }
 
-    $arsip = $query->orderBy('tahun', 'desc')->orderBy('created_at', 'asc')->get()->map(function ($item) {
-        return [
-            'judul' => $item->judul,
-            'nomor' => $item->nomor,
-            'tahun' => $item->tahun,
-            'kategori' => $item->kategori?->nama ?? '-',
-            'jenis_arsip' => $item->jenis_arsip ?? '-',
-            'download_url' => url('/download/' . $item->id),
-        ];
-    })->groupBy('tahun');
+    // 📦 Ambil + grouping per tahun
+    $arsip = $query->get()
+        ->groupBy('tahun')
+        ->map(function ($items) {
+            return $items->map(function ($item) {
+                return [
+                    'judul' => $item->judul,
+                    'nomor' => $item->nomor,
+                    'tahun' => $item->tahun,
+                    'kategori' => $item->kategori->nama ?? '-',
+                    'jenis_arsip' => $item->jenis_arsip,
+                ];
+            });
+        });
 
+    // 🧾 Load ke PDF
     $pdf = Pdf::loadView('pdf.laporan-arsip', [
-        'data' => $arsip,
-    ]);
+        'arsip' => $arsip,
+        'filter' => [
+            'kategori' => $request->kategori_nama ?? 'Semua',
+            'tanggal_awal' => $request->tanggal_awal,
+            'tanggal_akhir' => $request->tanggal_akhir,
+        ]
+    ])->setPaper('a4', 'portrait');
 
+    // ⬇️ Download
     return $pdf->download('laporan-arsip.pdf');
 }
-
 public function statistikSuperAdmin(Request $request)
 {
     if (auth()->user()->role !== 'superadmin') {

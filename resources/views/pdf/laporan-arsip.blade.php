@@ -4,10 +4,6 @@
     <meta charset="utf-8">
     <title>Laporan Arsip</title>
     <style>
-        th {
-    background: #2f6f7e;
-    color: white;
-}
         body {
             font-family: sans-serif;
             margin: 30px;
@@ -51,11 +47,11 @@
 
         .judul-laporan {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
 
         .tanggal {
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             font-size: 12px;
         }
 
@@ -70,14 +66,9 @@
             font-size: 11px;
         }
 
-        a {
-            color: blue;
-            text-decoration: underline;
-        }
-
         th {
-            background-color: #000000 !important;
-            color: white !important;
+            background-color: #2f6f7e;
+            color: white;
         }
 
         .year-header {
@@ -97,7 +88,6 @@
 
     <!-- KOP SURAT -->
     <div class="kop-container">
-
         <table class="kop-table">
             <tr>
 
@@ -128,6 +118,33 @@
         <h3>LAPORAN DATA ARSIP</h3>
     </div>
 
+    <!-- TANGGAL CETAK -->
+    <div class="tanggal">
+        Dicetak pada: {{ now()->format('d-m-Y') }}
+    </div>
+
+    <!-- FILTER INFO -->
+    @if(!empty($filter))
+        <div class="tanggal">
+            @if(isset($filter['search']) && $filter['search'])
+                <div>Keyword: {{ $filter['search'] }}</div>
+            @endif
+
+            @if(isset($filter['kategori']) && $filter['kategori'])
+                <div>Kategori: {{ $filter['kategori'] }}</div>
+            @endif
+
+            @if(isset($filter['tanggal_awal']) && $filter['tanggal_awal'])
+                <div>
+                    Periode: 
+                    {{ $filter['tanggal_awal'] }} 
+                    s/d 
+                    {{ $filter['tanggal_akhir'] ?? 'Sekarang' }}
+                </div>
+            @endif
+        </div>
+    @endif
+
     <!-- TABEL -->
     <table>
         <thead>
@@ -143,14 +160,17 @@
 
         <tbody>
             @php
-                $no = 1;
-                $yearGroups = $data instanceof \Illuminate\Support\Collection ? $data : collect($data);
+                $yearGroups = $arsip instanceof \Illuminate\Support\Collection ? $arsip : collect($arsip);
             @endphp
 
             @forelse ($yearGroups as $tahun => $items)
+
+                <!-- HEADER TAHUN -->
                 <tr>
                     <td colspan="6" class="year-header">Tahun {{ $tahun }}</td>
                 </tr>
+
+                @php $no = 1; @endphp
 
                 @foreach ($items as $item)
                     <tr>
@@ -163,13 +183,28 @@
                     </tr>
                     @php $no++; @endphp
                 @endforeach
+
             @empty
                 <tr>
-                    <td colspan="6" style="text-align: center; padding: 20px;">Tidak ada data arsip</td>
+                    <td colspan="6" style="text-align: center; padding: 20px;">
+                        Tidak ada data arsip
+                    </td>
                 </tr>
             @endforelse
         </tbody>
     </table>
+
+    <!-- TANDA TANGAN -->
+    <br><br>
+
+    <table width="100%" style="border: none;">
+    <tr>
+        <td style="border: none; text-align: right;">
+            Boyolali, {{ now()->format('d-m-Y') }}<br><br><br><br>
+            <b>Kepala Dinas</b>
+        </td>
+    </tr>
+</table>
 
 </body>
 </html>
