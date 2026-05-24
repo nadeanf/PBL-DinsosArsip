@@ -10,7 +10,8 @@ class Kategori extends Model
 
     protected $fillable = [
         'nama',
-        'parent_id'
+        'parent_id',
+        'masa_aktif'
     ];
 
     // relasi parent-child
@@ -28,4 +29,9 @@ public function childrenRecursive()
 {
     return $this->children()->with('childrenRecursive');
 }
+
+public function arsip()
+    {
+        return $this->hasMany(\App\Models\Arsip::class, 'id_kategori');
+    }
 }

@@ -149,7 +149,7 @@ const exportPDF = () => {
 
     if (ext === 'pdf') return 'PDF'
 
-    // 🔥 TAMBAH INI
+    // TAMBAH INI
     if (['xls', 'xlsx', 'csv'].includes(ext)) return 'EXCEL'
 
     return 'FILE'

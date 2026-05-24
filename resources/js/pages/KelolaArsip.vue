@@ -96,13 +96,6 @@ const openPreview = (item: any) => {
   nextTick(() => {
     selectedDoc.value = item
   })
-
-  // 🔥 Track riwayat akses
-  router.post('/riwayat/view', { dokumen_id: item.id }, {
-    preserveScroll: true,
-    preserveState: true,
-    onError: (err) => console.error('Error tracking view:', err)
-  })
 }
 
 const closePreviewModal = () => {

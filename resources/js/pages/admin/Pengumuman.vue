@@ -281,7 +281,7 @@ const handleCancelPermanentDelete = () => {
               : 'bg-white text-gray-700'
           ]"
         >
-          + Tambah Pengumuman
+          Tambah Pengumuman
         </button>
 
         <button
@@ -305,7 +305,7 @@ const handleCancelPermanentDelete = () => {
               : 'bg-white text-gray-700'
           ]"
         >
-          🗑️ Sampah
+          Sampah
         </button>
 
       </div>
@@ -607,7 +607,7 @@ const handleCancelPermanentDelete = () => {
         <div class="bg-[#7fa0ad] rounded-2xl p-10 shadow-xl">
 
           <h2 class="text-2xl font-black text-white mb-8">
-            🗑️ Sampah Pengumuman
+            Sampah Pengumuman
           </h2>
 
           <p class="text-white text-sm mb-6">
@@ -615,14 +615,14 @@ const handleCancelPermanentDelete = () => {
           </p>
 
           <div
-            v-if="trashed.data.length"
-            class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
-          >
+  v-if="trashed.data.length"
+  class="grid grid-cols-1 md:grid-cols-2 gap-6"
+>
 
             <div
               v-for="item in trashed.data"
               :key="item.id"
-              class="bg-white rounded-[28px] p-5 shadow-lg opacity-75"
+              class="bg-white rounded-[28px] p-5 shadow-lg opacity-75 min-h-[380px] flex flex-col justify-between hover:shadow-xl transition"
             >
 
               <!-- IMAGE -->
@@ -674,7 +674,28 @@ const handleCancelPermanentDelete = () => {
 
           </div>
 
-          
+          <!-- PAGINATION SAMPAH -->
+<div
+  v-if="trashed.links"
+  class="flex justify-center mt-8 gap-2 flex-wrap"
+>
+
+  <button
+    v-for="(link, index) in trashed.links"
+    :key="index"
+    v-html="link.label"
+    :disabled="!link.url"
+    @click="$inertia.visit(link.url)"
+    class="px-4 py-2 rounded-lg text-sm font-bold transition"
+    :class="[
+      link.active
+        ? 'bg-red-600 text-white'
+        : 'bg-white text-gray-700 hover:bg-gray-100',
+      !link.url && 'opacity-50 cursor-not-allowed'
+    ]"
+  />
+
+</div>
 
           <!-- EMPTY -->
           <div
