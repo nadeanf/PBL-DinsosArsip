@@ -1409,11 +1409,17 @@ public function statistikAdmin()
     ->groupBy('kategori.nama')
     ->get();
 
+    $bidangStat = Arsip::selectRaw('users.bagian as nama, COUNT(*) as total')
+    ->join('users', 'arsip.user_id', '=', 'users.id')
+    ->groupBy('users.bagian')
+    ->get();
+
     return Inertia::render('admin/StatistikLaporan', [
         'tipeDokumen' => $tipeDokumen,
         'totalArsip' => $totalArsip,
         'totalDownload' => $totalDownload,
-        'kategoriStat' => $kategoriStat
+        'kategoriStat' => $kategoriStat,
+        'bidangStat' => $bidangStat
     ]);
 }
 

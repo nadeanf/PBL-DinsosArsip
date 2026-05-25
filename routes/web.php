@@ -213,7 +213,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     \App\Models\Kategori::create([
         'nama' => $request->nama,
-        'parent_id' => $request->parent_id
+        'parent_id' => $request->parent_id,
+        'masa_aktif' => 3
     ]);
 
     return back();
