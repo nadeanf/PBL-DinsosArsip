@@ -1318,7 +1318,6 @@ public function statistikSuperAdmin(Request $request)
         abort(403);
     }
 
-    // TOTAL FILE BERDASARKAN TIPE
     $dokumen = File::where(function ($q) {
         $q->where('nama_file', 'like', '%.pdf')
           ->orWhere('nama_file', 'like', '%.doc')
