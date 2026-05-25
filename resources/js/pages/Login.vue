@@ -3,6 +3,7 @@ import { Head, router, useForm } from '@inertiajs/vue3'
 import { Eye, EyeOff } from 'lucide-vue-next'
 import { ref } from 'vue'
 import GuestLayout from '@/layouts/GuestLayout.vue'
+import { onMounted } from 'vue'
 
 defineOptions({ layout: GuestLayout })
 
@@ -17,9 +18,25 @@ const form = useForm({
 })
 
 const showPassword = ref(false)
-
+onMounted(() => {
+    const script = document.createElement('script')
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js'
+    script.async = true
+    script.defer = true
+    document.head.appendChild(script)
+})
 function handleSubmit() {
-    form.post('/login', {
+
+    const token = (
+        document.querySelector(
+            '[name="cf-turnstile-response"]'
+        ) as HTMLInputElement
+    )?.value
+
+    form.transform((data) => ({
+        ...data,
+        'cf-turnstile-response': token,
+    })).post('/login', {
         onError: () => {
             alert('Login gagal, cek email dan password!')
         }
@@ -140,7 +157,15 @@ function goToForgotPassword() {
                     </span>
                 </div>
 
-  
+                <div
+                class="cf-turnstile"
+                data-sitekey="0x4AAAAAADVe7s1edUnlFvz0"
+                ></div>
+                <input
+                type="hidden"
+                name="cf-turnstile-response"
+                />
+
                 <button
                     type="submit"
                     :disabled="form.processing"
