@@ -50,7 +50,7 @@ class ArsipController extends Controller
     {
         $request->validate([
             'judul' => 'required|string',
-            'tahun' => 'required',
+            'tahun' => ['required', 'integer', 'between:2017,' . date('Y')],
             'id_kategori' => 'required|exists:kategori,id',
             'lokasi' => 'required',
             'deskripsi' => 'required',
@@ -185,7 +185,7 @@ $jenisArsip = ($currentYear - (int)$request->tahun >= $masaAktif)
         $request->validate([
             'judul' => 'required|string',
             'nomor' => 'nullable|string',
-            'tahun' => 'required|integer',
+            'tahun' => ['required', 'integer', 'between:2017,' . date('Y')],
             'id_kategori' => 'required|exists:kategori,id',
             'lokasi' => 'required',
             'deskripsi' => 'required',
@@ -1424,11 +1424,17 @@ public function statistikAdmin()
     ->groupBy('kategori.nama')
     ->get();
 
+    $bidangStat = Arsip::selectRaw('users.bagian as nama, COUNT(*) as total')
+    ->join('users', 'arsip.user_id', '=', 'users.id')
+    ->groupBy('users.bagian')
+    ->get();
+
     return Inertia::render('admin/StatistikLaporan', [
         'tipeDokumen' => $tipeDokumen,
         'totalArsip' => $totalArsip,
         'totalDownload' => $totalDownload,
-        'kategoriStat' => $kategoriStat
+        'kategoriStat' => $kategoriStat,
+        'bidangStat' => $bidangStat
     ]);
 }
 
@@ -1499,7 +1505,7 @@ public function storeAdmin(Request $request)
 $request->validate([
     'judul' => 'required|string',
     'nomor' => 'required|string|unique:arsip,nomor',
-    'tahun' => 'required',
+    'tahun' => ['required', 'integer', 'between:2017,' . date('Y')],
     'id_kategori' => 'required|exists:kategori,id',
     'lokasi' => 'required',
     'deskripsi' => 'required',

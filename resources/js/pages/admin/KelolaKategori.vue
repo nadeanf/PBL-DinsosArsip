@@ -71,7 +71,7 @@ const tambahKategori = () => {
   router.post('/kategori', {
     nama: newItem.value,
     parent_id: selectedParent.value,
-    masa_aktif: masaAktif.value // 🔥 INI WAJIB
+    masa_aktif: 3
   }, {
     onSuccess: () => {
       newItem.value = ''
@@ -201,12 +201,6 @@ const renameKategori = () => {
         class="w-full border p-2 mb-4 rounded"
         placeholder="Nama kategori"
       />
-      <input
-  type="number"
-  v-model="masaAktif"
-  class="w-full border p-2 mb-4 rounded"
-  placeholder="Masa aktif (tahun)"
-/>
 
       <!-- BUTTON -->
       <div class="flex justify-end gap-2">
