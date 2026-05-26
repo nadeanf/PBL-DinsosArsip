@@ -230,13 +230,14 @@ const renameKategori = () => {
       <h2 class="text-lg font-bold mb-4">Rename Kategori</h2>
 
       <input
-        v-model="renameItemName"
-        class="w-full border p-2 mb-4 rounded"
-        placeholder="Nama baru kategori"
-      />
-      <input
+  v-model="renameItemName"
+  class="w-full border p-2 mb-4 rounded"
+  placeholder="Nama baru kategori"
+/>
+
+<input
   type="number"
-  v-model="renameMasaAktif"
+  v-model.number="renameMasaAktif"
   class="w-full border p-2 mb-4 rounded"
   placeholder="Masa aktif (tahun)"
 />
