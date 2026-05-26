@@ -7,6 +7,7 @@ class KategoriController extends Controller
 {
     public function store(Request $request)
     {
+         dd($request->all());
         Kategori::create([
             'nama' => $request->nama,
             'masa_aktif' => $request->masa_aktif,
