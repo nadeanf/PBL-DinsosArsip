@@ -1460,6 +1460,11 @@ public function statistikPimpinan()
     ->groupBy('kategori.nama')
     ->get();
 
+    $bidangStat = Arsip::selectRaw('users.bagian as nama, COUNT(*) as total')
+    ->join('users', 'arsip.user_id', '=', 'users.id')
+    ->groupBy('users.bagian')
+    ->get();
+
     $users = User::withCount('arsip')
             ->orderByDesc('arsip_count')
             ->paginate(5);
@@ -1472,6 +1477,7 @@ public function statistikPimpinan()
         'totalArsip' => $totalArsip,
         'totalDownload' => $totalDownload,
         'kategoriStat' => $kategoriStat,
+        'bidangStat' => $bidangStat,
         'users' => $users,
         'totalUser' => $totalUser,
         'totalAktif' => $totalAktif,
