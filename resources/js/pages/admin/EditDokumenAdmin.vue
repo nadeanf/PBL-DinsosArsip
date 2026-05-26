@@ -6,7 +6,13 @@ import { UploadCloud } from 'lucide-vue-next'
 import TreeDropdown from '@/components/TreeDropdown.vue'
 
 defineOptions({ layout: AdminLayout })
+const currentYear = new Date().getFullYear()
+const startYear = 2017
 
+const years = Array.from(
+  { length: currentYear - startYear + 1 },
+  (_, i) => currentYear - i
+)
 
 const isDragging = ref(false)
 const fileError = ref('')
@@ -261,11 +267,33 @@ const submit = () => {
 </div>
 
           <div>
-            <label class="block font-black mb-1 text-sm uppercase">Tahun
-              <span class="text-red-600">*</span>
-            </label>
-            <input v-model="form.tahun" class="w-full p-4 bg-white rounded-2xl border" />
-          </div>
+  <label class="block font-black mb-1 text-sm uppercase">
+    Tahun
+    <span class="text-red-600">*</span>
+  </label>
+
+  <div class="relative">
+    <select
+      v-model="form.tahun"
+      class="w-full p-4 pr-10 bg-white text-black rounded-2xl border border-gray-300 appearance-none"
+    >
+      <option disabled value="">-- Pilih Tahun --</option>
+
+      <option
+        v-for="year in years"
+        :key="year"
+        :value="year.toString()"
+      >
+        {{ year }}
+      </option>
+    </select>
+
+    <!-- arrow -->
+    <div class="pointer-events-none absolute inset-y-0 right-4 flex items-center text-gray-700">
+      ▼
+    </div>
+  </div>
+</div>
 
           <!-- KATEGORI -->
           <div>
