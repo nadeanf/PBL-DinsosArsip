@@ -80,18 +80,27 @@ function goToForgotPassword() {
 
 
                 <div>
-                    <label class="block text-xs text-gray-700 mb-1">Email</label>
-                    <input
-                        v-model="form.email"
-                        type="email"
-                        required
-                        class="field-input"
-                        placeholder="email@example.com"
-                    />
-                    <span v-if="form.errors.email" class="text-xs text-red-600">
-                        {{ form.errors.email }}
-                    </span>
-                </div>
+    <label class="block text-xs text-gray-700 mb-1">Email</label>
+
+    <input
+        v-model="form.email"
+        @input="form.email = form.email.toLowerCase()"
+        type="email"
+        required
+        class="field-input"
+        placeholder="Masukkan email @gmail.com"
+        pattern="^[a-z0-9._%+-]+@gmail\.com$"
+        title="Gunakan email dengan format @gmail.com"
+    />
+
+    <p class="text-[10px] text-gray-500 mt-1">
+        Contoh: example@gmail.com
+    </p>
+
+    <span v-if="form.errors.email" class="text-xs text-red-600">
+        {{ form.errors.email }}
+    </span>
+</div>
 
 
                 <div>
@@ -103,7 +112,7 @@ function goToForgotPassword() {
                      :type="showPassword ? 'text' : 'password'"
                     required
                      class="field-input pr-10"
-                    placeholder="Password"
+                    placeholder="Masukkan password"
                     />
 
                     <button
@@ -146,7 +155,7 @@ function goToForgotPassword() {
                     :disabled="form.processing"
                     class="w-full py-2 mt-1 font-bold text-white bg-[#2d3282] hover:bg-[#232769] rounded-lg disabled:opacity-50"
                 >
-                    {{ form.processing ? 'Loading...' : 'LOGIN' }}
+                    {{ form.processing ? 'Loading...' : 'MASUK' }}
                 </button>
             </form>
 

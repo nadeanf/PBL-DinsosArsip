@@ -10,36 +10,49 @@ use Illuminate\Support\Facades\Hash;
 class AuthController extends Controller
 {
     public function register(Request $request)
-    {
-        $request->validate([
-            'name' => 'required',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:6|confirmed',
-            'nip' => 'required',
-            'bagian' => 'required',
-        ]);
+{
+    $request->merge([
+        'email' => strtolower($request->email)
+    ]);
 
-        User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'nip' => $request->nip,
-            'bagian' => $request->bagian,
-            'role' => 'user'
-        ]);
+    $request->validate([
+        'name' => 'required',
+        'email' => [
+                        'required',
+                        'email',
+                        'unique:users',
+                        'regex:/^[a-z0-9._%+-]+@gmail\.com$/'
+                    ],
+        'password' => 'required|min:6|confirmed',
+        'nip' => 'required',
+        'bagian' => 'required',
+    ]);
 
-        return redirect('/login');
-    }
+    User::create([
+        'name' => $request->name,
+        'email' => $request->email,
+        'password' => Hash::make($request->password),
+        'nip' => $request->nip,
+        'bagian' => $request->bagian,
+        'role' => 'user'
+    ]);
+
+    return redirect('/login');
+}
 
     public function login(Request $request)
-    {
-        $credentials = $request->only('email', 'password');
+{
+    $request->merge([
+        'email' => strtolower($request->email)
+    ]);
 
-        if (Auth::attempt($credentials)) {
+    $credentials = $request->only('email', 'password');
 
-            $user = Auth::user();
+    if (Auth::attempt($credentials)) {
 
-            // CEK USER AKTIF / NONAKTIF
+        $user = Auth::user();
+
+        // CEK USER AKTIF / NONAKTIF
         if (!$user->is_active) {
 
             Auth::logout();
@@ -49,37 +62,36 @@ class AuthController extends Controller
             ]);
         }
 
-            // DETECT SUPER ADMIN
-            if ($user->email === 'superadmin@gmail.com') {
-                $user->role = 'superadmin';
-                $user->save();
+        // DETECT SUPER ADMIN
+        if ($user->email === 'superadmin@gmail.com') {
+            $user->role = 'superadmin';
+            $user->save();
 
-                return redirect('/super-admin/dashboard');
-            }
-
-            // DETECT PIMPINAN
-            if ($user->email === 'pimpinan@gmail.com') {
-                $user->role = 'pimpinan';
-                $user->save();
-
-                return redirect('/pimpinan/dashboard');
-            }
-
-
-            // DETECT ADMIN
-            if ($user->email === 'admin@gmail.com') {
-                $user->role = 'admin';
-                $user->save();
-
-                return redirect('/admin/dashboard');
+            return redirect('/super-admin/dashboard');
         }
 
-            // DEFAULT USER 
-            return redirect('/dashboard');
+        // DETECT PIMPINAN
+        if ($user->email === 'pimpinan@gmail.com') {
+            $user->role = 'pimpinan';
+            $user->save();
+
+            return redirect('/pimpinan/dashboard');
         }
 
-        return back()->withErrors([
-            'email' => 'Email atau password salah'
-        ]);
+        // DETECT ADMIN
+        if ($user->email === 'admin@gmail.com') {
+            $user->role = 'admin';
+            $user->save();
+
+            return redirect('/admin/dashboard');
+        }
+
+        // DEFAULT USER
+        return redirect('/dashboard');
     }
+
+    return back()->withErrors([
+        'email' => 'Email atau password salah'
+    ]);
+}
 }
