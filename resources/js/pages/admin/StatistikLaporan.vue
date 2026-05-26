@@ -28,6 +28,7 @@ defineOptions({
 })
 
 const page = usePage()
+const mode = ref('kategori')
 
 const tipeDokumen = computed(() => page.props?.tipeDokumen ?? [])
 const totalDownload = computed(() => page.props?.totalDownload ?? 0)
@@ -101,25 +102,36 @@ const chartOptions = {
   }
 }
 
-  const kategoriData = computed(() => page.props?.kategoriStat ?? [])
-
+  const dataStat = computed(() => {
+  return mode.value === 'kategori'
+    ? page.props?.kategoriStat ?? []
+    : page.props?.bidangStat ?? []
+})
 const barChartData = computed(() => ({
-  labels: kategoriData.value.map(i => i.nama),
+  labels: dataStat.value.map(i => i.nama),
   datasets: [
     {
       label: 'Jumlah Arsip',
-      data: kategoriData.value.map(i => i.total),
+      data: dataStat.value.map(i => i.total),
       backgroundColor: '#3b82f6'
     }
   ]
 }))
-
 const barChartOptions = {
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
     legend: {
       display: false
+    }
+  },
+  scales: {
+    y: {
+      beginAtZero: true,
+      ticks: {
+        stepSize: 1, // 🔥 ini kuncinya (biar 0,1,2,3 tanpa koma)
+        precision: 0 // 🔥 biar gak ada desimal
+      }
     }
   }
 }
@@ -189,14 +201,37 @@ const barChartOptions = {
 
   <!-- CARD 2 (BAR CHART) -->
   <div class="bg-white rounded-2xl shadow p-6 space-y-4">
+
+  <div class="flex justify-between items-center">
     <h2 class="font-semibold text-gray-700">
-      Statistik Per Kategori
+      Statistik Per {{ mode === 'kategori' ? 'Kategori' : 'Bidang' }}
     </h2>
 
-    <div class="h-[300px]">
-      <Bar :data="barChartData" :options="barChartOptions" />
+    <!-- 🔥 TOGGLE TARUH DI SINI -->
+    <div class="flex gap-2">
+      <button
+        @click="mode = 'kategori'"
+        :class="mode === 'kategori' ? 'bg-blue-500 text-white' : 'bg-gray-200'"
+        class="px-3 py-1 rounded text-sm"
+      >
+        Kategori
+      </button>
+
+      <button
+        @click="mode = 'bidang'"
+        :class="mode === 'bidang' ? 'bg-blue-500 text-white' : 'bg-gray-200'"
+        class="px-3 py-1 rounded text-sm"
+      >
+        Bidang
+      </button>
     </div>
   </div>
+
+  <div class="h-[300px]">
+    <Bar :data="barChartData" :options="barChartOptions" />
+  </div>
+
+</div>
 
 </div>
 </div>
