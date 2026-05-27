@@ -41,41 +41,41 @@ const kategoriData = {
 <template>
   <Head title="Unggah File" />
 
-  <div class="py-12 px-6">
+  <div class="py-8 md:py-12 px-4 md:px-6">
     <div class="max-w-7xl mx-auto">
 
-      <h1 class="text-4xl font-extrabold mb-12 tracking-tight">
+      <h1 class="text-2xl md:text-4xl font-extrabold mb-8 md:mb-12 tracking-tight">
         Unggah File
       </h1>
 
-      <div class="flex gap-16 justify-center mt-20">
+      <div class="flex flex-col md:flex-row gap-8 md:gap-16 justify-center mt-12 md:mt-20">
 
         <!-- FIX DISINI -->
-        <Link href="/unggah/aktif-inaktif" class="group flex flex-col items-center">
-          <div class="relative w-36 h-28 bg-[#2f55a4] rounded-2xl shadow-2xl group-hover:scale-105 transition-transform flex items-center justify-center">
-            <div class="absolute -top-3 left-0 w-16 h-6 bg-[#2f55a4] rounded-t-md"></div>
-            <span class="text-5xl">📄</span>
+        <Link href="/unggah/aktif-inaktif" class="group flex flex-col items-center w-full md:w-auto">
+          <div class="relative w-32 md:w-36 h-24 md:h-28 bg-[#2f55a4] rounded-2xl shadow-2xl group-hover:scale-105 transition-transform flex items-center justify-center">
+            <div class="absolute -top-3 left-0 w-14 md:w-16 h-5 md:h-6 bg-[#2f55a4] rounded-t-md"></div>
+            <span class="text-4xl md:text-5xl">📄</span>
           </div>
 
-          <span class="mt-6 text-2xl font-black text-gray-800 uppercase tracking-tighter">
+          <span class="mt-4 md:mt-6 text-lg md:text-2xl font-black text-gray-800 uppercase tracking-tighter">
             Aktif / Inaktif
           </span>
-          <p class="text-sm text-gray-600 text-center mt-2 max-w-[200px]">
+          <p class="text-xs md:text-sm text-gray-600 text-center mt-2 px-4 max-w-[200px]">
   Arsip aktif digunakan dalam kegiatan sehari-hari (≤ 3 tahun), 
   sedangkan arsip inaktif jarang digunakan namun masih disimpan.
 </p>
         </Link>
 
-        <Link href="/unggah/vital" class="group flex flex-col items-center">
-          <div class="relative w-36 h-28 bg-[#94a3d8] rounded-2xl shadow-2xl group-hover:scale-105 transition-transform flex items-center justify-center">
-            <div class="absolute -top-3 left-0 w-16 h-6 bg-[#94a3d8] rounded-t-md"></div>
-            <span class="text-5xl">🛡️</span>
+        <Link href="/unggah/vital" class="group flex flex-col items-center w-full md:w-auto">
+          <div class="relative w-32 md:w-36 h-24 md:h-28 bg-[#94a3d8] rounded-2xl shadow-2xl group-hover:scale-105 transition-transform flex items-center justify-center">
+            <div class="absolute -top-3 left-0 w-14 md:w-16 h-5 md:h-6 bg-[#94a3d8] rounded-t-md"></div>
+            <span class="text-4xl md:text-5xl">🛡️</span>
           </div>
 
-          <span class="mt-6 text-2xl font-black text-gray-800 uppercase tracking-tighter">
+          <span class="mt-4 md:mt-6 text-lg md:text-2xl font-black text-gray-800 uppercase tracking-tighter">
             Vital
           </span>
-          <p class="text-sm text-gray-600 text-center mt-2 max-w-[200px]">
+          <p class="text-xs md:text-sm text-gray-600 text-center mt-2 px-4 max-w-[200px]">
   Arsip penting yang harus dijaga karena menyangkut kelangsungan 
   organisasi dan tidak dapat digantikan jika hilang.
 </p>

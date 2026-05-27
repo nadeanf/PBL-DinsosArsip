@@ -14,7 +14,7 @@ function getPhoto() {
 </script>
 
 <template>
-  <aside class="h-full overflow-x-hidden bg-gradient-to-b from-[#dbe3e7] to-[#2f6f7e] p-4 flex flex-col">
+  <aside class="h-full overflow-x-hidden bg-gradient-to-b from-[#dbe3e7] to-[#2f6f7e] p-3 md:p-4 flex flex-col">
     <div>
       <!-- PROFILE -->
       <Link href="/edit-profile" class="flex items-center gap-3 mb-6 group">
