@@ -159,7 +159,7 @@ const submit = () => {
     <div class="max-w-4xl mx-auto">
 
       <h1 class="text-4xl font-black mb-10 text-gray-800 uppercase tracking-tight">
-        Edit Dokumen
+        Edit Arsip
       </h1>
 
       <form @submit.prevent="submit" class="bg-[#7fa1b1] p-10 rounded-[40px] shadow-lg">

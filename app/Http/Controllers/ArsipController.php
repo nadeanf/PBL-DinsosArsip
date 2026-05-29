@@ -1269,6 +1269,14 @@ public function exportPdf(Request $request)
 {
     $query = Arsip::with('kategori');
 
+    // 🔍 Filter search (judul atau nomor)
+    if ($request->filled('search')) {
+        $query->where(function ($q) use ($request) {
+            $q->where('judul', 'like', '%' . $request->search . '%')
+                ->orWhere('nomor', 'like', '%' . $request->search . '%');
+        });
+    }
+
     // 🔍 Filter kategori
     if ($request->filled('kategori')) {
         $query->where('id_kategori', $request->kategori);
@@ -1299,11 +1307,18 @@ public function exportPdf(Request $request)
             });
         });
 
+    // Get kategori name if kategori ID is provided
+    $kategoriName = 'Semua';
+    if ($request->filled('kategori')) {
+        $kategori = Kategori::find($request->kategori);
+        $kategoriName = $kategori ? $kategori->nama : 'Semua';
+    }
+
     // 🧾 Load ke PDF
     $pdf = Pdf::loadView('pdf.laporan-arsip', [
         'arsip' => $arsip,
         'filter' => [
-            'kategori' => $request->kategori_nama ?? 'Semua',
+            'kategori' => $kategoriName,
             'tanggal_awal' => $request->tanggal_awal,
             'tanggal_akhir' => $request->tanggal_akhir,
         ]

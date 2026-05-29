@@ -281,7 +281,7 @@ const handleCancelPermanentDelete = () => {
               : 'bg-white text-gray-700'
           ]"
         >
-          Tambah Pengumuman
+          Unggah Pengumuman
         </button>
 
         <button
