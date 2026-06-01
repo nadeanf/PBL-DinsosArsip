@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Head, usePage, router } from '@inertiajs/vue3'
 import AdminLayout from '@/layouts/AdminLayout.vue'
-import { Search, Filter } from 'lucide-vue-next'
+import { Search } from 'lucide-vue-next'
 import { ref, watch } from 'vue'
 import { computed } from 'vue'
 
@@ -71,11 +71,6 @@ const updateStatus = (id: number, status: string) => {
   class="w-full pl-10 pr-4 py-2 rounded-lg border shadow-sm focus:outline-none"
 />
       </div>
-
-      <button class="flex items-center gap-2 text-gray-700 font-semibold">
-        <Filter class="w-5 h-5" />
-        Filter
-      </button>
 
     </div>
 

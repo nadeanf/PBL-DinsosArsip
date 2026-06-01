@@ -26,7 +26,7 @@
         }
 
         .logo {
-            width: 90px;
+            width: 100px;
         }
 
         .judul-dinas {
@@ -41,15 +41,16 @@
         }
 
         .garis {
-            border-top: 3px solid black;
+            border-top: 2px solid black;
             border-bottom: 1px solid black;
+            height: 3px;
             margin-top: 10px;
             margin-bottom: 25px;
         }
 
         .judul-laporan {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
 
         .judul-laporan h3 {
@@ -57,7 +58,7 @@
         }
 
         .tanggal {
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             font-size: 12px;
             color: #000000;
         }
@@ -69,8 +70,8 @@
 
         /* Warna Judul Tabel Hitam Pekat dengan Text Putih */
         th {
-            background-color: #050387 !important;
-            color: #ffffff !important;
+            background-color: #2f6f7e;
+            color: white;
             border: 1px solid #5964dc;
             padding: 8px;
             font-size: 11px;
@@ -85,13 +86,15 @@
             color: #000000;
         }
 
-        a {
-            color: #000000;
-            text-decoration: none;
-        }
-
-        a:hover {
-            text-decoration: underline;
+        .year-header {
+            background-color: #f3f4f6;
+            font-weight: bold;
+            font-size: 12px;
+            padding: 10px;
+            text-align: center;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            border: 1px solid #d1d5db;
         }
     </style>
 </head>
@@ -106,10 +109,23 @@
                     <img src="{{ public_path('image/logodinsos.png') }}" class="logo">
                 </td>
                 <td class="judul-dinas">
-                    <h2>PEMERINTAH KABUPATEN BOYOLALI</h2>
-                    <h3>DINAS SOSIAL</h3>
-                    <p>Jl. Kebo Kenongo Tegalarum, Kemiri, Mojosongo, Boyolali</p>
-                    <p>Email: dinsos@boyolali.go.id</p>
+                    <div style="font-size: 18px;">
+                        PEMERINTAH KABUPATEN BOYOLALI
+                    </div>
+
+                    <div style="font-size: 34px; font-weight: bold; margin-top: 5px;">
+                        DINAS SOSIAL
+                    </div>
+
+                    <div style="font-size: 14px; margin-top: 6px; line-height: 1.5;">
+                        Komplek Perkantoran Terpadu Kabupaten Boyolali<br>
+                        Jalan : Kebo Kenongo, (0276) 321 021 / 321 047, Faks 321 098, Kemiri<br>
+                        Boyolali 57321, Provinsi Jawa Tengah
+                    </div>
+
+                    <div style="font-size: 14px; margin-top: 5px;">
+                        <i>Email : dinsos@boyolali.go.id</i>
+                    </div>
                 </td>
             </tr>
         </table>
@@ -121,10 +137,32 @@
         <h3>LAPORAN DATA ARSIP</h3>
     </div>
 
-    <!-- TANGGAL -->
+    <!-- TANGGAL CETAK -->
     <div class="tanggal">
-        Tanggal Export: {{ \Carbon\Carbon::now('Asia/Jakarta')->translatedFormat('d F Y H:i') }} WIB
+        Dicetak pada: {{ now()->format('d-m-Y') }}
     </div>
+
+    <!-- FILTER INFO -->
+    @if(!empty($filter))
+        <div class="tanggal">
+            @if(isset($filter['search']) && $filter['search'])
+                <div>Keyword: {{ $filter['search'] }}</div>
+            @endif
+
+            @if(isset($filter['kategori']) && $filter['kategori'])
+                <div>Kategori: {{ $filter['kategori'] }}</div>
+            @endif
+
+            @if(isset($filter['tanggal_awal']) && $filter['tanggal_awal'])
+                <div>
+                    Periode: 
+                    {{ $filter['tanggal_awal'] }} 
+                    s/d 
+                    {{ $filter['tanggal_akhir'] ?? 'Sekarang' }}
+                </div>
+            @endif
+        </div>
+    @endif
 
     <!-- TABEL -->
     <table>
@@ -135,25 +173,57 @@
                 <th>Nomor</th>
                 <th>Tahun</th>
                 <th>Kategori</th>
-                <th>Akses</th>
-                <th>Masa Aktif</th>
+                <th>Jenis</th>
             </tr>
         </thead>
 
         <tbody>
-            @foreach ($data as $index => $item)
-            <tr>
-                <td style="text-align: center;">{{ $index + 1 }}</td>
-                <td>{{ $item['judul'] }}</td>
-                <td style="text-align: center;">{{ $item['nomor'] }}</td>
-                <td style="text-align: center;">{{ $item['tahun'] }}</td>
-                <td>{{ $item['kategori'] }}</td>
-                <td style="text-align: center;">{{ $item['status'] }}</td>
-                <td style="text-align: center;">{{ $item['masa_aktif'] ?? '-' }}</td>
-            </tr>
-            @endforeach
+            @php
+                $yearGroups = $arsip instanceof \Illuminate\Support\Collection ? $arsip : collect($arsip);
+            @endphp
+
+            @forelse ($yearGroups as $tahun => $items)
+
+                <!-- HEADER TAHUN -->
+                <tr>
+                    <td colspan="6" class="year-header">Tahun {{ $tahun }}</td>
+                </tr>
+
+                @php $no = 1; @endphp
+
+                @foreach ($items as $item)
+                    <tr>
+                        <td>{{ $no }}</td>
+                        <td>{{ $item['judul'] }}</td>
+                        <td>{{ $item['nomor'] }}</td>
+                        <td>{{ $item['tahun'] }}</td>
+                        <td>{{ $item['kategori'] }}</td>
+                        <td>{{ $item['jenis_arsip'] }}</td>
+                    </tr>
+                    @php $no++; @endphp
+                @endforeach
+
+            @empty
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 20px;">
+                        Tidak ada data arsip
+                    </td>
+                </tr>
+            @endforelse
         </tbody>
     </table>
+
+    <!-- TANDA TANGAN -->
+    <br><br>
+
+    <table width="100%" style="border: none;">
+    <tr>
+        <td style="border: none; text-align: right;">
+            Boyolali, {{ now()->format('d-m-Y') }}<br><br><br><br>
+            <b>Kepala Dinas</b>
+        </td>
+    </tr>
+</table>
 
 </body>
 </html>

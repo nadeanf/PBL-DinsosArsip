@@ -111,7 +111,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/super-admin/user/{id}/toggle', [UserController::class, 'toggleStatus']);
     Route::post('/super-admin/tambah-user', [UserController::class, 'store']);
     Route::put('/super-admin/user/{id}', [UserController::class, 'update']);
-    Route::get('/super-admin/daftar-arsip', [ArsipController::class, 'listAdmin']);
+    Route::get('/super-admin/daftar-arsip', [ArsipController::class, 'listSuperAdmin']);
     Route::get('/super-admin/backup-database', [ArsipController::class, 'backupDatabase']);
 });
 /* AUTH + FITUR */
@@ -213,7 +213,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     \App\Models\Kategori::create([
         'nama' => $request->nama,
-        'parent_id' => $request->parent_id
+        'parent_id' => $request->parent_id,
+        'masa_aktif' => 3
     ]);
 
     return back();
@@ -234,10 +235,26 @@ Route::patch('/kategori/{id}', function (Illuminate\Http\Request $request, $id) 
 
     $request->validate([
         'nama' => 'required|string',
+        'masa_aktif' => 'required|integer|min:1'
     ]);
 
     $kategori = \App\Models\Kategori::findOrFail($id);
-    $kategori->update(['nama' => $request->nama]);
+    $kategori->update([
+        'nama' => $request->nama,
+        'masa_aktif' => $request->masa_aktif // 🔥 INI YANG KURANG
+    ]);
+
+    \App\Models\Arsip::where('id_kategori', $kategori->id)
+        ->update([
+            'jenis_arsip' => \DB::raw("
+                CASE 
+                    WHEN YEAR(NOW()) - tahun >= {$request->masa_aktif} 
+                    THEN 'inaktif'
+                    ELSE 'aktif'
+                END
+            ")
+        ]);
+
 
     return back();
 });

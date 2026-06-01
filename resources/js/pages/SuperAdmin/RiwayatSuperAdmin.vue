@@ -118,7 +118,7 @@ const mappedHistory = computed(() => {
     <div class="py-10 px-6 max-w-7xl mx-auto">
 
         <h1 class="text-4xl font-black mb-10 text-gray-800">
-            Riwayat Aktivitas Sistem
+            Riwayat Aktivitas 
         </h1>
 
         <!-- SEARCH -->

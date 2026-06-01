@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, router, useForm } from '@inertiajs/vue3'
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import GuestLayout from '@/layouts/GuestLayout.vue'
 import { Eye, EyeOff } from 'lucide-vue-next'
 
@@ -18,8 +18,26 @@ const form = useForm({
 
 const showPassword = ref(false)
 
+onMounted(() => {
+    const script = document.createElement('script')
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js'
+    script.async = true
+    script.defer = true
+    document.head.appendChild(script)
+})
+
 function handleSubmit() {
-    form.post('/login', {
+
+    const token = (
+        document.querySelector(
+            '[name="cf-turnstile-response"]'
+        ) as HTMLInputElement
+    )?.value
+
+    form.transform((data) => ({
+        ...data,
+        'cf-turnstile-response': token,
+    })).post('/login', {
         onError: () => {
             alert('Login gagal, cek email dan password!')
         }
@@ -80,37 +98,45 @@ function goToForgotPassword() {
 
 
                 <div>
-                    <label class="block text-xs text-gray-700 mb-1">Email</label>
-                    <input
-                        v-model="form.email"
-                        type="email"
-                        required
-                        class="field-input"
-                        placeholder="email@example.com"
-                    />
-                    <span v-if="form.errors.email" class="text-xs text-red-600">
-                        {{ form.errors.email }}
-                    </span>
-                </div>
+    <label class="block text-xs text-gray-700 mb-1">Email</label>
+
+    <input
+        v-model="form.email"
+        @input="form.email = form.email.toLowerCase()"
+        type="email"
+        required
+        class="field-input"
+        placeholder="Masukkan email @gmail.com"
+        pattern="^[a-z0-9._%+-]+@gmail\.com$"
+        title="Gunakan email dengan format @gmail.com"
+    />
+
+    <p class="text-[10px] text-gray-500 mt-1">
+        Contoh: example@gmail.com
+    </p>
+
+    <span v-if="form.errors.email" class="text-xs text-red-600">
+        {{ form.errors.email }}
+    </span>
+</div>
 
 
                 <div>
                     <label class="block text-xs text-gray-700 mb-1">Password</label>
-                    <div class="relative w-full flex items-center">
+                    <div class="relative">
                         <input
                             v-model="form.password"
                             :type="showPassword ? 'text' : 'password'"
                             required
                             class="field-input pr-10"
-                            placeholder="Password"
+                            placeholder="Masukkan password"
                         />
                         <button
                             type="button"
                             @click="showPassword = !showPassword"
-                            class="absolute right-3 text-gray-500 hover:text-gray-700 focus:outline-none flex items-center justify-center"
-                            style="background: none; border: none; padding: 0;"
+                            class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500"
                         >
-                            <EyeOff v-if="showPassword" class="w-4 h-4" />
+                            <EyeOff v-if="!showPassword" class="w-4 h-4" />
                             <Eye v-else class="w-4 h-4" />
                         </button>
                     </div>
@@ -138,13 +164,21 @@ function goToForgotPassword() {
                     </span>
                 </div>
 
-  
+                <div
+                class="cf-turnstile"
+                data-sitekey="0x4AAAAAADVe7s1edUnlFvz0"
+                ></div>
+                <input
+                type="hidden"
+                name="cf-turnstile-response"
+                />
+
                 <button
                     type="submit"
                     :disabled="form.processing"
                     class="w-full py-2 mt-1 font-bold text-white bg-[#2d3282] hover:bg-[#232769] rounded-lg disabled:opacity-50"
                 >
-                    {{ form.processing ? 'Loading...' : 'LOGIN' }}
+                    {{ form.processing ? 'Loading...' : 'MASUK' }}
                 </button>
             </form>
 

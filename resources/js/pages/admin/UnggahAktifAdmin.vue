@@ -1,3 +1,4 @@
+
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { Head, useForm } from '@inertiajs/vue3'
@@ -26,6 +27,14 @@ const form = useForm({
   bagian: '',
   folder: props.folder
 })
+
+const currentYear = new Date().getFullYear()
+
+// misal 10 tahun ke belakang
+const years = Array.from({ length: 10 }, (_, i) => currentYear - i)
+
+// default langsung tahun sekarang
+form.tahun = currentYear.toString()
 
 const fileError = ref('')
 /* STATE */
@@ -151,6 +160,12 @@ const kategoriTree = computed(() => props.kategoriData)
 const goBack = () => window.history.back()
 
 const submit = () => {
+
+  if (!form.files || form.files.length === 0) {
+    fileError.value = 'File wajib diunggah'
+    return
+  }
+
   form.post('/admin/arsip', {
     forceFormData: true
   })
@@ -296,8 +311,25 @@ const submit = () => {
               Tahun 
               <span class="text-red-600">*</span>
             </label>
-            <input v-model="form.tahun"
-              class="w-full p-4 bg-white text-black rounded-2xl border border-gray-300" />
+           <div class="relative">
+  <select
+    v-model="form.tahun"
+    class="w-full p-4 pr-10 bg-white text-black rounded-2xl border border-gray-300 appearance-none"
+  >
+    <option disabled value="">-- Pilih Tahun --</option>
+
+    <option v-for="year in years"
+      :key="year"
+      :value="year.toString()">
+      {{ year }}
+    </option>
+  </select>
+
+  <!-- Arrow custom -->
+  <div class="pointer-events-none absolute inset-y-0 right-4 flex items-center text-gray-700">
+    ▼
+  </div>
+</div>
           </div>
 
           <!-- kategori -->

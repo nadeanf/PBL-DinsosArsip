@@ -50,8 +50,10 @@ class ArsipController extends Controller
     {
         $request->validate([
             'judul' => 'required|string',
-            'tahun' => 'required',
+            'tahun' => ['required', 'integer', 'between:2017,' . date('Y')],
             'id_kategori' => 'required|exists:kategori,id',
+            'lokasi' => 'required',
+            'deskripsi' => 'required',
             'status_akses' => 'required'
         ]);
        $request->merge([
@@ -64,6 +66,7 @@ $request->validate([
     'tahun' => 'required',
     'id_kategori' => 'required|exists:kategori,id',
     'status_akses' => 'required',
+    'files' => 'required|array|min:1',
 'files.*' => [
         'file',
         function ($attribute, $file, $fail) {
@@ -105,10 +108,15 @@ $request->validate([
         if ($request->folder === 'vital') {
             $jenisArsip = 'vital';
         } else {
-            $currentYear = now()->year;
-            $jenisArsip = ($currentYear - (int)$request->tahun >= 3)
-                ? 'inaktif'
-                : 'aktif';
+            $kategori = Kategori::find($request->id_kategori);
+
+$masaAktif = $kategori?->masa_aktif ?? 3; // default 3 kalau kosong
+
+$currentYear = now()->year;
+
+$jenisArsip = ($currentYear - (int)$request->tahun >= $masaAktif)
+    ? 'inaktif'
+    : 'aktif';
         }
 
         $kategoriModel = Kategori::find($request->id_kategori);
@@ -128,12 +136,12 @@ $request->validate([
             'status_approval' => 'pending'
         ]);
 
-        // Track arsip creation in RiwayatAkses
+        /*// Track arsip creation in RiwayatAkses
         RiwayatAkses::create([
             'user_id' => $user->id,
             'arsip_id' => $arsip->id,
             'aksi' => 'buat'
-        ]);
+        ]);*/
 
        if ($request->hasFile('files')) {
 
@@ -180,8 +188,10 @@ $request->validate([
         $request->validate([
             'judul' => 'required|string',
             'nomor' => 'nullable|string',
-            'tahun' => 'required|integer',
+            'tahun' => ['required', 'integer', 'between:2017,' . date('Y')],
             'id_kategori' => 'required|exists:kategori,id',
+            'lokasi' => 'required',
+            'deskripsi' => 'required',
             'status_akses' => 'required',
             'files.*' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png,mp4|max:20480'
         ]);
@@ -232,9 +242,13 @@ $request->validate([
         }
     ]
 ]);
-        $jenisArsip = (now()->year - (int)$request->tahun >= 5)
-            ? 'inaktif'
-            : 'aktif';
+        $kategori = Kategori::find($request->id_kategori);
+
+$masaAktif = $kategori?->masa_aktif ?? 3;
+
+$jenisArsip = (now()->year - (int)$request->tahun >= $masaAktif)
+    ? 'inaktif'
+    : 'aktif';
 
         $kategoriModel = Kategori::find($request->id_kategori);
 
@@ -353,6 +367,10 @@ $request->validate([
             $query->where('id_kategori', $request->kategori);
         }
 
+        if ($request->filled('tahun')) {
+        $query->where('tahun', $request->tahun);
+    }
+
         if ($request->filled('tanggal_awal')) {
             $query->whereDate('created_at', '>=', $request->tanggal_awal);
         }
@@ -377,7 +395,7 @@ $request->validate([
             return Inertia::render('Pimpinan/ListArsipPimpinan', [
                 'arsip' => $arsip,
                 'kategori' => $this->kategoriTree(),
-                'filters' => $request->only(['search', 'kategori', 'tanggal_awal', 'tanggal_akhir'])
+                'filters' => $request->only(['search', 'kategori', 'tahunl'])
             ]);
         }
 
@@ -544,6 +562,10 @@ $request->validate([
                 OR LOWER(nama_file) LIKE '%.png'
                 OR LOWER(nama_file) LIKE '%.gif'
                 OR LOWER(nama_file) LIKE '%.bmp'
+                OR LOWER(nama_file) LIKE '%.webp'
+                OR LOWER(nama_file) LIKE '%.svg'
+                OR LOWER(nama_file) LIKE '%.jfif'
+                OR LOWER(nama_file) LIKE '%.heic'
             THEN 'Foto / Gambar'
 
             WHEN LOWER(nama_file) LIKE '%.pdf'
@@ -554,6 +576,14 @@ $request->validate([
                 OR LOWER(nama_file) LIKE '%.xlsx'
                 OR LOWER(nama_file) LIKE '%.ppt'  
                 OR LOWER(nama_file) LIKE '%.pptx'
+                OR LOWER(nama_file) LIKE '%.sql'
+                OR LOWER(nama_file) LIKE '%.csv'
+                OR LOWER(nama_file) LIKE '%.zip'
+                OR LOWER(nama_file) LIKE '%.rar'
+                OR LOWER(nama_file) LIKE '%.7z'
+                OR LOWER(nama_file) LIKE '%.odt'
+                OR LOWER(nama_file) LIKE '%.ods'
+                OR LOWER(nama_file) LIKE '%.odp'
             THEN 'Dokumen'
 
             WHEN LOWER(nama_file) LIKE '%.mp4'
@@ -563,6 +593,9 @@ $request->validate([
                 OR LOWER(nama_file) LIKE '%.wmv'
                 OR LOWER(nama_file) LIKE '%.flv'
                 OR LOWER(nama_file) LIKE '%.mpeg'
+                OR LOWER(nama_file) LIKE '%.webm'
+                OR LOWER(nama_file) LIKE '%.3gp'
+                OR LOWER(nama_file) LIKE '%.m4v'
             THEN 'Video'
 
             WHEN LOWER(nama_file) LIKE '%.mp3'
@@ -577,6 +610,7 @@ $request->validate([
                 OR LOWER(nama_file) LIKE '%.aiff'
                 OR LOWER(nama_file) LIKE '%.dsd'
                 OR LOWER(nama_file) LIKE '%.pcm'
+                OR LOWER(nama_file) LIKE '%.amr'
             THEN 'Audio'
 
             ELSE 'Lainnya'
@@ -705,80 +739,136 @@ $request->validate([
     }
 
     public function dashboardSuperAdmin(Request $request)
-{
-    if (auth()->user()->role !== 'superadmin') {
-        abort(403);
-    }
+    {
+        $query = Arsip::with(['kategori', 'user', 'files']);
 
-    $query = Arsip::with(['kategori', 'user', 'files']);
+        $arsip = $query->latest()->get()->map(function ($item) {
+            $user = Auth::user();
 
-    // SEARCH
-    if ($request->search) {
-        $query->where(function ($q) use ($request) {
-            $q->where('judul', 'like', '%' . $request->search . '%')
-              ->orWhere('nomor', 'like', '%' . $request->search . '%');
+            $req = RequestAkses::where('user_id', $user->id)
+                ->where('arsip_id', $item->id)
+                ->first();
+
+            $item->request_status = $req?->status;
+            return $item;
         });
-    }
 
-    // FILTER KATEGORI
-    if ($request->kategori) {
-        $query->where('jenis_arsip', $request->kategori);
-    }
+        $totalDownload = DownloadLog::where('user_id', Auth::id())->count();
+        $totalArsip = Arsip::count();
 
-    // FILTER TANGGAL
-    if ($request->tanggal_awal) {
-        $query->whereDate('created_at', '>=', $request->tanggal_awal);
-    }
-
-    if ($request->tanggal_akhir) {
-        $query->whereDate('created_at', '<=', $request->tanggal_akhir);
-    }
-
-    $arsip = $query->latest()->get();
-
-    // TOTAL VIEW
-    $totalView = RiwayatAkses::where('aksi', 'lihat')->count();
-
-    // TOTAL DOWNLOAD
-    $totalDownload = DownloadLog::count();
-
-    // TIPE DOKUMEN
-    $tipeDokumen = File::selectRaw("
+        $tipeDokumen = File::selectRaw("
         CASE
-            WHEN LOWER(nama_file) LIKE '%.jpg'
+            WHEN LOWER(nama_file) LIKE '%.jpg' 
                 OR LOWER(nama_file) LIKE '%.jpeg'
                 OR LOWER(nama_file) LIKE '%.png'
+                OR LOWER(nama_file) LIKE '%.gif'
+                OR LOWER(nama_file) LIKE '%.bmp'
+                OR LOWER(nama_file) LIKE '%.webp'
+                OR LOWER(nama_file) LIKE '%.svg'
+                OR LOWER(nama_file) LIKE '%.jfif'
+                OR LOWER(nama_file) LIKE '%.heic'
             THEN 'Foto / Gambar'
 
             WHEN LOWER(nama_file) LIKE '%.pdf'
+                OR LOWER(nama_file) LIKE '%.txt'
                 OR LOWER(nama_file) LIKE '%.doc'
                 OR LOWER(nama_file) LIKE '%.docx'
                 OR LOWER(nama_file) LIKE '%.xls'
                 OR LOWER(nama_file) LIKE '%.xlsx'
+                OR LOWER(nama_file) LIKE '%.ppt'  
+                OR LOWER(nama_file) LIKE '%.pptx'
+                OR LOWER(nama_file) LIKE '%.sql'
+                OR LOWER(nama_file) LIKE '%.csv'
+                OR LOWER(nama_file) LIKE '%.zip'
+                OR LOWER(nama_file) LIKE '%.rar'
+                OR LOWER(nama_file) LIKE '%.7z'
+                OR LOWER(nama_file) LIKE '%.odt'
+                OR LOWER(nama_file) LIKE '%.ods'
+                OR LOWER(nama_file) LIKE '%.odp'
             THEN 'Dokumen'
 
             WHEN LOWER(nama_file) LIKE '%.mp4'
+                OR LOWER(nama_file) LIKE '%.avi'
+                OR LOWER(nama_file) LIKE '%.mkv'
+                OR LOWER(nama_file) LIKE '%.mov'
+                OR LOWER(nama_file) LIKE '%.wmv'
+                OR LOWER(nama_file) LIKE '%.flv'
+                OR LOWER(nama_file) LIKE '%.mpeg'
+                OR LOWER(nama_file) LIKE '%.webm'
+                OR LOWER(nama_file) LIKE '%.3gp'
+                OR LOWER(nama_file) LIKE '%.m4v'
             THEN 'Video'
 
             WHEN LOWER(nama_file) LIKE '%.mp3'
+                OR LOWER(nama_file) LIKE '%.wav'
+                OR LOWER(nama_file) LIKE '%.ogg'
+                OR LOWER(nama_file) LIKE '%.flac'
+                OR LOWER(nama_file) LIKE '%.aac'
+                OR LOWER(nama_file) LIKE '%.wma'
+                OR LOWER(nama_file) LIKE '%.m4a'
+                OR LOWER(nama_file) LIKE '%.opus'
+                OR LOWER(nama_file) LIKE '%.alac'
+                OR LOWER(nama_file) LIKE '%.aiff'
+                OR LOWER(nama_file) LIKE '%.dsd'
+                OR LOWER(nama_file) LIKE '%.pcm'
+                OR LOWER(nama_file) LIKE '%.amr'
             THEN 'Audio'
 
             ELSE 'Lainnya'
         END as nama,
         COUNT(*) as total
-    ")
-    ->groupBy('nama')
-    ->get();
+        ")
+        ->groupBy('nama')
+        ->get();
 
-    return Inertia::render('SuperAdmin/DashboardSuperAdmin', [
-        'arsip' => $arsip,
-        'kategoriData' => $this->kategoriTree(),
-        'totalView' => $totalView,
-        'totalDownload' => $totalDownload,
-        'tipeDokumen' => $tipeDokumen,
-    ]);
-}
+        return Inertia::render('SuperAdmin/DashboardSuperAdmin', [
+            'arsip' => $arsip,
+            'kategori' => $this->kategoriTree(),
+            'totalDownload' => $totalDownload,
+            'tipeDokumen' => $tipeDokumen,
+            'totalArsip' => $totalArsip
+        ]);
+    }
 
+public function listSuperAdmin(Request $request)
+    {
+        $query = Arsip::with(['kategori', 'user', 'files']);
+
+        if ($request->search) {
+            $query->where(function ($q) use ($request) {
+                $q->where('judul', 'like', '%' . $request->search . '%')
+                    ->orWhere('nomor', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        if ($request->kategori) {
+            $query->where('id_kategori', $request->kategori);
+        }
+
+        if ($request->filled('tanggal_awal')) {
+            $query->whereDate('created_at', '>=', $request->tanggal_awal);
+        }
+
+        if ($request->filled('tanggal_akhir')) {
+            $query->whereDate('created_at', '<=', $request->tanggal_akhir);
+        }
+
+        if (auth()->user()->role !== 'superadmin') {
+            abort(403);
+        }
+
+        return Inertia::render('SuperAdmin/ListArsipSuperAdmin', [
+            'arsip' => $query->latest()->get(),
+            'kategori' => $this->kategoriTree(),
+        
+        'filters' => $request->only([
+            'search',
+            'kategori',
+            'tanggal_awal',
+            'tanggal_akhir'
+        ]),
+        ]);
+    }
     public function show($id)
     {
         $arsip = Arsip::with(['kategori', 'user', 'files'])->findOrFail($id);
@@ -1043,14 +1133,15 @@ $request->validate([
     {
         $user = Auth::user();
 
-    // 🔥 ADMIN & SUPERADMIN AKSES SEMUA
-    if (in_array($user->role, ['admin', 'superadmin'])) {
+    
+    if (in_array($user->role, ['admin', 'superadmin', 'pimpinan'])) {
         return true;
     }
 
     // publik bebas
         if ($user->role === 'superadmin') return true;
     if ($arsip->status_akses === 'publik') return true;
+    
 
     // pemilik arsip
     if ($arsip->user_id === $user->id) return true;
@@ -1180,79 +1271,69 @@ $request->validate([
     ]);
 }
 
-public function exportPDF(Request $request)
+public function exportPdf(Request $request)
 {
-    $query = Arsip::with(['kategori', 'user', 'files']);
+    $query = Arsip::with('kategori');
 
-    if ($request->search) {
+    // 🔍 Filter search (judul atau nomor)
+    if ($request->filled('search')) {
         $query->where(function ($q) use ($request) {
             $q->where('judul', 'like', '%' . $request->search . '%')
-              ->orWhere('nomor', 'like', '%' . $request->search . '%');
+                ->orWhere('nomor', 'like', '%' . $request->search . '%');
         });
     }
 
-    if ($request->kategori) {
+    // 🔍 Filter kategori
+    if ($request->filled('kategori')) {
         $query->where('id_kategori', $request->kategori);
     }
 
+    // 🔍 Filter tanggal awal
     if ($request->filled('tanggal_awal')) {
         $query->whereDate('created_at', '>=', $request->tanggal_awal);
     }
 
-    if ($request->filled('tanggal_akhir')) {
-        $query->whereDate('created_at', '<=', $request->tanggal_akhir);
+    // � Ambil + grouping per tahun
+    $arsip = $query->get()
+        ->groupBy('tahun')
+        ->map(function ($items) {
+            return $items->map(function ($item) {
+                return [
+                    'judul' => $item->judul,
+                    'nomor' => $item->nomor,
+                    'tahun' => $item->tahun,
+                    'kategori' => $item->kategori->nama ?? '-',
+                    'jenis_arsip' => $item->jenis_arsip,
+                ];
+            });
+        });
+
+    // Get kategori name if kategori ID is provided
+    $kategoriName = 'Semua';
+    if ($request->filled('kategori')) {
+        $kategori = Kategori::find($request->kategori);
+        $kategoriName = $kategori ? $kategori->nama : 'Semua';
     }
 
-    // Urutkan berdasarkan `tahun` secara numerik (jika tersedia), lalu `created_at`
-    $arsip = $query->orderByRaw("CAST(tahun AS UNSIGNED) ASC, created_at ASC")->get()->map(function ($item) {
-        $jenis = $item->jenis_arsip ? ucfirst($item->jenis_arsip) : '-';
-
-        // Hitung umur arsip berdasarkan kolom `tahun` jika tersedia
-        $masaAktif = '-';
-        $age = null;
-        if (!empty($item->tahun) && is_numeric($item->tahun)) {
-            $age = now()->year - (int) $item->tahun;
-        }
-
-        if ($item->jenis_arsip === 'vital') {
-            $masaAktif = 'Vital';
-        } elseif ($age === null) {
-            $masaAktif = 'Tahun ' . ($item->tahun ?? '-');
-        } else {
-            // Jika usia < 3 tahun -> Aktif, sebaliknya Inaktif
-            if ($age < 3) {
-                $masaAktif = 'Aktif (usia ' . $age . ' tahun)';
-            } else {
-                $masaAktif = 'Inaktif (usia ' . $age . ' tahun)';
-            }
-        }
-
-        return [
-            'judul' => $item->judul,
-            'nomor' => $item->nomor,
-            'tahun' => $item->tahun,
-            'kategori' => $item->kategori ?? '-',
-            'jenis' => $jenis,
-            'masa_aktif' => $masaAktif,
-            'status' => ucfirst($item->status_akses),
-            'download_url' => url('/download/' . $item->id),
-        ];
-    });
-
+    // 🧾 Load ke PDF
     $pdf = Pdf::loadView('pdf.laporan-arsip', [
-        'data' => $arsip,
-    ]);
+        'arsip' => $arsip,
+        'filter' => [
+            'kategori' => $kategoriName,
+            'tanggal_awal' => $request->tanggal_awal,
+            'tanggal_akhir' => $request->tanggal_akhir,
+        ]
+    ])->setPaper('a4', 'portrait');
 
+    // ⬇️ Download
     return $pdf->download('laporan-arsip.pdf');
 }
-
 public function statistikSuperAdmin(Request $request)
 {
     if (auth()->user()->role !== 'superadmin') {
         abort(403);
     }
 
-    // TOTAL FILE BERDASARKAN TIPE
     $dokumen = File::where(function ($q) {
         $q->where('nama_file', 'like', '%.pdf')
           ->orWhere('nama_file', 'like', '%.doc')
@@ -1344,11 +1425,17 @@ public function statistikAdmin()
     ->groupBy('kategori.nama')
     ->get();
 
+    $bidangStat = Arsip::selectRaw('users.bagian as nama, COUNT(*) as total')
+    ->join('users', 'arsip.user_id', '=', 'users.id')
+    ->groupBy('users.bagian')
+    ->get();
+
     return Inertia::render('admin/StatistikLaporan', [
         'tipeDokumen' => $tipeDokumen,
         'totalArsip' => $totalArsip,
         'totalDownload' => $totalDownload,
-        'kategoriStat' => $kategoriStat
+        'kategoriStat' => $kategoriStat,
+        'bidangStat' => $bidangStat
     ]);
 }
 
@@ -1419,8 +1506,10 @@ public function storeAdmin(Request $request)
 $request->validate([
     'judul' => 'required|string',
     'nomor' => 'required|string|unique:arsip,nomor',
-    'tahun' => 'required',
+    'tahun' => ['required', 'integer', 'between:2017,' . date('Y')],
     'id_kategori' => 'required|exists:kategori,id',
+    'lokasi' => 'required',
+    'deskripsi' => 'required',
     'status_akses' => 'required',
 
    'files.*' => [
@@ -1465,10 +1554,12 @@ $request->validate([
     if ($request->folder === 'vital') {
         $jenisArsip = 'vital';
     } else {
-        $currentYear = now()->year;
-        $jenisArsip = ($currentYear - (int)$request->tahun >= 3)
-            ? 'inaktif'
-            : 'aktif';
+        $kategori = Kategori::find($request->id_kategori);
+$masaAktif = $kategori?->masa_aktif ?? 3;
+
+$jenisArsip = (now()->year - (int)$request->tahun >= $masaAktif)
+    ? 'inaktif'
+    : 'aktif';
     }
 
     $kategoriModel = Kategori::find($request->id_kategori);

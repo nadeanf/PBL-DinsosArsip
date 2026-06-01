@@ -25,6 +25,11 @@ const canAccessFull = (doc) => {
 return false
 }
 
+  // pimpinan bisa akses semua arsip (seperti admin dan superadmin)
+  if (user.role === 'pimpinan') {
+    return true
+  }
+
   // publik → bebas
   if (doc.status === 'publik') {
 return true

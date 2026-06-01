@@ -57,6 +57,20 @@ const handleSearch = () => {
   })
 }
 
+const exportPDF = () => {
+  const params = new URLSearchParams()
+
+  if (search.value) params.append('search', search.value)
+  if (kategori.value) params.append('kategori', kategori.value)
+  if (selectedKategoriName.value) {
+    params.append('kategori_nama', selectedKategoriName.value)
+  }
+  if (tanggal_awal.value) params.append('tanggal_awal', tanggal_awal.value)
+  if (tanggal_akhir.value) params.append('tanggal_akhir', tanggal_akhir.value)
+
+  window.location.href = `/export/pdf?${params.toString()}`
+}
+
 /* FILE TYPE */
 const getFileType = (path) => {
   if (!path) return 'FILE'
@@ -96,8 +110,8 @@ const canAccessFull = (doc) => {
 
   if (!doc || !user) return false
 
-  // ADMIN
-  if (['admin', 'superadmin'].includes(user.role)) {
+  // PIMPINAN / ADMIN / SUPERADMIN
+  if (['pimpinan', 'admin', 'superadmin'].includes(user.role)) {
     return true
   }
 
@@ -308,6 +322,21 @@ const handleDownload = (id) => {
   <div class="text-sm">
     Ditemukan <b>{{ totalData }}</b> arsip
   </div>
+
+  <div class="flex justify-between items-center">
+
+  <h2 class="text-lg font-bold">
+    Hasil Pencarian Arsip
+  </h2>
+
+  <button 
+    @click="exportPDF"
+    class="text-xs bg-red-500 text-white px-3 py-1 rounded"
+  >
+    Export PDF
+  </button>
+
+</div>
 
 
   <!-- LIST -->
