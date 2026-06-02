@@ -339,35 +339,35 @@ const mappedHistory = computed(() => {
                     </div>
 
                     <div class="flex flex-wrap gap-2 mb-4">
-                        <span class="bg-gray-200 px-3 py-1 rounded-full text-xs font-bold">
+                        <span class="bg-black/20 px-3 py-0.5 rounded-full text-[10px] font-bold">
                             No: {{ selectedDoc?.nomor }}
                         </span>
-                        <span class="bg-blue-100 px-3 py-1 rounded-full text-xs font-bold">
+                        <span class="bg-blue-500/30 px-3 py-0.5 rounded-full text-[10px] font-bold">
                             {{ selectedDoc?.kategori }}
                         </span>
-                        <span class="bg-green-100 px-3 py-1 rounded-full text-xs font-bold uppercase">
+                        <span class="bg-green-500/70 px-3 py-0.5 rounded-full text-[10px] font-bold uppercase">
                             {{ selectedDoc?.jenis }}
                         </span>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4 text-sm">
                         <div>
-                            <p class="font-bold">Tahun</p>
-                            <p>{{ selectedDoc?.tahun }}</p>
+                            <p class="text-black font-bold">Tahun</p>
+                            <p class="text-gray-600 font-medium">{{ selectedDoc?.tahun }}</p>
                         </div>
                         <div>
-                            <p class="font-bold">Status</p>
-                            <p>{{ selectedDoc?.status }}</p>
+                            <p class="text-black font-bold">Status</p>
+                            <p class="text-gray-600 font-medium">{{ selectedDoc?.status }}</p>
                         </div>
                         <div class="col-span-2">
-                            <p class="font-bold">Lokasi</p>
-                            <p>{{ selectedDoc?.lokasi }}</p>
+                            <p class="text-black font-bold">Lokasi</p>
+                            <p class="text-gray-600 font-medium">{{ selectedDoc?.lokasi }}</p>
                         </div>
                     </div>
 
                     <div class="mt-6">
-                        <p class="font-bold">Deskripsi</p>
-                        <p class="text-gray-600">
+                        <p class="text-black font-bold">Deskripsi</p>
+                        <p class="text-gray-600 font-medium">
                             {{ selectedDoc?.deskripsi || '-' }}
                         </p>
                     </div>

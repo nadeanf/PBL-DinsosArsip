@@ -26,7 +26,7 @@ function getPhoto() {
         />
 
         <div>
-          <p class="text-sm font-semibold group-hover:text-gray-900 transition-colors">
+          <p class="text-gray-900 text-sm font-semibold group-hover:text-gray-700 transition-colors">
             {{ user?.name || 'Guest' }}
           </p>
           <p class="text-xs text-gray-700">

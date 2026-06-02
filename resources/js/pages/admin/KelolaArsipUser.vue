@@ -80,13 +80,9 @@ const previewModal = ref(false)
 const selectedDoc = ref<any>(null)
 
 const openPreview = (item: any) => {
-  // 🔥 buka modal dulu, lalu set selectedDoc
+  // 🔥 Set data terlebih dahulu agar objeknya langsung siap dibaca oleh template modal
+  selectedDoc.value = item
   previewModal.value = true
-  
-  // 🔥 gunakan nextTick untuk memastikan modal sudah render
-  nextTick(() => {
-    selectedDoc.value = item
-  })
 }
 
 const closePreviewModal = () => {
@@ -144,38 +140,30 @@ const goToPage = (page: number) => {
       Kelola Arsip User
     </h1>
 
-   <div class="flex gap-4 mb-6 items-center">
+    <div class="flex gap-4 mb-6 items-center">
+      <input
+        v-model="search"
+        type="text"
+        placeholder="Cari judul / nomor..."
+        class="p-3 rounded-xl border w-full max-w-md"
+      />
 
-  <!-- SEARCH -->
-  <input
-    v-model="search"
-    type="text"
-    placeholder="Cari judul / nomor..."
-    class="p-3 rounded-xl border w-full max-w-md"
-  />
+      <select v-model="filterJenis" class="p-3 rounded-xl border">
+        <option value="">Semua Jenis</option>
+        <option value="aktif">Aktif</option>
+        <option value="inaktif">Inaktif</option>
+        <option value="vital">Vital</option>
+      </select>
+    </div>
 
-  <!-- FILTER -->
-  <select v-model="filterJenis" class="p-3 rounded-xl border">
-    <option value="">Semua Jenis</option>
-    <option value="aktif">Aktif</option>
-    <option value="inaktif">Inaktif</option>
-    <option value="vital">Vital</option>
-  </select>
-
-</div>
-    <!-- LIST (SAMA PERSIS USER) -->
     <div class="space-y-4 mb-8">
-
       <div
         v-for="item in paginatedData"
         :key="item.id"
         @click="openPreview(item)"
         class="flex items-center justify-between bg-[#7fa1b1] p-4 rounded-2xl shadow-md cursor-pointer hover:scale-[1.01] transition-all"
       >
-
-        <!-- LEFT -->
         <div class="flex items-center gap-6 flex-1">
-
           <div class="w-20 h-20 bg-white rounded-2xl flex items-center justify-center shadow-sm">
             <FileText v-if="item.format === 'PDF'" class="w-10 h-10 text-red-500"/>
             <FileImage v-else-if="item.format === 'IMAGE'" class="w-10 h-10 text-blue-500"/>
@@ -193,16 +181,12 @@ const goToPage = (page: number) => {
               <span class="bg-black/20 px-3 py-0.5 rounded-full text-[10px] font-bold">
                 No: {{ item.nomor }}
               </span>
-
               <span class="bg-blue-500/30 px-3 py-0.5 rounded-full text-[10px] font-bold">
                 {{ item.kategori }}
               </span>
-
               <span class="bg-green-500/30 px-3 py-0.5 rounded-full text-[10px] font-bold uppercase">
                 {{ item.jenis }}
               </span>
-
-              <!-- ADMIN -->
               <span class="bg-yellow-500/30 px-3 py-0.5 rounded-full text-[10px] font-bold">
                 {{ item.user }}
               </span>
@@ -216,189 +200,158 @@ const goToPage = (page: number) => {
           </div>
         </div>
 
-        <!-- RIGHT -->
         <div class="flex items-center gap-2">
-
           <select
             @click.stop
-            @change="updateStatus(item.id, $event.target.value)"
+            @change="updateStatus(item.id, (e) => (e.target as HTMLSelectElement).value)"
             :value="item.status"
-            class="p-2 rounded-lg text-sm"
+            class="p-2 rounded-lg text-sm text-gray-700"
           >
             <option value="publik">Publik</option>
             <option value="private">Private</option>
           </select>
 
-
           <button @click.stop="openDelete(item.id)" class="bg-red-500 text-white p-2 rounded-lg">
             🗑️
           </button>
-
         </div>
-
       </div>
     </div>
 
-    <!-- EMPTY -->
-    <div v-if="filteredDocuments.length === 0" class="text-center py-10">
+    <div v-if="filteredDocuments.length === 0" class="text-center py-10 text-gray-500">
       Tidak ada arsip
     </div>
 
-    <!-- PAGINATION -->
-    <div
-      v-if="totalPages > 1"
-      class="flex justify-center items-center gap-2 mb-10"
-    >
-      <!-- PREV -->
+    <div v-if="totalPages > 1" class="flex justify-center items-center gap-2 mb-10">
       <button
         @click="currentPage--"
         :disabled="currentPage === 1"
-        class="px-3 py-1 rounded-lg bg-gray-200 disabled:opacity-50"
+        class="px-3 py-1 rounded-lg bg-gray-200 disabled:opacity-50 text-gray-700"
       >
         Prev
       </button>
 
-      <!-- ANGKA -->
       <button
         v-for="page in totalPages"
         :key="page"
         @click="goToPage(page)"
         :class="[
-          'px-3 py-1 rounded-lg',
-          currentPage === page
-            ? 'bg-blue-600 text-white'
-            : 'bg-gray-200'
+          'px-3 py-1 rounded-lg font-medium',
+          currentPage === page ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'
         ]"
       >
         {{ page }}
       </button>
 
-      <!-- NEXT -->
       <button
         @click="currentPage++"
         :disabled="currentPage === totalPages"
-        class="px-3 py-1 rounded-lg bg-gray-200 disabled:opacity-50"
+        class="px-3 py-1 rounded-lg bg-gray-200 disabled:opacity-50 text-gray-700"
       >
         Next
       </button>
     </div>
   </div>
 
-  <!-- ✅ PREVIEW (DISAMAKAN 100% USER) -->
-  <div v-if="selectedDoc"
+  <div v-if="previewModal && selectedDoc"
     class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-6"
     @click.self="closePreviewModal"
   >
+    <div class="bg-white w-full max-w-5xl rounded-[30px] shadow-2xl overflow-hidden flex flex-col md:flex-row text-gray-600">
 
-    <div class="bg-white w-full max-w-5xl rounded-[30px] shadow-2xl overflow-hidden flex flex-col md:flex-row">
-
-      <!-- LEFT -->
       <div class="w-full md:w-1/2 bg-gray-100 flex items-center justify-center p-6">
-
         <img v-if="selectedDoc.format === 'IMAGE'"
-          :src="`/storage/${selectedDoc.files[0].path_file}`"
+          :src="`/storage/${selectedDoc.files[0]?.path_file}`"
           class="max-h-[400px] object-contain rounded-xl shadow" />
 
         <iframe v-else-if="selectedDoc.format === 'PDF'"
-          :src="`/storage/${selectedDoc.files[0].path_file}`"
+          :src="`/storage/${selectedDoc.files[0]?.path_file}`"
           class="w-full h-[400px] rounded-xl"></iframe>
 
         <div v-else class="text-gray-500 text-center">
           📄<br/>Preview tidak tersedia
         </div>
-
       </div>
 
-      <!-- RIGHT -->
-      <div class="w-full md:w-1/2 p-8 flex flex-col justify-between">
-
+      <div class="w-full md:w-1/2 p-8 flex flex-col justify-between text-gray-600">
         <div>
           <div class="flex justify-between items-start mb-4">
-            <h2 class="text-2xl font-black text-gray-800">
+            <h2 class="text-2xl font-black text-gray-600">
               {{ selectedDoc.title }}
             </h2>
-
-            <button @click="closePreviewModal">✕</button>
+            <button @click="closePreviewModal" class="text-gray-400 hover:text-gray-600">✕</button>
           </div>
 
           <div class="flex flex-wrap gap-2 mb-4">
-            <span class="bg-gray-200 px-3 py-1 rounded-full text-xs font-bold">
+            <span class="bg-gray-100 text-gray-500 px-3 py-1 rounded-full text-xs font-bold">
               No: {{ selectedDoc.nomor }}
             </span>
-
-            <span class="bg-blue-100 px-3 py-1 rounded-full text-xs font-bold">
+            <span class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-xs font-bold">
               {{ selectedDoc.kategori }}
             </span>
-
-            <span class="bg-green-100 px-3 py-1 rounded-full text-xs font-bold uppercase">
+            <span class="bg-green-50 text-green-600 px-3 py-1 rounded-full text-xs font-bold uppercase">
               {{ selectedDoc.jenis }}
             </span>
           </div>
 
           <div class="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <p class="font-bold">Tahun</p>
-              <p>{{ selectedDoc.tahun }}</p>
+              <p class="text-gray-500 font-bold">Tahun</p>
+              <p class="text-gray-600">{{ selectedDoc.tahun }}</p>
             </div>
 
             <div>
-              <p class="font-bold">Status</p>
-              <p>{{ selectedDoc.status }}</p>
+              <p class="text-gray-500 font-bold">Status</p>
+              <p class="text-gray-600">{{ selectedDoc.status }}</p>
             </div>
 
             <div class="col-span-2">
-              <p class="font-bold">Lokasi</p>
-              <p>{{ selectedDoc.lokasi }}</p>
+              <p class="text-gray-500 font-bold">Lokasi</p>
+              <p class="text-gray-600">{{ selectedDoc.lokasi }}</p>
             </div>
           </div>
 
           <div class="mt-6">
-            <p class="font-bold">Deskripsi</p>
-            <p>{{ selectedDoc.deskripsi || '-' }}</p>
+            <p class="text-gray-500 font-bold">Deskripsi</p>
+            <p class="text-gray-600">{{ selectedDoc.deskripsi || '-' }}</p>
           </div>
         </div>
 
         <div class="flex justify-end gap-3 mt-6">
           <a
-            v-if="selectedDoc.files.length"
+            v-if="selectedDoc.files?.length"
             :href="`/download/${selectedDoc.id}`"
-            class="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold"
+            class="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold hover:bg-blue-700 transition"
           >
             Download
           </a>
 
           <button
             @click="closePreviewModal"
-            class="bg-gray-300 px-4 py-2 rounded-xl font-bold"
+            class="bg-slate-100 text-gray-500 px-4 py-2 rounded-xl font-bold hover:bg-slate-200 transition"
           >
             Tutup
           </button>
         </div>
-
       </div>
 
     </div>
   </div>
 
-  <!-- DELETE MODAL -->
   <div v-if="showDelete"
     class="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm">
-
-    <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl">
-
-      <h2 class="text-lg font-bold mb-3">Konfirmasi Hapus</h2>
+    <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl text-gray-600">
+      <h2 class="text-lg font-bold mb-3 text-gray-800">Konfirmasi Hapus</h2>
       <p class="mb-6">Yakin mau hapus?</p>
 
       <div class="flex justify-end gap-3">
-        <button @click="showDelete = false" class="bg-gray-200 px-4 py-2 rounded-xl">
+        <button @click="showDelete = false" class="bg-gray-200 px-4 py-2 rounded-xl text-gray-700 font-medium">
           Batal
         </button>
-        <button @click="confirmDelete" class="bg-red-500 text-white px-4 py-2 rounded-xl">
+        <button @click="confirmDelete" class="bg-red-500 text-white px-4 py-2 rounded-xl font-medium hover:bg-red-600 transition">
           Hapus
         </button>
       </div>
-
     </div>
   </div>
-
 </template>

@@ -391,7 +391,7 @@ const handleDownload = (id) => {
       Export PDF
     </button>
 
-    <a href="/daftar-arsip" class="text-xs bg-gray-200 px-2 py-1 rounded">
+    <a href="/daftar-arsip" class="text-xs bg-slate-800 text-slate-100 px-2 py-1 rounded-md font-medium">
       Lihat Semua
     </a>
   </div>
@@ -485,7 +485,7 @@ const handleDownload = (id) => {
     </div>
 
     <!-- RIGHT -->
-    <div class="w-full md:w-1/2 p-8 flex flex-col justify-between">
+    <div class="w-full md:w-1/2 p-8 flex flex-col justify-between text-black">
 
       <div>
         <div class="flex justify-between items-start mb-4">
@@ -493,43 +493,43 @@ const handleDownload = (id) => {
             {{ selectedDoc.title }}
           </h2>
 
-          <button @click="previewModal=false">✕</button>
+          <button @click="closePreviewModal" class="text-gray-400 hover:text-gray-600">✕</button>
         </div>
 
         <div class="flex flex-wrap gap-2 mb-4">
-          <span class="bg-gray-200 px-3 py-1 rounded-full text-xs font-bold">
+          <span class="bg-black/70 px-3 py-0.5 rounded-full text-[10px] font-bold">
             No: {{ selectedDoc.nomor }}
           </span>
 
-          <span class="bg-blue-100 px-3 py-1 rounded-full text-xs font-bold">
+          <span class="bg-blue-500/70 px-3 py-0.5 rounded-full text-[10px] font-bold">
             {{ selectedDoc.kategori }}
           </span>
 
-          <span class="bg-green-100 px-3 py-1 rounded-full text-xs font-bold uppercase">
+          <span class="bg-green-500/70 px-3 py-0.5 rounded-full text-[10px] font-bold uppercase">
             {{ selectedDoc.jenis }}
           </span>
         </div>
 
         <div class="grid grid-cols-2 gap-4 text-sm">
           <div>
-            <p class="font-bold">Tahun</p>
-            <p>{{ selectedDoc.tahun }}</p>
+            <p class="text-black font-bold">Tahun</p>
+            <p class="text-gray-600 font-medium">{{ selectedDoc.tahun }}</p>
           </div>
 
           <div>
-            <p class="font-bold">Status</p>
-            <p>{{ selectedDoc.status_akses }}</p>
+            <p class="text-black font-bold">Status</p>
+            <p class="text-gray-600 font-medium">{{ selectedDoc.status_akses }}</p>
           </div>
 
           <div class="col-span-2">
-            <p class="font-bold">Lokasi</p>
-            <p>{{ selectedDoc.lokasi }}</p>
+            <p class="text-black font-bold">Lokasi</p>
+            <p class="text-gray-600 font-medium">{{ selectedDoc.lokasi }}</p>
           </div>
         </div>
 
         <div class="mt-6">
-          <p class="font-bold">Deskripsi</p>
-          <p>{{ selectedDoc.deskripsi || '-' }}</p>
+          <p class="text-black font-bold">Deskripsi</p>
+          <p class="text-gray-600 font-medium">{{ selectedDoc.deskripsi || '-' }}</p>
         </div>
       </div>
 

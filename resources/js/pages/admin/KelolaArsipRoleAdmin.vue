@@ -364,44 +364,49 @@ watch(filterJenis, () => {
             {{ selectedDoc.title }}
           </h2>
 
-          <button @click="closePreviewModal">✕</button>
+          <button 
+  @click="closePreviewModal" 
+  class="text-black hover:text-gray-600 font-bold text-lg transition-colors p-1"
+>
+  ✕
+</button>
         </div>
 
         <div class="flex flex-wrap gap-2 mb-4">
-          <span class="bg-gray-200 px-3 py-1 rounded-full text-xs font-bold">
+          <span class="bg-black/70 px-3 py-0.5 rounded-full text-[10px] font-bold">
             No: {{ selectedDoc.nomor }}
           </span>
 
-          <span class="bg-blue-100 px-3 py-1 rounded-full text-xs font-bold">
+          <span class="bg-blue-500/70 px-3 py-0.5 rounded-full text-[10px] font-bold">
             {{ selectedDoc.kategori }}
           </span>
 
-          <span class="bg-green-100 px-3 py-1 rounded-full text-xs font-bold uppercase">
+          <span class="bg-green-500/70 px-3 py-0.5 rounded-full text-[10px] font-bold uppercase">
             {{ selectedDoc.jenis }}
           </span>
         </div>
 
         <div class="grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <p class="font-bold">Tahun</p>
-            <p>{{ selectedDoc.tahun }}</p>
-          </div>
+  <div>
+    <p class="text-black font-bold">Tahun</p>
+    <p class="text-gray-600 font-medium">{{ selectedDoc.tahun }}</p>
+  </div>
 
           <div>
-            <p class="font-bold">Status</p>
-            <p>{{ selectedDoc.status }}</p>
-          </div>
+    <p class="text-black font-bold">Status</p>
+    <p class="text-gray-600 font-medium">{{ selectedDoc.status }}</p>
+  </div>
 
           <div class="col-span-2">
-            <p class="font-bold">Lokasi</p>
-            <p>{{ selectedDoc.lokasi }}</p>
-          </div>
-        </div>
+    <p class="text-black font-bold">Lokasi</p>
+    <p class="text-gray-600 font-medium">{{ selectedDoc.lokasi }}</p>
+  </div>
+</div>
 
         <div class="mt-6">
-          <p class="font-bold">Deskripsi</p>
-          <p>{{ selectedDoc.deskripsi || '-' }}</p>
-        </div>
+  <p class="text-black font-bold">Deskripsi</p>
+  <p class="text-gray-600 font-medium">{{ selectedDoc.deskripsi || '-' }}</p>
+</div>
       </div>
 
       <div class="flex justify-end gap-3 mt-6">
@@ -415,7 +420,7 @@ watch(filterJenis, () => {
 
         <button
           @click="closePreviewModal"
-          class="bg-gray-300 px-4 py-2 rounded-xl font-bold"
+          class="bg-red-600 px-4 py-2 rounded-xl font-bold"
         >
           Tutup
         </button>
@@ -445,7 +450,7 @@ watch(filterJenis, () => {
 
       <button
         @click="showModal = false"
-        class="px-4 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 text-sm"
+        class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-sm"
       >
         Batal
       </button>

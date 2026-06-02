@@ -247,7 +247,7 @@ const handleDownload = (id) => {
 
 
 <template>
-<div class="p-6 bg-[#f3f4f6] min-h-screen space-y-6">
+<div class="p-6 bg-[#f3f4f6] min-h-screen space-y-6 text-gray-900">
 
   <!-- FORM -->
   <form
@@ -446,7 +446,7 @@ v-if="previewModal"
 class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-6"
 >
 
-<div class="bg-white w-full max-w-5xl rounded-[30px] shadow-2xl overflow-hidden flex flex-col md:flex-row">
+<div class="bg-white w-full max-w-5xl rounded-[30px] shadow-2xl overflow-hidden flex flex-col md:flex-row text-gray-900">
 
 <!-- LEFT -->
 <div class="w-full md:w-1/2 bg-gray-100 flex items-center justify-center p-6">
@@ -479,7 +479,7 @@ class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-
 
 
 <!-- RIGHT -->
-<div class="w-full md:w-1/2 p-8 flex flex-col justify-between">
+<div class="w-full md:w-1/2 p-8 flex flex-col justify-between text-black">
 
 <div>
 <div class="flex justify-between items-start mb-4">
@@ -497,15 +497,15 @@ class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-
 
 <div class="flex flex-wrap gap-2 mb-4">
 
-<span class="bg-gray-200 px-3 py-1 rounded-full text-xs font-bold">
+<span class="bg-black/20 px-3 py-0.5 rounded-full text-[10px] font-bold">
 No: {{ selectedDoc.nomor }}
 </span>
 
-<span class="bg-blue-100 px-3 py-1 rounded-full text-xs font-bold">
+<span class="bg-blue-500/30 px-3 py-0.5 rounded-full text-[10px] font-bold">
 {{ selectedDoc.kategori }}
 </span>
 
-<span class="bg-green-100 px-3 py-1 rounded-full text-xs font-bold uppercase">
+<span class="bg-green-500/70 px-3 py-0.5 rounded-full text-[10px] font-bold uppercase">
 {{ selectedDoc.jenis }}
 </span>
 
@@ -514,27 +514,27 @@ No: {{ selectedDoc.nomor }}
 
 <div class="grid grid-cols-2 gap-4 text-sm">
 
-<div>
-<p class="font-bold">Tahun</p>
-<p>{{ selectedDoc.tahun }}</p>
-</div>
+  <div>
+    <p class="text-black font-bold">Tahun</p>
+    <p class="text-gray-600 font-medium">{{ selectedDoc.tahun }}</p>
+  </div>
 
-<div>
-<p class="font-bold">Status</p>
-<p>{{ selectedDoc.status }}</p>
-</div>
+  <div>
+    <p class="text-black font-bold">Status</p>
+    <p class="text-gray-600 font-medium">{{ selectedDoc.status }}</p>
+  </div>
 
-<div class="col-span-2">
-<p class="font-bold">Lokasi</p>
-<p>{{ selectedDoc.lokasi }}</p>
-</div>
+  <div class="col-span-2">
+    <p class="text-black font-bold">Lokasi</p>
+    <p class="text-gray-600 font-medium">{{ selectedDoc.lokasi }}</p>
+  </div>
 
 </div>
 
 
 <div class="mt-6">
-<p class="font-bold">Deskripsi</p>
-<p>{{ selectedDoc.deskripsi || '-' }}</p>
+  <p class="text-black font-bold">Deskripsi</p>
+  <p class="text-gray-600 font-medium">{{ selectedDoc.deskripsi || '-' }}</p>
 </div>
 
 </div>

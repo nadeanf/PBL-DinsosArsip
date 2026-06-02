@@ -115,7 +115,7 @@ const mappedHistory = computed(() => {
 <template>
     <Head title="Riwayat Super Admin" />
 
-    <div class="py-10 px-6 max-w-7xl mx-auto">
+    <div class="py-10 px-6 max-w-7xl mx-auto text-gray-900">
 
         <h1 class="text-4xl font-black mb-10 text-gray-800">
             Riwayat Aktivitas 
@@ -219,7 +219,7 @@ const mappedHistory = computed(() => {
         @click.self="previewModal = false"
     >
 
-        <div class="bg-white w-full max-w-5xl rounded-[30px] shadow-2xl overflow-hidden flex flex-col md:flex-row">
+        <div class="bg-white w-full max-w-5xl rounded-[30px] shadow-2xl overflow-hidden flex flex-col md:flex-row text-gray-900">
 
             <!-- PREVIEW -->
             <div class="w-full md:w-1/2 bg-gray-100 flex items-center justify-center p-6">
@@ -284,11 +284,11 @@ const mappedHistory = computed(() => {
 
                     <div class="flex flex-wrap gap-2 mb-4">
 
-                        <span class="bg-gray-200 px-3 py-1 rounded-full text-xs font-bold">
+                        <span class="bg-black/20 px-3 py-0.5 rounded-full text-[10px] font-bold">
                             No: {{ selectedDoc?.nomor }}
                         </span>
 
-                        <span class="bg-blue-100 px-3 py-1 rounded-full text-xs font-bold">
+                        <span class="bg-blue-500/30 px-3 py-0.5 rounded-full text-[10px] font-bold">
                             {{ selectedDoc?.kategori }}
                         </span>
 
@@ -332,7 +332,7 @@ const mappedHistory = computed(() => {
 
                     <button
                         @click="previewModal = false"
-                        class="bg-gray-300 px-4 py-2 rounded-xl font-bold"
+                        class="bg-red-600 px-4 py-2 rounded-xl font-bold"
                     >
                         Tutup
                     </button>

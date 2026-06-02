@@ -195,22 +195,22 @@ export default {
 
               <div>
                 <label class="text-sm text-gray-600">Nama Lengkap</label>
-                <p class="mt-1">{{ user?.name || '-' }}</p>
+                <p class="text-black mt-1">{{ user?.name || '-' }}</p>
               </div>
 
               <div>
                 <label class="text-sm text-gray-600">NIP</label>
-                <p class="mt-1">{{ user?.nip || '-' }}</p>
+                <p class="text-black mt-1">{{ user?.nip || '-' }}</p>
               </div>
 
               <div>
                 <label class="text-sm text-gray-600">Bagian</label>
-                <p class="mt-1">{{ user?.bagian || '-' }}</p>
+                <p class="text-black mt-1">{{ user?.bagian || '-' }}</p>
               </div>
 
               <div>
                 <label class="text-sm text-gray-600">Email</label>
-                <p class="mt-1">{{ user?.email || '-' }}</p>
+                <p class="text-black mt-1">{{ user?.email || '-' }}</p>
               </div>
 
             </div>

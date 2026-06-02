@@ -143,7 +143,7 @@ const handleExecute = () => {
 
             <div class="flex gap-3">
               <button @click="openConfirm('restore', item.id)"
-                class="bg-white px-6 py-2 rounded-full text-xs font-bold flex items-center gap-2">
+                class="bg-[#706C66] text-[#ffffff] px-6 py-2 rounded-full text-xs font-bold flex items-center gap-2">
                 <RotateCcw class="w-3 h-3" /> Pulihkan
               </button>
 
@@ -181,16 +181,33 @@ const handleExecute = () => {
   </div>
 
   <!-- MODAL -->
-  <div v-if="showModal" class="fixed inset-0 flex items-center justify-center bg-black/40">
-    <div class="bg-white p-6 rounded-xl text-center">
-      <h3 class="font-bold mb-2">{{ modalConfig.title }}</h3>
-      <p>{{ modalConfig.message }}</p>
+  <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+    <div class="bg-white p-6 rounded-2xl text-center w-full max-w-sm shadow-xl border">
+      
+      <h3 class="text-lg font-bold text-gray-900 mb-2">
+        {{ modalConfig.title }}
+      </h3>
+      
+      <p class="text-sm text-gray-600 mb-6">
+        {{ modalConfig.message }}
+      </p>
 
-      <div class="flex gap-3 mt-4 justify-center">
-        <button @click="showModal = false">Batal</button>
-        <button @click="handleExecute" class="text-red-600 font-bold">
+      <div class="flex gap-4 mt-4 justify-center">
+        
+        <button 
+          @click="showModal = false" 
+          class="px-5 py-2 rounded-xl bg-slate-100 text-[#1e3a8a] hover:bg-slate-200 transition font-bold text-sm"
+        >
+          Batal
+        </button>
+        
+        <button 
+          @click="handleExecute" 
+          class="px-5 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white transition font-bold text-sm shadow-sm"
+        >
           Iya
         </button>
+
       </div>
     </div>
   </div>
