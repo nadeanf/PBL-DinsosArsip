@@ -137,7 +137,7 @@ const barChartOptions = {
 }
 </script>
 <template>
-<div>
+<div class="statistik-laporan-root">
 <Head title="Statistik & Laporan - Admin" />
 
 <div class="p-6 bg-[#f3f4f6] min-h-screen space-y-6">
@@ -236,3 +236,18 @@ const barChartOptions = {
 </div>
 </div>
 </template>
+
+<style>
+.statistik-laporan-root {
+  color: #111827;
+}
+.statistik-laporan-root :where(h1, h2, h3, h4, h5, h6, p, span, label, th, td, small, li, a) {
+  color: inherit !important;
+}
+.statistik-laporan-root :where(.text-gray-500, .text-gray-600) {
+  color: #6b7280 !important;
+}
+.statistik-laporan-root :where(.text-gray-700, .text-gray-800, .text-gray-900) {
+  color: #111827 !important;
+}
+</style>

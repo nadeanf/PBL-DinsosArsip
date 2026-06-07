@@ -44,7 +44,7 @@ const kategoriData = {
   <div class="py-12 px-6">
     <div class="max-w-7xl mx-auto">
 
-      <h1 class="text-4xl font-extrabold mb-12 tracking-tight">
+      <h1 class="text-4xl text-black font-extrabold mb-12 tracking-tight">
         Unggah File
       </h1>
 

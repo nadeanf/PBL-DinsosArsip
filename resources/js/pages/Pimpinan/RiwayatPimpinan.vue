@@ -52,20 +52,13 @@ const setPage = (page) => {
 const formatTanggal = (dateString) => {
     if (!dateString) return ''
     const date = new Date(dateString)
-    return date.toLocaleDateString('id-ID', {
+    return date.toLocaleString('id-ID', {
         day: '2-digit',
         month: 'long',
-        year: 'numeric'
-    })
-}
-
-const formatWaktu = (dateString) => {
-    if (!dateString) return ''
-    const date = new Date(dateString)
-    return 'pukul ' + date.toLocaleTimeString('id-ID', {
+        year: 'numeric',
         hour: '2-digit',
         minute: '2-digit'
-    }).replace('.', ':') // Mengubah format bawaan ID (17.59) menjadi (17:59) jika diperlukan, atau hapus .replace jika ingin tetap titik.
+    })
 }
 
 const openPreview = (item) => {
@@ -212,10 +205,15 @@ const mappedHistory = computed(() => {
                     <p class="font-bold text-lg">{{ item.title }}</p>
                 </div>
 
-                <div class="text-right text-xs bg-white/20 px-2 py-1 rounded flex flex-col justify-center items-end">
-                  <span class="font-medium">{{ formatTanggal(item.waktu) }}</span>
-                  <span class="opacity-80">{{ formatWaktu(item.waktu) }}</span>
-                </div>
+                <div class="text-right">
+    <p class="text-sm font-semibold text-white">
+        Status: {{ item.aksi || 'Lihat' }}
+    </p>
+
+    <p class="text-xs text-black mt-1">
+        {{ formatTanggal(item.waktu) }}
+    </p>
+</div>
             </div>
 
         </div>
@@ -339,43 +337,43 @@ class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-
             {{ selectedDoc?.title }}
           </h2>
 
-          <button @click="closePreviewModal" class="text-gray-400 hover:text-gray-600">✕</button>
+          <button @click="previewModal = false">✕</button>
         </div>
 
         <div class="flex flex-wrap gap-2 mb-4">
-          <span class="bg-black/20 px-3 py-0.5 rounded-full text-[10px] font-bold">
+          <span class="bg-gray-200 px-3 py-1 rounded-full text-xs font-bold">
             No: {{ selectedDoc?.nomor }}
           </span>
 
-          <span class="bg-blue-500/30 px-3 py-0.5 rounded-full text-[10px] font-bold">
+          <span class="bg-blue-100 px-3 py-1 rounded-full text-xs font-bold">
             {{ selectedDoc?.kategori }}
           </span>
 
-          <span class="bg-green-500/70 px-3 py-0.5 rounded-full text-[10px] font-bold uppercase">
+          <span class="bg-green-100 px-3 py-1 rounded-full text-xs font-bold uppercase">
             {{ selectedDoc?.jenis }}
           </span>
         </div>
 
         <div class="grid grid-cols-2 gap-4 text-sm">
           <div>
-            <p class="text-black font-bold">Tahun</p>
-            <p class="text-gray-600 font-medium">{{ selectedDoc?.tahun }}</p>
+            <p class="font-bold">Tahun</p>
+            <p>{{ selectedDoc?.tahun }}</p>
           </div>
 
           <div>
-            <p class="text-black font-bold">Status</p>
-            <p class="text-gray-600 font-medium">{{ selectedDoc?.status_akses }}</p>
+            <p class="font-bold">Status</p>
+           <p>{{ selectedDoc?.status_akses }}</p>
           </div>
 
           <div class="col-span-2">
-            <p class="text-black font-bold">Lokasi</p>
-            <p class="text-gray-600 font-medium">{{ selectedDoc?.lokasi }}</p>
+            <p class="font-bold">Lokasi</p>
+            <p>{{ selectedDoc?.lokasi }}</p>
           </div>
         </div>
 
         <div class="mt-6">
-          <p class="text-black font-bold">Deskripsi</p>
-          <p class="text-gray-600 font-medium">{{ selectedDoc?.deskripsi || '-' }}</p>
+          <p class="font-bold">Deskripsi</p>
+          <p>{{ selectedDoc?.deskripsi || '-' }}</p>
         </div>
       </div>
 
@@ -390,7 +388,7 @@ class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-
 
         <button
           @click="previewModal = false"
-          class="bg-red-600 px-4 py-2 rounded-xl font-bold"
+          class="bg-gray-300 px-4 py-2 rounded-xl font-bold"
         >
           Tutup
         </button>

@@ -315,7 +315,7 @@ const handleDownload = (id) => {
   <!-- Akumulasi Arsip -->
   <div class="bg-[#7fa6b3] rounded-xl p-4 shadow-md flex justify-between items-center">
     <div>
-      <div class="bg-white text-xs px-2 py-1 rounded w-fit mb-1">
+      <div class="bg-white text-black text-xs px-2 py-1 rounded w-fit mb-1">
         {{ filteredData.length }}
       </div>
       <p class="text-sm text-white">Akumulasi Arsip</p>
@@ -326,7 +326,7 @@ const handleDownload = (id) => {
   <!-- Dokumen Diunduh -->
   <div class="bg-[#7fa6b3] rounded-xl p-4 shadow-md flex justify-between items-center">
     <div>
-      <div class="bg-white text-xs px-2 py-1 rounded w-fit mb-1">
+      <div class="bg-white text-black text-xs px-2 py-1 rounded w-fit mb-1">
         {{ totalDownload }}
       </div>
       <p class="text-sm text-white">Dokumen diunduh</p>
@@ -363,7 +363,7 @@ const handleDownload = (id) => {
       <div
         v-for="item in tipeDokumen"
         :key="item.nama"
-        class="bg-white px-4 py-3 rounded flex justify-between text-sm"
+        class="bg-white px-4 py-3 rounded flex justify-between text-sm text-black"
       >
         <span>{{ item.nama }}</span>
         <span>{{ item.total }} Jumlah</span>
@@ -388,7 +388,7 @@ const handleDownload = (id) => {
       Export PDF
     </button>
 
-    <a href="/super-admin/daftar-arsip" class="text-xs bg-gray-200 px-2 py-1 rounded">
+    <a href="/super-admin/daftar-arsip" class="text-black text-xs bg-gray-200 px-2 py-1 rounded">
       Lihat Semua
     </a>
   </div>

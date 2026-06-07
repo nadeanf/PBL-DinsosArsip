@@ -64,7 +64,7 @@ function goToForgotPassword() {
         <div class="absolute inset-0 bg-white/30 backdrop-blur-[2px]"></div>
 
 
-        <div class="relative z-10 w-full max-w-sm px-6 py-4 bg-white/95 rounded-2xl shadow-xl text-gray-900">
+        <div class="relative z-10 w-full max-w-sm px-6 py-4 bg-[#e8e8e8]/80 rounded-2xl shadow-xl">
 
 
             <div class="flex items-center justify-center gap-2 mb-3.5">
@@ -74,15 +74,15 @@ function goToForgotPassword() {
                     class="w-9.5 h-11.5 object-contain"
                 />
                 <div class="text-center leading-tight">
-                    <p class="text-xs font-bold text-gray-900">Sistem Arsip Digital</p>
-                    <p class="text-[10px] text-gray-700">Dinas Sosial Boyolali</p>
+                    <p class="text-xs font-bold text-gray-800">Sistem Arsip Digital</p>
+                    <p class="text-[10px] text-gray-600">Dinas Sosial Boyolali</p>
                 </div>
             </div>
 
 
             <div class="text-center mb-3.5">
                 <h1 class="text-lg font-extrabold text-gray-900">MASUK</h1>
-                <p class="text-xs text-gray-700">Silahkan masuk untuk melanjutkan</p>
+                <p class="text-xs text-gray-500">Silahkan masuk untuk melanjutkan</p>
             </div>
 
             
@@ -111,7 +111,7 @@ function goToForgotPassword() {
         title="Gunakan email dengan format @gmail.com"
     />
 
-    <p class="text-[10px] text-gray-700 mt-1">
+    <p class="text-[10px] text-gray-500 mt-1">
         Contoh: example@gmail.com
     </p>
 
@@ -147,7 +147,7 @@ function goToForgotPassword() {
 
 
                 <div class="flex items-center justify-between">
-                    <label class="flex items-center text-xs text-gray-900">
+                    <label class="flex items-center text-xs text-gray-700">
                         <input
                             v-model="form.remember"
                             type="checkbox"
@@ -158,7 +158,7 @@ function goToForgotPassword() {
 
                     <span
                         @click="goToForgotPassword"
-                        class="text-xs text-gray-900 cursor-pointer hover:underline hover:text-gray-700"
+                        class="text-xs text-blue-600 cursor-pointer hover:underline"
                     >
                         Lupa Password?
                     </span>
@@ -183,11 +183,11 @@ function goToForgotPassword() {
             </form>
 
             
-            <p class="mt-3 text-xs text-center text-gray-900">
+            <p class="mt-3 text-xs text-center text-gray-700">
                 Belum punya akun?
                 <span
                     @click="goToRegister"
-                    class="text-gray-900 font-medium cursor-pointer hover:underline hover:text-gray-700"
+                    class="text-blue-600 font-medium cursor-pointer hover:underline"
                 >
                     Daftar
                 </span>

@@ -363,7 +363,7 @@ const handleDownload = (id) => {
       <div
         v-for="item in tipeDokumen"
         :key="item.nama"
-        class="bg-white px-4 py-3 rounded flex justify-between text-sm"
+        class="bg-white px-4 py-3 rounded flex justify-between text-sm text-black"
       >
         <span>{{ item.nama }}</span>
         <span>{{ item.total }} Jumlah</span>
@@ -388,7 +388,7 @@ const handleDownload = (id) => {
       Export PDF
     </button>
 
-    <a href="/pimpinan/daftar-arsip" class="text-xs bg-gray-200 px-2 py-1 rounded">
+    <a href="/pimpinan/daftar-arsip" class="text-black text-xs bg-gray-200 px-2 py-1 rounded">
       Lihat Semua
     </a>
   </div>

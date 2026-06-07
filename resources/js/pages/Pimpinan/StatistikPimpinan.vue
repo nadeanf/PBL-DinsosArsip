@@ -70,6 +70,41 @@ const search = ref('')
 const kategori = ref('')
 const tanggal_awal = ref('')
 const tanggal_akhir = ref('')
+const selectedBidang = ref('')
+
+const bidangOptions = [
+  'Sekretariat',
+  'Bidang Rehabilitasi Sosial',
+  'Bidang Perlindungan dan Jaminan Sosial',
+  'Bidang Pemberdayaan Sosial dan Penanganan Fakir Miskin',
+]
+
+const bidangStatistics = computed(() => {
+  const totals = bidangOptions.reduce((acc, nama) => ({ ...acc, [nama]: 0 }), {})
+
+  if (page.props?.bidangStat) {
+    page.props.bidangStat.forEach(item => {
+      if (item.nama in totals) {
+        totals[item.nama] = item.total
+      }
+    })
+  } else {
+    users.value.forEach(user => {
+      const nama = user.bagian || 'Tidak Diketahui'
+      if (nama in totals) {
+        totals[nama] += user.arsip_count ?? 0
+      }
+    })
+  }
+
+  return bidangOptions.map(nama => ({ nama, total: totals[nama] ?? 0 }))
+})
+
+const bidangList = computed(() => bidangStatistics.value.map(i => i.nama))
+const filteredBidangStat = computed(() => {
+  if (!selectedBidang.value) return bidangStatistics.value
+  return bidangStatistics.value.filter(i => i.nama === selectedBidang.value)
+})
 
 const aksesCepat = ref([
   { nama: 'Peraturan Daerah' },
@@ -110,9 +145,11 @@ const chartOptions = {
 }
 
   const dataStat = computed(() => {
-  return mode.value === 'kategori'
-    ? page.props?.kategoriStat ?? []
-    : page.props?.bidangStat ?? []
+  if (mode.value === 'kategori') {
+    return page.props?.kategoriStat ?? []
+  }
+
+  return filteredBidangStat.value
 })
 
 const barChartData = computed(() => ({
@@ -125,25 +162,34 @@ const barChartData = computed(() => ({
     }
   ]
 }))
-
-const barChartOptions = {
+const barChartOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
+  indexAxis: mode.value === 'bidang' ? 'x' : 'x',
   plugins: {
     legend: {
       display: false
     }
   },
   scales: {
-    y: {
+    x: {
       beginAtZero: true,
       ticks: {
-        stepSize: 1, // 🔥 ini kuncinya (biar 0,1,2,3 tanpa koma)
-        precision: 0 // 🔥 biar gak ada desimal
+        precision: 0,
+        autoSkip: false,
+        maxRotation: 0,
+        minRotation: 0
+      }
+    },
+    y: {
+      ticks: {
+        autoSkip: false,
+        maxRotation: 0,
+        minRotation: 0
       }
     }
   }
-}
+}))
 </script>
 <template>
 <div>
@@ -212,17 +258,16 @@ const barChartOptions = {
   <!-- CARD 2 (BAR CHART) -->
   <div class="bg-white rounded-2xl shadow p-6 space-y-4">
 
-  <div class="flex justify-between items-center">
-    <h2 class="font-semibold text-gray-700">
+  <div class="flex flex-col gap-4">
+    <h2 class="font-semibold text-gray-700 text-lg">
       Statistik Per {{ mode === 'kategori' ? 'Kategori' : 'Bidang' }}
     </h2>
 
-    <!-- ...  -->
-    <div class="flex gap-2">
+    <div class="grid grid-cols-2 gap-2 w-full">
       <button
         @click="mode = 'kategori'"
         :class="mode === 'kategori' ? 'bg-blue-500 text-white' : 'bg-gray-200'"
-        class="px-3 py-1 rounded text-sm"
+        class="px-3 py-2 rounded-lg text-sm font-medium transition"
       >
         Kategori
       </button>
@@ -230,17 +275,29 @@ const barChartOptions = {
       <button
         @click="mode = 'bidang'"
         :class="mode === 'bidang' ? 'bg-blue-500 text-white' : 'bg-gray-200'"
-        class="px-3 py-1 rounded text-sm"
+        class="px-3 py-2 rounded-lg text-sm font-medium transition"
       >
         Bidang
       </button>
+    </div>
+
+    <div v-if="mode === 'bidang'" class="w-full">
+      <select
+        v-model="selectedBidang"
+        class="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      >
+        <option value="">-- Semua Bidang --</option>
+        <option v-for="bidang in bidangList" :key="bidang" :value="bidang">
+          {{ bidang }}
+        </option>
+      </select>
     </div>
   </div>
 
   <div class="h-[300px]">
     <Bar :data="barChartData" :options="barChartOptions" />
   </div>
-  </div>
+</div>
 
   
   <!-- TOTAL PENGGUNA AKTIF -->
