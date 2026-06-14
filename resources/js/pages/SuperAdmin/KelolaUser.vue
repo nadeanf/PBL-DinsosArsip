@@ -400,66 +400,85 @@ defineOptions({
                 v-model="form.name"
                 type="text"
                 placeholder="Nama"
+                :class="{ 'border-red-500': form.errors.name }"
                 class="w-full border rounded-xl px-4 py-3"
             />
+            <span v-if="form.errors.name" class="text-red-500 text-xs">{{ form.errors.name }}</span>
 
             <input
                 v-model="form.email"
                 type="email"
                 placeholder="Email"
+                :class="{ 'border-red-500': form.errors.email }"
                 class="w-full border rounded-xl px-4 py-3"
             />
+            <span v-if="form.errors.email" class="text-red-500 text-xs">{{ form.errors.email }}</span>
 
             <input
                 v-model="form.nip"
                 type="text"
                 placeholder="NIP"
+                :class="{ 'border-red-500': form.errors.nip }"
                 class="w-full border rounded-xl px-4 py-3"
             />
+            <span v-if="form.errors.nip" class="text-red-500 text-xs">{{ form.errors.nip }}</span>
 
-            <select
-            v-model="form.bagian"
-            class="w-full border rounded-xl px-4 py-3"
-                >
-            <option value="">Pilih Bagian</option>
-            <option value="Sekretariat">Sekretariat</option>
-            <option value="Bidang Rehabilitasi Sosial">Bidang Rehabilitasi Sosial</option>
-            <option value="Bidang Perlindungan dan Jaminan Sosial">
-            Bidang Perlindungan dan Jaminan Sosial
-            </option>
-            <option value="Bidang Pemberdayaan Sosial dan Penanganan Fakir Miskin">
-            Bidang Pemberdayaan Sosial dan Penanganan Fakir Miskin
-            </option>
-        </select>
 
             <select
                 v-model="form.role"
+                :class="{ 'border-red-500': form.errors.role }"
                 class="w-full border rounded-xl px-4 py-3"
             >
                 <option value="user">User</option>
                 <option value="admin">Admin</option>
                 <option value="pimpinan">Pimpinan</option>
             </select>
+            <span v-if="form.errors.role" class="text-red-500 text-xs">{{ form.errors.role }}</span>
+
+            <select
+                v-if="form.role === 'user'"
+                v-model="form.bagian"
+                :class="{ 'border-red-500': form.errors.bagian }"
+                class="w-full border rounded-xl px-4 py-3"
+            >
+                <option value="">Pilih Bagian</option>
+                <option value="Sekretariat">Sekretariat</option>
+                <option value="Bidang Rehabilitasi Sosial">
+                    Bidang Rehabilitasi Sosial
+                </option>
+                <option value="Bidang Perlindungan dan Jaminan Sosial">
+                    Bidang Perlindungan dan Jaminan Sosial
+                </option>
+                <option value="Bidang Pemberdayaan Sosial dan Penanganan Fakir Miskin">
+                    Bidang Pemberdayaan Sosial dan Penanganan Fakir Miskin
+                </option>
+            </select>
+            <span v-if="form.errors.bagian && form.role === 'user'" class="text-red-500 text-xs">{{ form.errors.bagian }}</span>
 
             <input
                 v-model="form.password"
                 type="password"
                 placeholder="Password"
+                :class="{ 'border-red-500': form.errors.password }"
                 class="w-full border rounded-xl px-4 py-3"
             />
+            <span v-if="form.errors.password" class="text-red-500 text-xs">{{ form.errors.password }}</span>
 
             <input
                 v-model="form.password_confirmation"
                 type="password"
                 placeholder="Konfirmasi Password"
+                :class="{ 'border-red-500': form.errors.password_confirmation }"
                 class="w-full border rounded-xl px-4 py-3"
             />
+            <span v-if="form.errors.password_confirmation" class="text-red-500 text-xs">{{ form.errors.password_confirmation }}</span>
 
             <button
                 type="submit"
-                class="w-full bg-[#2f4fa2] text-white py-3 rounded-xl font-bold hover:bg-blue-900 transition"
+                :disabled="form.processing"
+                class="w-full bg-[#2f4fa2] text-white py-3 rounded-xl font-bold hover:bg-blue-900 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-                Tambah User
+                {{ form.processing ? 'Loading...' : 'Tambah User' }}
             </button>
 
         </form>
@@ -488,25 +507,32 @@ defineOptions({
                 v-model="editForm.name"
                 type="text"
                 placeholder="Nama"
+                :class="{ 'border-red-500': editForm.errors.name }"
                 class="w-full border rounded-xl px-4 py-3"
             />
+            <span v-if="editForm.errors.name" class="text-red-500 text-xs">{{ editForm.errors.name }}</span>
 
             <input
                 v-model="editForm.email"
                 type="email"
                 placeholder="Email"
+                :class="{ 'border-red-500': editForm.errors.email }"
                 class="w-full border rounded-xl px-4 py-3"
             />
+            <span v-if="editForm.errors.email" class="text-red-500 text-xs">{{ editForm.errors.email }}</span>
 
             <input
                 v-model="editForm.nip"
                 type="text"
                 placeholder="NIP"
+                :class="{ 'border-red-500': editForm.errors.nip }"
                 class="w-full border rounded-xl px-4 py-3"
             />
+            <span v-if="editForm.errors.nip" class="text-red-500 text-xs">{{ editForm.errors.nip }}</span>
 
             <select
                 v-model="editForm.bagian"
+                :class="{ 'border-red-500': editForm.errors.bagian }"
                 class="w-full border rounded-xl px-4 py-3"
             >
                 <option value="">Pilih Bagian</option>
@@ -519,21 +545,25 @@ defineOptions({
                     Bidang Pemberdayaan Sosial dan Penanganan Fakir Miskin
                 </option>
             </select>
+            <span v-if="editForm.errors.bagian" class="text-red-500 text-xs">{{ editForm.errors.bagian }}</span>
 
             <select
                 v-model="editForm.role"
+                :class="{ 'border-red-500': editForm.errors.role }"
                 class="w-full border rounded-xl px-4 py-3"
             >
                 <option value="user">User</option>
                 <option value="admin">Admin</option>
                 <option value="pimpinan">Pimpinan</option>
             </select>
+            <span v-if="editForm.errors.role" class="text-red-500 text-xs">{{ editForm.errors.role }}</span>
 
             <button
                 type="submit"
-                class="w-full bg-yellow-500 text-white py-3 rounded-xl font-bold hover:bg-yellow-600 transition"
+                :disabled="editForm.processing"
+                class="w-full bg-yellow-500 text-white py-3 rounded-xl font-bold hover:bg-yellow-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-                Simpan Perubahan
+                {{ editForm.processing ? 'Loading...' : 'Simpan Perubahan' }}
             </button>
 
         </form>

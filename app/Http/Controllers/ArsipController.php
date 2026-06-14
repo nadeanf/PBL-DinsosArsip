@@ -73,7 +73,7 @@ $request->validate([
             $ext = strtolower($file->getClientOriginalExtension());
             $sizeMB = $file->getSize() / 1024 / 1024;
 
-            // dokumen 2MB
+            // dokumen 10MB
             $dokumen = ['pdf','doc','docx','xls','xlsx','ppt','pptx','txt'];
 
             $gambar = ['jpg','jpeg','png','gif','webp','bmp'];
@@ -84,8 +84,8 @@ $request->validate([
             // video 100MB
             $video = ['mp4','avi','mkv','mov','wmv','flv','mpeg'];
 
-            if (in_array($ext, $dokumen) && $sizeMB > 2) {
-                $fail("Dokumen maksimal 2MB");
+            if (in_array($ext, $dokumen) && $sizeMB > 10) {
+                $fail("Dokumen maksimal 10MB");
             }
 
             if (in_array($ext, $gambar) && $sizeMB > 5) {
@@ -210,7 +210,7 @@ $request->validate([
             $ext = strtolower($file->getClientOriginalExtension());
             $sizeMB = $file->getSize() / 1024 / 1024;
 
-            // dokumen 2MB
+            // dokumen 10MB
             $dokumen = ['pdf','doc','docx','xls','xlsx','ppt','pptx','txt'];
 
             $gambar = ['jpg','jpeg','png','gif','webp','bmp'];
@@ -221,8 +221,8 @@ $request->validate([
             // video 100MB
             $video = ['mp4','avi','mkv','mov','wmv','flv','mpeg'];
 
-            if (in_array($ext, $dokumen) && $sizeMB > 2) {
-                $fail("Dokumen maksimal 2MB");
+            if (in_array($ext, $dokumen) && $sizeMB > 10) {
+                $fail("Dokumen maksimal 10MB");
             }
 
             if (in_array($ext, $gambar) && $sizeMB > 5) {
@@ -446,7 +446,7 @@ $jenisArsip = (now()->year - (int)$request->tahun >= $masaAktif)
 
         return Inertia::render('EditDokumen', [
             'arsip' => $arsip,
-            'kategori' => Kategori::all()
+            'kategori' => $this->kategoriTree()
         ]);
     }
 
@@ -1269,6 +1269,14 @@ public function exportPdf(Request $request)
 {
     $query = Arsip::with('kategori');
 
+    // 🔍 Filter search (judul atau nomor)
+    if ($request->filled('search')) {
+        $query->where(function ($q) use ($request) {
+            $q->where('judul', 'like', '%' . $request->search . '%')
+                ->orWhere('nomor', 'like', '%' . $request->search . '%');
+        });
+    }
+
     // 🔍 Filter kategori
     if ($request->filled('kategori')) {
         $query->where('id_kategori', $request->kategori);
@@ -1299,11 +1307,18 @@ public function exportPdf(Request $request)
             });
         });
 
+    // Get kategori name if kategori ID is provided
+    $kategoriName = 'Semua';
+    if ($request->filled('kategori')) {
+        $kategori = Kategori::find($request->kategori);
+        $kategoriName = $kategori ? $kategori->nama : 'Semua';
+    }
+
     // 🧾 Load ke PDF
     $pdf = Pdf::loadView('pdf.laporan-arsip', [
         'arsip' => $arsip,
         'filter' => [
-            'kategori' => $request->kategori_nama ?? 'Semua',
+            'kategori' => $kategoriName,
             'tanggal_awal' => $request->tanggal_awal,
             'tanggal_akhir' => $request->tanggal_akhir,
         ]
@@ -1460,11 +1475,6 @@ public function statistikPimpinan()
     ->groupBy('kategori.nama')
     ->get();
 
-    $bidangStat = Arsip::selectRaw('users.bagian as nama, COUNT(*) as total')
-    ->join('users', 'arsip.user_id', '=', 'users.id')
-    ->groupBy('users.bagian')
-    ->get();
-
     $users = User::withCount('arsip')
             ->orderByDesc('arsip_count')
             ->paginate(5);
@@ -1477,7 +1487,6 @@ public function statistikPimpinan()
         'totalArsip' => $totalArsip,
         'totalDownload' => $totalDownload,
         'kategoriStat' => $kategoriStat,
-        'bidangStat' => $bidangStat,
         'users' => $users,
         'totalUser' => $totalUser,
         'totalAktif' => $totalAktif,
@@ -1508,7 +1517,7 @@ $request->validate([
             $ext = strtolower($file->getClientOriginalExtension());
             $sizeMB = $file->getSize() / 1024 / 1024;
 
-            // dokumen 2MB
+            // dokumen 10MB
             $dokumen = ['pdf','doc','docx','xls','xlsx','ppt','pptx','txt'];
 
             // gambar 5MB
@@ -1520,8 +1529,8 @@ $request->validate([
             // video 100MB
             $video = ['mp4','avi','mkv','mov','wmv','flv','mpeg'];
 
-            if (in_array($ext, $dokumen) && $sizeMB > 2) {
-                $fail("Dokumen maksimal 2MB");
+            if (in_array($ext, $dokumen) && $sizeMB > 10) {
+                $fail("Dokumen maksimal 10MB");
             }
 
             if (in_array($ext, $gambar) && $sizeMB > 5) {

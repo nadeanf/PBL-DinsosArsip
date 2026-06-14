@@ -25,7 +25,7 @@
         }
 
         .logo {
-            width: 90px;
+            width: 100px;
         }
 
         .judul-dinas {
@@ -39,8 +39,9 @@
         }
 
         .garis {
-            border-top: 3px solid black;
+            border-top: 2px solid black;
             border-bottom: 1px solid black;
+            height: 3px;
             margin-top: 10px;
             margin-bottom: 25px;
         }
@@ -101,10 +102,23 @@
 
                 <!-- IDENTITAS -->
                 <td class="judul-dinas">
-                    <h2>PEMERINTAH KABUPATEN BOYOLALI</h2>
-                    <h3>DINAS SOSIAL</h3>
-                    <p>Jl. Contoh Alamat No. 123</p>
-                    <p>Email: dinsos@example.go.id</p>
+                    <div style="font-size: 18px;">
+                        PEMERINTAH KABUPATEN BOYOLALI
+                    </div>
+
+                    <div style="font-size: 34px; font-weight: bold; margin-top: 5px;">
+                        DINAS SOSIAL
+                    </div>
+
+                    <div style="font-size: 14px; margin-top: 6px; line-height: 1.5;">
+                        Komplek Perkantoran Terpadu Kabupaten Boyolali<br>
+                        Jalan : Kebo Kenongo, (0276) 321 021 / 321 047, Faks 321 098, Kemiri<br>
+                        Boyolali 57321, Provinsi Jawa Tengah
+                    </div>
+
+                    <div style="font-size: 14px; margin-top: 5px;">
+                        <i>Email : dinsos@boyolali.go.id</i>
+                    </div>
                 </td>
 
             </tr>

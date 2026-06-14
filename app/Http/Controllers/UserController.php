@@ -4,9 +4,23 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class UserController extends Controller
+class UserController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware(function ($request, $next) {
+                if (auth()->check() && auth()->user()->role !== 'superadmin') {
+                    abort(403);
+                }
+                return $next($request);
+            }),
+        ];
+    }
+
     public function toggleStatus($id)
     {
         $user = User::findOrFail($id);
@@ -24,7 +38,7 @@ class UserController extends Controller
         'email' => 'required|email|unique:users',
         'password' => 'required|min:6|confirmed',
         'nip' => 'required',
-        'bagian' => 'required',
+        'bagian' => $request->role === 'user' ? 'required' : 'nullable',
         'role' => 'required',
     ]);
 
@@ -33,7 +47,9 @@ class UserController extends Controller
         'email' => $request->email,
         'password' => Hash::make($request->password),
         'nip' => $request->nip,
-        'bagian' => $request->bagian,
+        'bagian' => $request->role === 'user'
+        ? $request->bagian
+        : null,
         'role' => $request->role,
         'is_active' => true,
     ]);
@@ -48,7 +64,9 @@ public function update(Request $request, $id)
         'name' => 'required',
         'email' => 'required|email|unique:users,email,' . $user->id,
         'nip' => 'required',
-        'bagian' => 'required',
+        'bagian' => $request->role === 'user'
+        ? 'required'
+        : 'nullable',
         'role' => 'required',
     ]);
 
@@ -56,7 +74,9 @@ public function update(Request $request, $id)
         'name' => $request->name,
         'email' => $request->email,
         'nip' => $request->nip,
-        'bagian' => $request->bagian,
+        'bagian' => $request->role === 'user'
+        ? $request->bagian
+        : null,
         'role' => $request->role,
     ]);
 

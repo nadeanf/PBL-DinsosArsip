@@ -15,7 +15,7 @@ const user = computed(() => props.user || page.props.auth?.user)
 </script>
 
 <template>
-  <aside class="w-64 min-h-screen overflow-x-hidden bg-gradient-to-b from-[#dbe3e7] to-[#2f6f7e] p-4 flex flex-col justify-between">
+  <aside class="w-full min-h-screen overflow-x-hidden bg-gradient-to-b from-[#dbe3e7] to-[#2f6f7e] p-3 md:p-4 flex flex-col justify-between">
     <div class="w-full overflow-x-hidden">
       <Link href="/edit-profile" class="flex items-center gap-3 mb-6">
         <div class="w-12 h-12 flex items-center justify-center rounded-full bg-[#b7d3d8] overflow-hidden border-2 border-white shadow-sm">
@@ -196,15 +196,6 @@ const user = computed(() => props.user || page.props.auth?.user)
           <span class="text-sm font-medium">Pengumuman</span>
         </Link>
 
-      </div>
-
-      <!-- STORAGE -->
-      <div class="mt-8 bg-white/70 p-4 rounded-xl text-xs shadow-inner">
-        <p class="mb-3 font-semibold text-gray-800">Penyimpanan</p>
-        <div class="w-full bg-gray-300 h-2.5 rounded-full overflow-hidden">
-          <div class="bg-[#2f4fa2] h-full w-1/3 rounded-full"></div>
-        </div>
-        <p class="mt-2.5 text-[10px] text-gray-700">xx GB / xx GB (xx%)</p>
       </div>
     </div>
 

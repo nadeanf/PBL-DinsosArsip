@@ -95,12 +95,12 @@ const getLimit = (ext: string) => {
     'mov','wmv','flv','mpeg'
   ]
 
-  if (dokumen.includes(ext)) return 2
+  if (dokumen.includes(ext)) return 10
   if (gambar.includes(ext)) return 5
   if (audio.includes(ext)) return 25
   if (video.includes(ext)) return 100
 
-  return 2
+  return 10
 }
 const setFiles = (files: File[]) => {
   fileError.value = ''
@@ -267,7 +267,7 @@ const submit = () => {
               </p>
 
               <p class="text-gray-400 text-xs mt-2">
-               (Max: Dokumen 2 MB | Gambar 5 MB | Audio 25 MB | Video 100 MB)
+               (Max: Dokumen 10 MB | Gambar 5 MB | Audio 25 MB | Video 100 MB)
               </p>
             </div>
 

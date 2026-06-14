@@ -170,3 +170,111 @@
         @apply bg-background text-foreground;
     }
 }
+
+/* Responsive Utilities */
+@layer utilities {
+    /* Touch-friendly spacing for mobile */
+    @media (max-width: 640px) {
+        .touch-safe {
+            @apply p-4 space-y-4;
+        }
+        
+        .touch-target {
+            @apply min-h-12 min-w-12;
+        }
+
+        /* Responsive text */
+        h1 {
+            @apply text-2xl;
+        }
+
+        h2 {
+            @apply text-xl;
+        }
+
+        h3 {
+            @apply text-lg;
+        }
+
+        h4 {
+            @apply text-base;
+        }
+    }
+
+    /* Responsive grid fixes */
+    .responsive-grid {
+        @apply grid grid-cols-1 gap-4;
+    }
+
+    @media (min-width: 640px) {
+        .responsive-grid {
+            @apply grid-cols-2 gap-5;
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .responsive-grid {
+            @apply grid-cols-3 gap-6;
+        }
+    }
+
+    /* Responsive modal */
+    .modal-responsive {
+        @apply fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/50 backdrop-blur-sm p-0 md:p-4;
+    }
+
+    .modal-content-responsive {
+        @apply bg-white w-full md:max-w-2xl lg:max-w-4xl rounded-t-3xl md:rounded-3xl shadow-2xl overflow-hidden;
+    }
+
+    /* Responsive flex */
+    .flex-responsive {
+        @apply flex flex-col md:flex-row;
+    }
+
+    /* Responsive padding */
+    .p-responsive {
+        @apply p-3 md:p-6;
+    }
+
+    /* Responsive container */
+    .container-responsive {
+        @apply w-full px-4 md:px-6 lg:px-8 mx-auto;
+    }
+
+    /* Smooth transitions */
+    .transition-smooth {
+        @apply transition-all duration-300 ease-in-out;
+    }
+
+    /* Mobile-first overflow */
+    .overflow-safe {
+        @apply overflow-hidden overflow-y-auto;
+    }
+
+    /* Responsive table */
+    .table-responsive {
+        @apply w-full overflow-x-auto;
+    }
+
+    .table-responsive table {
+        @apply min-w-full;
+    }
+
+    /* Prevent layout shift */
+    @media (max-width: 640px) {
+        .hide-on-mobile {
+            @apply hidden;
+        }
+
+        .full-width-mobile {
+            @apply w-full;
+        }
+    }
+
+    @media (min-width: 641px) {
+        .show-on-mobile {
+            @apply hidden;
+        }
+    }
+}
