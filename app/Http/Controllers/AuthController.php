@@ -47,7 +47,7 @@ class AuthController extends Controller
         'email' => strtolower($request->email)
     ]);
 
-        $response = Http::asForm()->post(
+        $response = Http::withoutVerifying()->asForm()->post(
     'https://challenges.cloudflare.com/turnstile/v0/siteverify',
     [
         'secret' => env('TURNSTILE_SECRET_KEY'),
