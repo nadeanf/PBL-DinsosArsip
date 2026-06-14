@@ -11,18 +11,18 @@ const user = computed(() => page.props.auth?.user)
 </script>
 
 <template>
-  <div class="flex flex-col min-h-screen">
+  <div class="flex flex-col h-screen overflow-hidden">
 
     <!-- NAVBAR -->
     <Navbar />
 
-    <div class="flex flex-1">
+    <div class="flex flex-1 overflow-hidden">
 
       <!-- SIDEBAR -->
       <Sidebar />
 
       <!-- CONTENT -->
-      <main class="flex-1 bg-gray-100">
+      <main class="flex-1 bg-gray-100 overflow-y-auto overflow-x-hidden">
         <slot />
       </main>
 

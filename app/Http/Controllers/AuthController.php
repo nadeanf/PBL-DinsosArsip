@@ -82,29 +82,16 @@ if (! $response->json('success')) {
             ]);
         }
 
-        // DETECT SUPER ADMIN
-        if ($user->email === 'superadmin@gmail.com') {
-            $user->role = 'superadmin';
-            $user->save();
-
-            return redirect('/super-admin/dashboard');
-        }
-
-        // DETECT PIMPINAN
-        if ($user->email === 'pimpinan@gmail.com') {
-            $user->role = 'pimpinan';
-            $user->save();
-
-            return redirect('/pimpinan/dashboard');
-        }
-
-        // DETECT ADMIN
-        if ($user->email === 'admin@gmail.com') {
-            $user->role = 'admin';
-            $user->save();
-
-            return redirect('/admin/dashboard');
-        }
+            // REDIRECT BERDASARKAN ROLE
+            $role = $user->role;
+            
+            if ($role === 'superadmin') {
+                return redirect('/super-admin/dashboard');
+            } elseif ($role === 'pimpinan') {
+                return redirect('/pimpinan/dashboard');
+            } elseif ($role === 'admin') {
+                return redirect('/admin/dashboard');
+            }
 
         // DEFAULT USER
         return redirect('/dashboard');

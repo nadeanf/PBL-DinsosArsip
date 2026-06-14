@@ -73,7 +73,7 @@ $request->validate([
             $ext = strtolower($file->getClientOriginalExtension());
             $sizeMB = $file->getSize() / 1024 / 1024;
 
-            // dokumen 2MB
+            // dokumen 10MB
             $dokumen = ['pdf','doc','docx','xls','xlsx','ppt','pptx','txt'];
 
             $gambar = ['jpg','jpeg','png','gif','webp','bmp'];
@@ -84,8 +84,8 @@ $request->validate([
             // video 100MB
             $video = ['mp4','avi','mkv','mov','wmv','flv','mpeg'];
 
-            if (in_array($ext, $dokumen) && $sizeMB > 2) {
-                $fail("Dokumen maksimal 2MB");
+            if (in_array($ext, $dokumen) && $sizeMB > 10) {
+                $fail("Dokumen maksimal 10MB");
             }
 
             if (in_array($ext, $gambar) && $sizeMB > 5) {
@@ -210,7 +210,7 @@ $request->validate([
             $ext = strtolower($file->getClientOriginalExtension());
             $sizeMB = $file->getSize() / 1024 / 1024;
 
-            // dokumen 2MB
+            // dokumen 10MB
             $dokumen = ['pdf','doc','docx','xls','xlsx','ppt','pptx','txt'];
 
             $gambar = ['jpg','jpeg','png','gif','webp','bmp'];
@@ -221,8 +221,8 @@ $request->validate([
             // video 100MB
             $video = ['mp4','avi','mkv','mov','wmv','flv','mpeg'];
 
-            if (in_array($ext, $dokumen) && $sizeMB > 2) {
-                $fail("Dokumen maksimal 2MB");
+            if (in_array($ext, $dokumen) && $sizeMB > 10) {
+                $fail("Dokumen maksimal 10MB");
             }
 
             if (in_array($ext, $gambar) && $sizeMB > 5) {
@@ -1517,7 +1517,7 @@ $request->validate([
             $ext = strtolower($file->getClientOriginalExtension());
             $sizeMB = $file->getSize() / 1024 / 1024;
 
-            // dokumen 2MB
+            // dokumen 10MB
             $dokumen = ['pdf','doc','docx','xls','xlsx','ppt','pptx','txt'];
 
             // gambar 5MB
@@ -1529,8 +1529,8 @@ $request->validate([
             // video 100MB
             $video = ['mp4','avi','mkv','mov','wmv','flv','mpeg'];
 
-            if (in_array($ext, $dokumen) && $sizeMB > 2) {
-                $fail("Dokumen maksimal 2MB");
+            if (in_array($ext, $dokumen) && $sizeMB > 10) {
+                $fail("Dokumen maksimal 10MB");
             }
 
             if (in_array($ext, $gambar) && $sizeMB > 5) {

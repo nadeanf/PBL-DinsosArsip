@@ -92,13 +92,7 @@ const user = page.props.auth?.user
 
       </div>
 
-      <div class="bg-white/70 p-4 rounded-xl text-xs shadow-inner mt-6 mb-5">
-        <p class="mb-3 font-semibold text-gray-800">Penyimpanan</p>
-        <div class="w-full bg-gray-300 h-2.5 rounded-full overflow-hidden">
-          <div class="bg-[#2f4fa2] h-full w-1/3 rounded-full"></div>
-        </div>
-        <p class="mt-2.5 text-[10px] text-gray-700">xx GB / xx GB (xx%)</p>
-      </div>
+
 
       <Link href="/logout" method="post" as="button"
         class="flex items-center gap-3 bg-gray-200 px-3 py-3 rounded-xl w-full text-left hover:bg-gray-300 transition-all group mt-2">
