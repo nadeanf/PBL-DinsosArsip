@@ -446,7 +446,7 @@ $jenisArsip = (now()->year - (int)$request->tahun >= $masaAktif)
 
         return Inertia::render('EditDokumen', [
             'arsip' => $arsip,
-            'kategori' => Kategori::all()
+            'kategori' => $this->kategoriTree()
         ]);
     }
 
