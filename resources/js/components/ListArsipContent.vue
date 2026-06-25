@@ -21,7 +21,7 @@ const showDropdown = ref(false)
 
 /* PAGINATION */
 const currentPage = ref(1)
-const perPage = 10
+const perPage = 5
 
 /* RESET PAGE kalau filter berubah */
 const resetPage = () => {
@@ -196,11 +196,16 @@ const previewModal = ref(false)
 const selectedDoc = ref(null)
 
 const openPreview = (item) => {
-  // 🔥 set data dokumen sebelum buka modal agar status akses langsung benar
+  
+  console.log('DATA DOKUMEN:', item)
+  console.log('REQUEST STATUS:', item.request_status)
+  console.log('REQUEST USER ID:', item.request_user_id)
+
+  // set data dokumen sebelum buka modal agar status akses langsung benar
   selectedDoc.value = { ...item }
   previewModal.value = true
 
-  // 🔥 Track riwayat akses (silent - tidak perlu error dialog)
+  // Track riwayat akses (silent - tidak perlu error dialog)
   const trackView = async () => {
     try {
       const response = await fetch('/riwayat/view', {
@@ -240,7 +245,7 @@ const requestAkses = (arsipId) => {
 }
 
 const handleDownload = (id) => {
-  // 🔥 Gunakan route download agar controller mencatat download ke riwayat.
+  // Gunakan route download agar controller mencatat download ke riwayat.
   window.location.href = `/download/${id}`
 }
 </script>
@@ -265,7 +270,7 @@ const handleDownload = (id) => {
       />
     </div>
 
-    <!-- 🔥 DROPDOWN FIX -->
+    <!-- DROPDOWN FIX -->
 <div class="relative w-[300px]">
 
   <!-- BUTTON -->

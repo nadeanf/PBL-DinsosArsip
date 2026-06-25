@@ -380,6 +380,8 @@ $jenisArsip = (now()->year - (int)$request->tahun >= $masaAktif)
                 ->first();
 
             $item->request_status = $req?->status;
+            $item->request_user_id = $req?->user_id;
+            
             return $item;
         });
 
@@ -1475,6 +1477,11 @@ public function statistikPimpinan()
     ->groupBy('kategori.nama')
     ->get();
 
+    $bidangStat = Arsip::selectRaw('users.bagian as nama, COUNT(*) as total')
+    ->join('users', 'arsip.user_id', '=', 'users.id')
+    ->groupBy('users.bagian')
+    ->get();
+
     $users = User::withCount('arsip')
             ->orderByDesc('arsip_count')
             ->paginate(5);
@@ -1487,6 +1494,7 @@ public function statistikPimpinan()
         'totalArsip' => $totalArsip,
         'totalDownload' => $totalDownload,
         'kategoriStat' => $kategoriStat,
+        'bidangStat' => $bidangStat,
         'users' => $users,
         'totalUser' => $totalUser,
         'totalAktif' => $totalAktif,
@@ -1678,15 +1686,17 @@ public function backupDatabase()
         mkdir(storage_path('app/backups'), 0777, true);
     }
 
-    $command = sprintf(
-        'mysqldump --user=%s --password=%s %s > %s',
-        env('DB_USERNAME'),
-        env('DB_PASSWORD'),
-        env('DB_DATABASE'),
-        $path
-    );
+    $mysqldump = '"C:\laragon\bin\mysql\mysql-8.4.3-winx64\bin\mysqldump.exe"';
 
-    system($command);
+$command = sprintf(
+    '%s --user=%s %s > "%s"',
+    $mysqldump,
+    env('DB_USERNAME'),
+    env('DB_DATABASE'),
+    $path
+);
+
+system($command);
 
     return response()->download($path)->deleteFileAfterSend(true);
 }
