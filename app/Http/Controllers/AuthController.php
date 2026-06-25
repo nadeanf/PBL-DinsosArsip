@@ -47,24 +47,24 @@ class AuthController extends Controller
         'email' => strtolower($request->email)
     ]);
 
-        $response = Http::asForm()->post(
-    'https://challenges.cloudflare.com/turnstile/v0/siteverify',
-    [
-        'secret' => env('TURNSTILE_SECRET_KEY'),
-        'response' => $request->input('cf-turnstile-response'),
-        'remoteip' => $request->ip(),
-    ]
-);
-if (! $response->json('success')) {
-    return back()->withErrors([
-        'email' => 'Captcha gagal, coba lagi.'
-    ]);
-}
-        if (! $response->json('success')) {
-            return back()->withErrors([
-                'email' => 'Captcha gagal, coba lagi.'
-            ]);
-            }
+  //      $response = Http::asForm()->post(
+    //'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+    //[
+    //    'secret' => env('TURNSTILE_SECRET_KEY'),
+      //  'response' => $request->input('cf-turnstile-response'),
+        //'remoteip' => $request->ip(),
+   // ]
+//);
+//if (! $response->json('success')) {
+  //  return back()->withErrors([
+    //    'email' => 'Captcha gagal, coba lagi.'
+    //]);
+//}
+       // if (! $response->json('success')) {
+         //   return back()->withErrors([
+           //     'email' => 'Captcha gagal, coba lagi.'
+            //]);
+            //}
 
     $credentials = $request->only('email', 'password');
 

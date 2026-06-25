@@ -145,7 +145,7 @@ const getFileIcon = (filePath) => {
 </script>
 
 <template>
-    <Head title="SOSISBOY - Dinas Sosial Boyolali" />
+    <Head title="SIDARLING - Dinas Sosial Boyolali" />
 
     <div
         class="min-h-screen bg-white flex flex-col w-full overflow-x-hidden font-sans text-slate-800"
@@ -160,9 +160,9 @@ const getFileIcon = (filePath) => {
             >
                 <h1
                     class="text-white leading-none mb-16 drop-shadow-[0_12px_15px_rgba(0,0,0,0.9)] tracking-[0.15em] animate-title-pop"
-                    style="font-family: 'Georgia', serif; font-style: italic; font-weight: 900; font-size: clamp(64px, 12vw, 120px); -webkit-text-stroke: 1px rgba(255,255,255,0.25);"
+                    style="font-family: 'Georgia', serif; font-style: italic; font-weight: 400; font-size: clamp(64px, 12vw, 50px); -webkit-text-stroke: 1px rgba(255,255,255,0.25);"
                 >
-                    SOSISBOY
+                    SIDARLING DINSOS
                 </h1>
 
                 <!-- STAT CARD -->

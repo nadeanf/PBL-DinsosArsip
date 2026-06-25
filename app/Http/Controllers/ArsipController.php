@@ -471,7 +471,7 @@ $jenisArsip = (now()->year - (int)$request->tahun >= $masaAktif)
     public function restore($id)
     {
         Arsip::onlyTrashed()->findOrFail($id)->restore();
-        return back();
+        return redirect()->route('arsip.trash');
     }
 
     public function forceDelete($id)
