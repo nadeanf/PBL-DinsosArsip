@@ -19,7 +19,7 @@ const mobileMenuOpen = ref(false)
           Dinas Sosial Boyolali
         </h1>
         <p class="text-xs md:text-sm opacity-80">
-          Sistem Arsip Digital
+           Sistem Digital Arsip dan Layanan Informasi Dinas Sosial Boyolali
         </p>
       </div>
     </div>

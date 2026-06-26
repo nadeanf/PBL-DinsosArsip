@@ -145,12 +145,15 @@ const getFileIcon = (filePath) => {
 </script>
 
 <template>
-    <Head title="SIDARLING - Dinas Sosial Boyolali" />
+    <Head title="SIDARLING DINSOS - Dinas Sosial Boyolali" />
 
     <div
         class="min-h-screen bg-white flex flex-col w-full overflow-x-hidden font-sans text-slate-800"
     >
-        <HeaderBaru />
+        <!-- HEADER STICKY: tetap menempel di atas saat halaman discroll -->
+        <div class="sticky top-0 z-50 w-full">
+            <HeaderBaru />
+        </div>
 
         <main class="flex-grow">
             <!-- HERO -->
@@ -159,10 +162,29 @@ const getFileIcon = (filePath) => {
                 style="background-image: linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url('/image/bgsosis.png');"
             >
                 <h1
-                    class="text-white leading-none mb-16 drop-shadow-[0_12px_15px_rgba(0,0,0,0.9)] tracking-[0.15em] animate-title-pop"
-                    style="font-family: 'Georgia', serif; font-style: italic; font-weight: 400; font-size: clamp(64px, 12vw, 50px); -webkit-text-stroke: 1px rgba(255,255,255,0.25);"
+                    class="text-white leading-tight mb-16 text-center drop-shadow-[0_8px_18px_rgba(0,0,0,0.55)] animate-title-pop"
+                    style="font-family: 'Poppins', 'Inter', 'Helvetica Neue', Arial, sans-serif;"
                 >
-                    SIDARLING DINSOS
+                    <span
+                    class="block font-extrabold uppercase tracking-[0.18em] coiny-regular"
+                    :style="{
+                        fontSize: 'clamp(44px, 8vw, 84px)'
+                    }"
+                >
+                    Sidarling
+                </span>
+                    <span
+                        class="block font-light uppercase tracking-[0.55em] opacity-90 mt-3"
+                        style="font-size: clamp(14px, 2vw, 20px);"
+                    >
+                        Sistem Digital Arsip dan Layanan Informasi
+                    </span>
+                    <span
+                        class="block font-light uppercase tracking-[0.55em] opacity-90 mt-1"
+                        style="font-size: clamp(14px, 2vw, 20px);"
+                    >
+                        Dinas Sosial Boyolali
+                    </span>
                 </h1>
 
                 <!-- STAT CARD -->

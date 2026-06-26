@@ -75,10 +75,7 @@ const user = computed(() => props.user || page.props.auth?.user)
 
           <span class="text-sm font-medium">Riwayat</span>
         </Link>
-      </div>
-
-      <div>
-      <Link href="/logout" method="post" as="button"
+        <Link href="/logout" method="post" as="button"
         class="flex items-center gap-3 bg-gray-200 px-3 py-2 rounded-lg w-full text-left hover:bg-gray-300 transition-all group">
 
         <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-white">

@@ -89,12 +89,7 @@ const user = page.props.auth?.user
           </span>
           <span class="text-sm font-medium">Pengaturan</span>
         </Link>
-
-      </div>
-
-
-
-      <Link href="/logout" method="post" as="button"
+       <Link href="/logout" method="post" as="button"
         class="flex items-center gap-3 bg-gray-200 px-3 py-3 rounded-xl w-full text-left hover:bg-gray-300 transition-all group mt-2">
         <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-white shadow-sm group-hover:bg-red-50">
           <LogOut class="w-5 h-5 text-red-600" />
@@ -102,6 +97,8 @@ const user = page.props.auth?.user
         <span class="text-sm font-semibold text-gray-800">Keluar</span>
       </Link>
     </div>
+
+      </div>
 
   </aside>
 </template>

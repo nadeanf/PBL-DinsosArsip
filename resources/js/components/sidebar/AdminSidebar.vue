@@ -197,10 +197,7 @@ const user = computed(() => props.user || page.props.auth?.user)
         </Link>
 
       </div>
-    </div>
-
-    <!-- LOGOUT -->
-    <div class="mt-6">
+      <div class="mt-6">
       <Link href="/logout" method="post" as="button"
         class="flex items-center gap-3 bg-gray-200 px-3 py-2 rounded-lg w-full text-left hover:bg-gray-300 transition-all group">
 
@@ -213,6 +210,10 @@ const user = computed(() => props.user || page.props.auth?.user)
         </span>
       </Link>
     </div>
+    </div>
+
+    <!-- LOGOUT -->
+    
 
   </aside>
 </template>

@@ -4,7 +4,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 max-w-6xl mx-auto mb-8 md:mb-12">
       <!-- Section 1: About -->
       <div class="space-y-3">
-        <h3 class="text-lg md:text-xl font-bold">Sistem Arsip Digital</h3>
+        <h3 class="text-lg md:text-xl font-bold"> Sistem Digital Arsip dan Layanan Informasi Dinas Sosial Boyolali</h3>
         <p class="text-sm md:text-base text-blue-100 leading-relaxed">
           Platform digital untuk pengelolaan arsip dokumen pemerintahan
           yang aman, efisien, dan terintegrasi.

@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Coiny&display=swap');
 @import 'tailwindcss';
 
 @import 'tw-animate-css';
@@ -277,4 +278,7 @@
             @apply hidden;
         }
     }
+}
+.coiny-regular {
+  font-family: "Coiny", system-ui;
 }
