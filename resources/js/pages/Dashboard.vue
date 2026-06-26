@@ -23,7 +23,7 @@ const canAccessFull = (doc) => {
   const normalize = (val) =>
     String(val || '').toLowerCase().trim()
 
-  // 🔥 ADMIN / SUPERADMIN
+  //  ADMIN / SUPERADMIN
   if (['admin', 'superadmin'].includes(user.role)) {
     return true
   }
