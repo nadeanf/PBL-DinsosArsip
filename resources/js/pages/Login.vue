@@ -18,25 +18,27 @@ const form = useForm({
 })
 
 const showPassword = ref(false)
-onMounted(() => {
+/*onMounted(() => {
     const script = document.createElement('script')
     script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js'
     script.async = true
     script.defer = true
     document.head.appendChild(script)
-})
+})*/
+
 function handleSubmit() {
 
-    const token = (
+    /*const token = (
         document.querySelector(
             '[name="cf-turnstile-response"]'
         ) as HTMLInputElement
-    )?.value
+    )?.value */
 
-    form.transform((data) => ({
+    /*form.transform((data) => ({
         ...data,
         'cf-turnstile-response': token,
-    })).post('/login', {
+    }))*/
+   form.post('/login', {
         onError: () => {
             alert('Login gagal, cek email dan password!')
         }
@@ -106,7 +108,7 @@ function goToForgotPassword() {
         required
         class="field-input"
         placeholder="Masukkan email @gmail.com"
-        pattern="^[a-z0-9._%+-]+@gmail\.com$"
+        pattern="^[a-z0-9._%+\\-]+@gmail\.com$"
         title="Gunakan email dengan format @gmail.com"
     />
 
@@ -166,14 +168,14 @@ function goToForgotPassword() {
                     </span>
                 </div>
 
-                <div
+                <!--<div
                 class="cf-turnstile"
                 data-sitekey="0x4AAAAAADVe7s1edUnlFvz0"
                 ></div>
                 <input
                 type="hidden"
                 name="cf-turnstile-response"
-                />
+                /> -->
 
                 <button
                     type="submit"

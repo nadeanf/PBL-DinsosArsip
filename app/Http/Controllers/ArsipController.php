@@ -1678,30 +1678,48 @@ public function pengaturanSuperAdmin()
 public function backupDatabase()
 {
     $filename = 'backup_' . now()->format('d-m-Y_H-i-s') . '.sql';
-
-    $path = storage_path('app/backups/' . $filename);
+    $backupDir = storage_path('app/backups');
+    $path = $backupDir . '/' . $filename;
 
     // pastikan folder backups ada
-    if (!file_exists(storage_path('app/backups'))) {
-        mkdir(storage_path('app/backups'), 0777, true);
+    if (!file_exists($backupDir)) {
+        mkdir($backupDir, 0777, true);
     }
 
-    $mysqldump = '"C:\laragon\bin\mysql\mysql-8.4.3-winx64\bin\mysqldump.exe"';
+    $mysqldump = '/usr/bin/mysqldump';
 
-$command = sprintf(
-    '%s --user=%s %s > "%s"',
-    $mysqldump,
-    env('DB_USERNAME'),
-    env('DB_DATABASE'),
-    $path
-);
+    $host = config('database.connections.mysql.host');
+    $port = config('database.connections.mysql.port');
+    $user = config('database.connections.mysql.username');
+    $pass = config('database.connections.mysql.password');
+    $db   = config('database.connections.mysql.database');
 
-system($command);
+    // handle password kosong (biar gak error -p"")
+    $passwordPart = $pass ? '-p"' . $pass . '"' : '';
+
+    $command = sprintf(
+        '%s --no-tablespaces -h %s -P %s -u%s %s %s > "%s"',
+        $mysqldump,
+        escapeshellarg($host),
+        escapeshellarg($port),
+        escapeshellarg($user),
+        $passwordPart,
+        escapeshellarg($db),
+        $path
+    );
+
+    // optional debug
+    // dd($command);
+
+    system($command, $result);
+
+    if ($result !== 0) {
+        return response()->json([
+            'message' => 'Backup gagal dijalankan',
+            'command' => $command
+        ], 500);
+    }
 
     return response()->download($path)->deleteFileAfterSend(true);
 }
-
-
-
-
 }

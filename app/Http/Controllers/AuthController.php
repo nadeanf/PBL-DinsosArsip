@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Http;
+//use Illuminate\Support\Facades\Http;
 
 class AuthController extends Controller
 {
@@ -47,7 +47,7 @@ class AuthController extends Controller
         'email' => strtolower($request->email)
     ]);
 
-  $response = Http::asForm()->post(
+  /* $response = Http::asForm()->post(
 'https://challenges.cloudflare.com/turnstile/v0/siteverify',
 [
   'secret' => env('TURNSTILE_SECRET_KEY'),
@@ -59,7 +59,7 @@ if (! $response->json('success')) {
     return back()->withErrors([
         'email' => 'Captcha gagal, coba lagi.'
     ]);
-}
+} */
 
     $credentials = $request->only('email', 'password');
 
