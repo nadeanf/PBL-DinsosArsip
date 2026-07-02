@@ -471,11 +471,15 @@ $jenisArsip = (now()->year - (int)$request->tahun >= $masaAktif)
     }
 
     public function restore($id)
-    {
-        Arsip::onlyTrashed()->findOrFail($id)->restore();
-        return redirect()->route('arsip.trash');
+{
+    Arsip::onlyTrashed()->findOrFail($id)->restore();
+
+    if (auth()->user()->role === 'admin') {
+        return redirect('/admin/sampah-admin');
     }
 
+    return redirect()->route('arsip.trash');
+}
     public function forceDelete($id)
     {
         Arsip::onlyTrashed()->findOrFail($id)->forceDelete();

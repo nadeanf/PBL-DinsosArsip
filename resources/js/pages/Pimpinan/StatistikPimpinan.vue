@@ -2,7 +2,13 @@
 import AuthLayoutPimpinan from '@/layouts/AuthLayoutPimpinan.vue'
 import { ref, computed } from 'vue'
 import { Head, usePage } from '@inertiajs/vue3'
-import { Eye, Download } from 'lucide-vue-next'
+import {
+  Eye,
+  Download,
+  Users,
+  UserCheck,
+  ShieldCheck
+} from 'lucide-vue-next'
 import { Pie, Bar } from 'vue-chartjs'
 import {
   Chart as ChartJS,
@@ -116,7 +122,7 @@ const chartOptions = {
 })
 
 const barChartData = computed(() => ({
-  labels: dataStat.value.map(i => i.nama),
+  labels: dataStat.value.map((_, index) => index + 1),
   datasets: [
     {
       label: 'Jumlah Arsip',
@@ -132,14 +138,28 @@ const barChartOptions = {
   plugins: {
     legend: {
       display: false
+    },
+    tooltip: {
+      callbacks: {
+        title(context) {
+          const index = context[0].dataIndex
+
+          return mode.value === 'kategori'
+            ? `Kategori: ${dataStat.value[index].nama}`
+            : `Bidang: ${dataStat.value[index].nama}`
+        },
+        label(context) {
+          return `Jumlah Arsip: ${context.raw}`
+        }
+      }
     }
   },
   scales: {
     y: {
       beginAtZero: true,
       ticks: {
-        stepSize: 1, // 🔥 ini kuncinya (biar 0,1,2,3 tanpa koma)
-        precision: 0 // 🔥 biar gak ada desimal
+        stepSize: 1,
+        precision: 0
       }
     }
   }
@@ -240,6 +260,41 @@ const barChartOptions = {
   <div class="h-[300px]">
     <Bar :data="barChartData" :options="barChartOptions" />
   </div>
+
+  <div class="mt-6">
+  <h3 class="text-sm font-semibold text-gray-700 mb-3">
+    Keterangan {{ mode === 'kategori' ? 'Kategori' : 'Bidang' }}
+  </h3>
+
+  <div class="overflow-x-auto rounded-xl border border-gray-200">
+    <table class="w-full text-sm">
+      <thead class="bg-gray-100">
+        <tr>
+          <th class="px-4 py-3 text-center w-16">No</th>
+          <th class="px-4 py-3 text-left">
+            {{ mode === 'kategori' ? 'Kategori' : 'Bidang' }}
+          </th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr
+          v-for="(item, index) in dataStat"
+          :key="index"
+          class="border-t hover:bg-gray-50"
+        >
+          <td class="px-4 py-3 text-center font-semibold">
+            {{ index + 1 }}
+          </td>
+
+          <td class="px-4 py-3">
+            {{ item.nama }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
   </div>
 
   
@@ -262,7 +317,13 @@ const barChartOptions = {
 
       <p class="font-bold text-xs">Total Pengguna</p>
 
-      <div class="absolute right-5 top-1/2 -translate-y-1/2 w-11 h-11 bg-white/90 rounded-xl shadow-sm"></div>
+     <div
+  class="absolute right-5 top-1/2 -translate-y-1/2
+         w-12 h-12 bg-white rounded-xl shadow-md
+         flex items-center justify-center"
+>
+  <Users class="w-6 h-6 text-[#759fb1]" />
+</div>
 
       <div class="mt-3 h-1.5 w-24 bg-white rounded-full opacity-80"></div>
 
@@ -277,7 +338,13 @@ const barChartOptions = {
 
       <p class="font-bold text-xs">Pengguna Aktif</p>
 
-      <div class="absolute right-5 top-1/2 -translate-y-1/2 w-11 h-11 bg-white/90 rounded-xl shadow-sm"></div>
+      <div
+  class="absolute right-5 top-1/2 -translate-y-1/2
+         w-12 h-12 bg-white rounded-xl shadow-md
+         flex items-center justify-center"
+>
+  <UserCheck class="w-6 h-6 text-[#759fb1]" />
+</div>
 
       <div class="mt-3 h-1.5 w-24 bg-white rounded-full opacity-80"></div>
 
@@ -292,7 +359,13 @@ const barChartOptions = {
 
       <p class="font-bold text-xs">Administrator</p>
 
-      <div class="absolute right-5 top-1/2 -translate-y-1/2 w-11 h-11 bg-white/90 rounded-xl shadow-sm"></div>
+      <div
+  class="absolute right-5 top-1/2 -translate-y-1/2
+         w-12 h-12 bg-white rounded-xl shadow-md
+         flex items-center justify-center"
+>
+  <ShieldCheck class="w-6 h-6 text-[#759fb1]" />
+</div>
 
       <div class="mt-3 h-1.5 w-24 bg-white rounded-full opacity-80"></div>
 

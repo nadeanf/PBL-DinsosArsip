@@ -108,7 +108,7 @@ const chartOptions = {
     : page.props?.bidangStat ?? []
 })
 const barChartData = computed(() => ({
-  labels: dataStat.value.map(i => i.nama),
+  labels: dataStat.value.map((_, index) => index + 1),
   datasets: [
     {
       label: 'Jumlah Arsip',
@@ -123,14 +123,27 @@ const barChartOptions = {
   plugins: {
     legend: {
       display: false
+    },
+    tooltip: {
+      callbacks: {
+        title(context) {
+          const index = context[0].dataIndex
+          return mode.value === 'kategori'
+            ? `Kategori: ${dataStat.value[index].nama}`
+            : `Bidang: ${dataStat.value[index].nama}`
+        },
+        label(context) {
+          return `Jumlah Arsip: ${context.raw}`
+        }
+      }
     }
   },
   scales: {
     y: {
       beginAtZero: true,
       ticks: {
-        stepSize: 1, // 🔥 ini kuncinya (biar 0,1,2,3 tanpa koma)
-        precision: 0 // 🔥 biar gak ada desimal
+        stepSize: 1,
+        precision: 0
       }
     }
   }
@@ -230,6 +243,34 @@ const barChartOptions = {
   <div class="h-[300px]">
     <Bar :data="barChartData" :options="barChartOptions" />
   </div>
+  <div class="mt-6 overflow-x-auto">
+  <table class="w-full text-sm border border-gray-200 rounded-lg overflow-hidden">
+    <thead class="bg-gray-100">
+      <tr>
+        <th class="px-4 py-2 text-left w-16">No</th>
+        <th class="px-4 py-2 text-left">
+          {{ mode === 'kategori' ? 'Kategori' : 'Bidang' }}
+        </th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr
+        v-for="(item, index) in dataStat"
+        :key="index"
+        class="border-t"
+      >
+        <td class="px-4 py-2 font-semibold">
+          {{ index + 1 }}
+        </td>
+
+        <td class="px-4 py-2">
+          {{ item.nama }}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
 
 </div>
 

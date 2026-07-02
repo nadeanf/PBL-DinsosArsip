@@ -282,9 +282,15 @@ const getFileIcon = (filePath) => {
 </div>
 </div>
 
+
             <!-- LIST ARSIP -->
             <div class="max-w-5xl mx-auto mt-36 px-6 mb-24">
                 <div class="flex flex-col gap-5">
+                    <div class="flex items-center justify-between mb-8">
+        <h2 class="text-3xl font-black text-slate-800">
+            Daftar Dokumen Arsip
+        </h2>
+    </div>
                     <div
                         v-for="(doc, i) in arsip"
                         :key="doc.id"

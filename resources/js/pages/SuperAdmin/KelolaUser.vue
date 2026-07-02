@@ -1,7 +1,18 @@
 <script setup lang="ts">
 import AppSidebarSuperAdminLayout from '@/layouts/app/AppSidebarSuperAdminLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
-import { Search, Eye, UserPlus, RotateCcw, X, Pencil, UserX } from 'lucide-vue-next';
+import {
+  Search,
+  Eye,
+  UserPlus,
+  RotateCcw,
+  X,
+  Pencil,
+  UserX,
+  Users,
+  UserCheck,
+  ShieldCheck
+} from 'lucide-vue-next';
 
 import { router } from '@inertiajs/vue3';
 import { ref } from 'vue';
@@ -135,7 +146,13 @@ defineOptions({
 
         <p class="font-bold text-xs">Total Pengguna</p>
 
-        <div class="absolute right-5 top-1/2 -translate-y-1/2 w-11 h-11 bg-white/90 rounded-xl shadow-sm"></div>
+        <div
+  class="absolute right-5 top-1/2 -translate-y-1/2
+         w-12 h-12 bg-white rounded-xl shadow-md
+         flex items-center justify-center"
+>
+  <Users class="w-6 h-6 text-[#759fb1]" />
+</div>
 
         <div class="mt-3 h-1.5 w-24 bg-white rounded-full opacity-80"></div>
     </div>
@@ -148,7 +165,13 @@ defineOptions({
 
         <p class="font-bold text-xs">Pengguna Aktif</p>
 
-        <div class="absolute right-5 top-1/2 -translate-y-1/2 w-11 h-11 bg-white/90 rounded-xl shadow-sm"></div>
+       <div
+  class="absolute right-5 top-1/2 -translate-y-1/2
+         w-12 h-12 bg-white rounded-xl shadow-md
+         flex items-center justify-center"
+>
+  <UserCheck class="w-6 h-6 text-[#759fb1]" />
+</div>
 
         <div class="mt-3 h-1.5 w-24 bg-white rounded-full opacity-80"></div>
     </div>
@@ -161,7 +184,13 @@ defineOptions({
 
         <p class="font-bold text-xs">Administrator</p>
 
-        <div class="absolute right-5 top-1/2 -translate-y-1/2 w-11 h-11 bg-white/90 rounded-xl shadow-sm"></div>
+        <div
+  class="absolute right-5 top-1/2 -translate-y-1/2
+         w-12 h-12 bg-white rounded-xl shadow-md
+         flex items-center justify-center"
+>
+  <ShieldCheck class="w-6 h-6 text-[#759fb1]" />
+</div>
 
         <div class="mt-3 h-1.5 w-24 bg-white rounded-full opacity-80"></div>
     </div>
