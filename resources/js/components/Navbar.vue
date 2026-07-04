@@ -36,7 +36,7 @@ const toggleSidebar = () => {
 
       <div class="leading-tight hidden sm:block">
         <p class="text-sm md:text-lg font-bold">Dinas Sosial Boyolali</p>
-        <p class="text-xs md:text-sm opacity-80">Sistem Arsip Digital</p>
+        <p class="text-xs md:text-sm opacity-80">Sistem Digital Arsip dan Layanan Informasi Dinas Sosial Boyolali</p>
       </div>
     </div>
 
